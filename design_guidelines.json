@@ -1,0 +1,105 @@
+{
+  "theme": "DARK",
+  "archetype": "5 (Luxury) + 4 (Swiss & High-Contrast)",
+  "typography": {
+    "font_family": {
+      "heading": "Inter, sans-serif",
+      "body": "Inter, sans-serif"
+    },
+    "rules": {
+      "h1": "text-5xl md:text-6xl lg:text-7xl font-medium tracking-tighter leading-none text-white",
+      "h2": "text-3xl md:text-4xl lg:text-5xl font-medium tracking-tight text-white",
+      "h3": "text-xl md:text-2xl font-medium tracking-tight text-white",
+      "body": "text-base md:text-lg text-[#BDBDBD] font-light leading-relaxed",
+      "overline": "text-xs font-semibold tracking-[0.2em] uppercase text-[#EDEDED]"
+    }
+  },
+  "colors": {
+    "background": "#000000",
+    "surface": "#0A0A0A",
+    "surface_secondary": "#111111",
+    "surface_tertiary": "#1A1A1A",
+    "border": "rgba(255, 255, 255, 0.1)",
+    "border_hover": "rgba(255, 255, 255, 0.3)",
+    "text_primary": "#FFFFFF",
+    "text_secondary": "#EDEDED",
+    "text_muted": "#BDBDBD",
+    "accent": "#FFFFFF"
+  },
+  "surfaces": {
+    "glass_panel": "bg-[#111111]/40 backdrop-blur-2xl border border-white/10 shadow-[0_8px_32px_rgba(0,0,0,0.5)]",
+    "glass_button": "bg-white/5 backdrop-blur-md border border-white/20 text-white hover:bg-white/15 transition-all duration-300 shadow-[0_0_15px_rgba(255,255,255,0.05)] hover:shadow-[0_0_25px_rgba(255,255,255,0.1)]",
+    "solid_card": "bg-[#0A0A0A] border border-white/5"
+  },
+  "spacing": {
+    "section_padding": "py-24 md:py-32",
+    "container": "max-w-7xl mx-auto px-6 md:px-8",
+    "grid_gap": "gap-8 md:gap-12"
+  },
+  "animations": {
+    "framer_motion": {
+      "initial": { "opacity": 0, "y": 40 },
+      "animate": { "opacity": 1, "y": 0 },
+      "transition": { "duration": 0.8, "ease": [0.16, 1, 0.3, 1] }
+    },
+    "hover_card": "hover:-translate-y-2 hover:border-white/30 transition-all duration-500",
+    "micro_interactions": "scale-95 active:scale-95 transition-transform duration-200"
+  },
+  "media": {
+    "hero": {
+      "video_url": "https://cdn.pixabay.com/video/2021/08/17/85386-589635056_large.mp4",
+      "fallback_image": "https://images.unsplash.com/photo-1626381958625-f4e4ea343925"
+    },
+    "before_after": {
+      "before": "https://images.unsplash.com/photo-1616591938558-fb03d845567b",
+      "after": "https://images.pexels.com/photos/35712082/pexels-photo-35712082.jpeg"
+    },
+    "services": [
+      {
+        "title": "Детейлинг",
+        "image": "https://images.unsplash.com/photo-1680844540129-48dacc7d5d88"
+      },
+      {
+        "title": "Оклейка пленкой",
+        "image": "https://images.pexels.com/photos/10126666/pexels-photo-10126666.jpeg"
+      },
+      {
+        "title": "Антихром",
+        "image": "https://images.unsplash.com/photo-1605036242577-8ee228902af1"
+      }
+    ],
+    "configurator": {
+      "base_car": "https://images.pexels.com/photos/2127012/pexels-photo-2127012.jpeg"
+    },
+    "asmr_video": {
+      "thumbnail": "https://images.pexels.com/photos/10126661/pexels-photo-10126661.jpeg"
+    },
+    "gallery": [
+      "https://images.unsplash.com/photo-1626381958625-f4e4ea343925",
+      "https://images.pexels.com/photos/35712082/pexels-photo-35712082.jpeg",
+      "https://images.unsplash.com/photo-1680844540129-48dacc7d5d88",
+      "https://images.pexels.com/photos/2127012/pexels-photo-2127012.jpeg",
+      "https://images.unsplash.com/photo-1605036242577-8ee228902af1"
+    ]
+  },
+  "sections_instructions": {
+    "hero": "Fullscreen height (100vh). Use absolute positioned video with object-cover. Overlay with bg-black/50 for text contrast. Central alignment. H1 extremely large, fluid typography. Glass CTA with hover glow.",
+    "before_after_slider": "Interactive slider component. Use framer-motion or a custom React state with clip-path to reveal 'after' image over 'before' image. Add a vertical dragger line in pure white.",
+    "services_cards": "Bento grid layout. Cards use the 'glass_panel' surface. Images should be grayscale and gain slight contrast on hover. Include slow zoom-in on image hover.",
+    "configurator": "Control Room Grid layout. Left side: Car preview (large). Right side: Dense, precise selection controls (buttons, toggles) using white/10 surfaces and pure white for active states. Tesla/Porsche configurator aesthetic.",
+    "process_timeline": "Vertical layout. A 1px wide white/20 line connecting steps. Small white dots for milestones. Luxury engineering aesthetic - precise and technical.",
+    "asmr_video_block": "Large cinematic container. Dark overlay. Subtle play button in the center. Hover reveals video or plays it.",
+    "stats": "Huge numbers (text-7xl or text-8xl). Use framer-motion useInView to trigger count-up animations. Strict monochrome palette.",
+    "horizontal_gallery": "Fullscreen horizontal scrolling section via Framer Motion useScroll and useTransform, or CSS snap scroll. Pure cinematic widescreen images of BMWs.",
+    "contact_form": "Minimalist inputs. Use border-bottom only (technical look) or fully glassmorphic inputs. No generic standard rounded borders. Include pure white hover/focus states."
+  },
+  "components_to_use": [
+    "lucide-react",
+    "framer-motion",
+    "shadcn/ui (Button, Slider, Form, Dialog)"
+  ],
+  "accessibility": {
+    "contrast": "Ensure pure white text on black/dark-gray backgrounds meets APCA standards.",
+    "data_testid": "Add data-testid attributes to all interactive elements."
+  }
+}
