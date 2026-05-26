@@ -27,8 +27,9 @@ from media_service import (
     ALLOWED_MIME_PREFIXES,
     MAX_UPLOAD_BYTES,
     save_file,
-    open_file,
-    stream_chunks,
+    find_file_meta,
+    iter_grid_range,
+    parse_range,
     guess_content_type,
 )
 
@@ -295,14 +296,69 @@ async def upload_media(file: UploadFile = File(...), admin: dict = Depends(get_c
     }
 
 
-@api_router.get("/media/{file_id}")
-async def get_media(file_id: str):
-    stream = await open_file(db, file_id)
-    if stream is None:
+@api_router.head("/media/{file_id}")
+async def head_media(file_id: str, request: Request):
+    meta = await find_file_meta(db, file_id)
+    if meta is None:
         raise HTTPException(status_code=404, detail="Media not found")
-    content_type = (stream.metadata or {}).get("content_type") or guess_content_type(stream.filename or "")
-    headers = {"Cache-Control": "public, max-age=31536000, immutable"}
-    return StreamingResponse(stream_chunks(stream), media_type=content_type, headers=headers)
+    file_size = int(meta.get("length", 0))
+    content_type = (meta.get("metadata") or {}).get("content_type") or guess_content_type(meta.get("filename") or "")
+    return Response(
+        status_code=200,
+        media_type=content_type,
+        headers={
+            "Accept-Ranges": "bytes",
+            "Content-Length": str(file_size),
+            "Cache-Control": "public, max-age=31536000, immutable",
+            "Access-Control-Allow-Origin": request.headers.get("origin") or "*",
+        },
+    )
+
+
+@api_router.get("/media/{file_id}")
+async def get_media(file_id: str, request: Request):
+    meta = await find_file_meta(db, file_id)
+    if meta is None:
+        raise HTTPException(status_code=404, detail="Media not found")
+
+    file_size = int(meta.get("length", 0))
+    content_type = (meta.get("metadata") or {}).get("content_type") or guess_content_type(meta.get("filename") or "")
+
+    range_header = request.headers.get("range") or request.headers.get("Range")
+    rng = parse_range(range_header, file_size) if range_header else None
+
+    common_headers = {
+        "Accept-Ranges": "bytes",
+        "Cache-Control": "public, max-age=31536000, immutable",
+        "Access-Control-Allow-Origin": request.headers.get("origin") or "*",
+        "Access-Control-Expose-Headers": "Content-Length, Content-Range, Accept-Ranges",
+    }
+
+    if rng is not None:
+        start, end = rng
+        length = end - start + 1
+        headers = {
+            **common_headers,
+            "Content-Range": f"bytes {start}-{end}/{file_size}",
+            "Content-Length": str(length),
+        }
+        return StreamingResponse(
+            iter_grid_range(db, file_id, start, end),
+            status_code=206,
+            headers=headers,
+            media_type=content_type,
+        )
+
+    # Full file
+    headers = {
+        **common_headers,
+        "Content-Length": str(file_size),
+    }
+    return StreamingResponse(
+        iter_grid_range(db, file_id, 0, file_size - 1),
+        media_type=content_type,
+        headers=headers,
+    )
 
 
 @app.on_event("startup")

@@ -4,8 +4,9 @@ import { ArrowUpRight, ChevronLeft, ChevronRight, Play } from "lucide-react";
 import { useContent } from "@/context/ContentContext";
 import { resolveMedia } from "@/lib/contentDefaults";
 import VideoLightbox from "@/components/VideoLightbox";
+import LeadPopup from "@/components/LeadPopup";
 
-function LiveCard({ item, index, total, onOpen }) {
+function LiveCard({ item, index, total, onOpen, onCta }) {
   const videoRef = useRef(null);
 
   // Autoplay only when the card is visible. Saves bandwidth + battery on mobile.
@@ -93,14 +94,15 @@ function LiveCard({ item, index, total, onOpen }) {
       </button>
 
       {/* CTA — single full-width button per video, label is per-item */}
-      <a
-        href="#configurator"
+      <button
+        type="button"
+        onClick={onCta}
         data-testid={`live-cta-${index}`}
-        className="group inline-flex items-center justify-between gap-3 px-5 py-3.5 bg-white text-black text-[10px] tracking-[0.28em] uppercase hover:bg-[#EDEDED] transition-all shine"
+        className="group inline-flex items-center justify-between gap-3 px-5 py-3.5 bg-white text-black text-[10px] tracking-[0.28em] uppercase hover:bg-[#EDEDED] transition-all shine cursor-pointer"
       >
         {item.cta_label || "Хочу так же"}
         <ArrowUpRight size={14} strokeWidth={1.5} className="transition-transform group-hover:translate-x-0.5 group-hover:-translate-y-0.5" />
-      </a>
+      </button>
     </article>
   );
 }
@@ -112,7 +114,9 @@ export default function AutoHausLive() {
   const headerIn = useInView(headerRef, { once: true, margin: "-15%" });
   const items = (live && live.items) || [];
   const [activeIdx, setActiveIdx] = useState(null);
+  const [popupIdx, setPopupIdx] = useState(null);
   const active = activeIdx != null ? items[activeIdx] : null;
+  const popupItem = popupIdx != null ? items[popupIdx] : null;
 
   const scrollByCards = useCallback((dir) => {
     const track = trackRef.current;
@@ -203,7 +207,14 @@ export default function AutoHausLive() {
         style={{ scrollPaddingLeft: "24px", scrollPaddingRight: "24px" }}
       >
         {items.map((item, i) => (
-          <LiveCard key={i} item={item} index={i} total={items.length} onOpen={() => setActiveIdx(i)} />
+          <LiveCard
+            key={i}
+            item={item}
+            index={i}
+            total={items.length}
+            onOpen={() => setActiveIdx(i)}
+            onCta={() => setPopupIdx(i)}
+          />
         ))}
         <div className="flex-shrink-0 w-2" aria-hidden="true" />
       </div>
@@ -232,6 +243,13 @@ export default function AutoHausLive() {
         title={active?.title}
         meta={active?.meta}
         onClose={() => setActiveIdx(null)}
+      />
+
+      <LeadPopup
+        open={popupItem != null}
+        onClose={() => setPopupIdx(null)}
+        source="autohaus_live"
+        subject={popupItem ? `AutoHaus Live · ${popupItem.title || `видео ${popupIdx + 1}`}` : ""}
       />
     </section>
   );

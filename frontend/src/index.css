@@ -16,6 +16,16 @@ html, body {
     overflow-x: clip;
 }
 
+html {
+    scroll-behavior: smooth;
+    /* Account for sticky navigation when jumping to anchors */
+    scroll-padding-top: 96px;
+}
+
+@media (prefers-reduced-motion: reduce) {
+    html { scroll-behavior: auto; }
+}
+
 * {
     box-sizing: border-box;
 }

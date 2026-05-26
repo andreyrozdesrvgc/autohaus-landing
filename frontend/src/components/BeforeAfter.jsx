@@ -2,9 +2,11 @@ import React, { useRef, useState, useCallback } from "react";
 import { motion, useInView } from "framer-motion";
 import { useContent } from "@/context/ContentContext";
 import { resolveMedia } from "@/lib/contentDefaults";
+import LeadPopup from "@/components/LeadPopup";
 
 export default function BeforeAfter() {
   const { before_after: ba } = useContent();
+  const [popupOpen, setPopupOpen] = useState(false);
   const ref = useRef(null);
   const inView = useInView(ref, { once: true, margin: "-15%" });
   const containerRef = useRef(null);
@@ -132,14 +134,21 @@ export default function BeforeAfter() {
           </p>
           <a
             href="#configurator"
+            onClick={(e) => { e.preventDefault(); setPopupOpen(true); }}
             data-testid="before-after-cta"
-            className="group inline-flex items-center justify-center gap-4 px-6 py-4 bg-white text-black text-[11px] tracking-[0.3em] uppercase hover:bg-[#EDEDED] transition-all duration-300 shine"
+            className="group inline-flex items-center justify-center gap-4 px-6 py-4 bg-white text-black text-[11px] tracking-[0.3em] uppercase hover:bg-[#EDEDED] transition-all duration-300 shine cursor-pointer"
           >
             {ba.cta_label}
             <span className="block w-8 h-px bg-current transition-all duration-500 group-hover:w-12" />
           </a>
         </motion.div>
       </div>
+      <LeadPopup
+        open={popupOpen}
+        onClose={() => setPopupOpen(false)}
+        source="before_after"
+        subject="Заявка после «До / После»"
+      />
     </section>
   );
 }
