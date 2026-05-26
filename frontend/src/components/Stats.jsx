@@ -8,27 +8,25 @@ const STATS = [
   { value: 7, suffix: "", label: "Этапов процесса" },
 ];
 
-function CountUp({ value, suffix, duration = 1800 }) {
-  const ref = useRef(null);
-  const inView = useInView(ref, { once: true, margin: "-15%" });
+function CountUp({ value, suffix, start, duration = 1800 }) {
   const [n, setN] = useState(0);
 
   useEffect(() => {
-    if (!inView) return;
-    const start = performance.now();
+    if (!start) return;
+    const t0 = performance.now();
     let raf;
     const tick = (t) => {
-      const p = Math.min(1, (t - start) / duration);
+      const p = Math.min(1, (t - t0) / duration);
       const eased = 1 - Math.pow(1 - p, 3);
       setN(Math.round(eased * value));
       if (p < 1) raf = requestAnimationFrame(tick);
     };
     raf = requestAnimationFrame(tick);
     return () => cancelAnimationFrame(raf);
-  }, [inView, value, duration]);
+  }, [start, value, duration]);
 
   return (
-    <span ref={ref}>
+    <span>
       {n}
       {suffix}
     </span>
@@ -37,7 +35,7 @@ function CountUp({ value, suffix, duration = 1800 }) {
 
 export default function Stats() {
   const ref = useRef(null);
-  const inView = useInView(ref, { once: true, margin: "-10%" });
+  const inView = useInView(ref, { once: true, amount: 0.2 });
   return (
     <section
       ref={ref}
@@ -74,7 +72,7 @@ export default function Stats() {
               className={`p-6 md:p-10 border-white/10 ${i < STATS.length - 1 ? "md:border-r" : ""} ${i % 2 === 0 ? "border-r" : ""} ${i < 2 ? "border-b md:border-b-0" : ""}`}
             >
               <div className="text-[clamp(2.5rem,6vw,5.5rem)] tracking-tighter font-medium leading-none text-white">
-                <CountUp value={s.value} suffix={s.suffix} />
+                <CountUp value={s.value} suffix={s.suffix} start={inView} />
               </div>
               <div className="mt-4 text-[#BDBDBD] text-sm md:text-base leading-relaxed font-light max-w-[14ch]">
                 {s.label}
