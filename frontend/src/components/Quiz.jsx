@@ -188,25 +188,25 @@ function ExpertCard({ q, contextKey }) {
             </motion.div>
           </AnimatePresence>
 
-          {/* Thin curved arrow → points across the gap to the question heading (desktop only) */}
+          {/* Thin curved arrow → from top-right of bubble to just above letter "К" of question heading (desktop only) */}
           <svg
             aria-hidden="true"
             className="hidden lg:block absolute pointer-events-none text-white/90"
             style={{
               top: "-120px",
               right: 0,
-              transform: "translate(calc(100% + 16px), 0)",
-              width: "240px",
-              height: "210px",
+              transform: "translate(100%, 0)",
+              width: "120px",
+              height: "200px",
               overflow: "visible",
               zIndex: 30,
             }}
-            viewBox="0 0 240 210"
+            viewBox="0 0 120 200"
             fill="none"
           >
-            {/* Arc: from top of bubble — up and over the gap — ending pointing down at the question heading */}
+            {/* Arc starts EXACTLY at bubble's top-right corner (0, 120), sweeps up and right, descends just above the "К" letter (~64, 56) */}
             <path
-              d="M 4 190 C 4 60, 150 -10, 215 30"
+              d="M 0 120 C 0 30, 50 5, 64 56"
               stroke="currentColor"
               strokeWidth="1.2"
               strokeLinecap="round"
@@ -214,7 +214,7 @@ function ExpertCard({ q, contextKey }) {
             />
             {/* Down-pointing arrowhead */}
             <path
-              d="M 207 22 L 217 33 L 224 18"
+              d="M 57 48 L 64 60 L 71 46"
               stroke="currentColor"
               strokeWidth="1.2"
               strokeLinecap="round"
