@@ -23,10 +23,11 @@ export default function Hero() {
         loop
         muted
         playsInline
-        poster="https://images.unsplash.com/photo-1626381958625-f4e4ea343925?auto=format&fit=crop&w=1920&q=80"
+        poster="https://images.unsplash.com/photo-1503376780353-7e6692767b70?auto=format&fit=crop&w=1920&q=85"
       >
+        <source src="https://assets.mixkit.co/videos/35540/35540-720.mp4" type="video/mp4" />
+        <source src="https://assets.mixkit.co/videos/35205/35205-720.mp4" type="video/mp4" />
         <source src="https://assets.mixkit.co/videos/4694/4694-720.mp4" type="video/mp4" />
-        <source src="https://assets.mixkit.co/videos/2010/2010-720.mp4" type="video/mp4" />
       </video>
 
       {/* Vignette and overlay */}

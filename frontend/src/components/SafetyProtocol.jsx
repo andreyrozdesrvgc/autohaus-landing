@@ -14,9 +14,9 @@ const STAGES = [
       "Обезжиривание поверхности",
       "Очистка труднодоступных зон",
     ],
-    video: "https://assets.mixkit.co/videos/4438/4438-720.mp4",
+    video: "https://assets.mixkit.co/videos/32957/32957-720.mp4",
     poster:
-      "https://images.unsplash.com/photo-1607860108855-64acf2078ed9?auto=format&fit=crop&w=2000&q=85",
+      "https://images.unsplash.com/photo-1606664515524-ed2f786a0bd6?auto=format&fit=crop&w=2000&q=85",
   },
   {
     n: "02",
@@ -30,9 +30,9 @@ const STAGES = [
       "Деликатная полировка",
       "Подготовка под оклейку",
     ],
-    video: "https://assets.mixkit.co/videos/24420/24420-720.mp4",
+    video: "https://assets.mixkit.co/videos/35205/35205-720.mp4",
     poster:
-      "https://images.unsplash.com/photo-1605030753481-bb38b08c384a?auto=format&fit=crop&w=2000&q=85",
+      "https://images.unsplash.com/photo-1503376780353-7e6692767b70?auto=format&fit=crop&w=2000&q=85",
   },
   {
     n: "03",
@@ -46,9 +46,9 @@ const STAGES = [
       "Покомпонентный QC",
       "Финальная проверка покрытия",
     ],
-    video: "https://assets.mixkit.co/videos/5320/5320-720.mp4",
+    video: "https://assets.mixkit.co/videos/35540/35540-720.mp4",
     poster:
-      "https://images.pexels.com/photos/10126666/pexels-photo-10126666.jpeg?auto=compress&cs=tinysrgb&w=2000",
+      "https://images.unsplash.com/photo-1492144534655-ae79c964c9d7?auto=format&fit=crop&w=2000&q=85",
   },
 ];
 
