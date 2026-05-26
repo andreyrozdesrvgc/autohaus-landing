@@ -18,13 +18,13 @@ export default function Landing() {
       <Navigation />
       <Hero />
       <SafetyProtocol />
+      <Quiz />
       <BeforeAfter />
       <Services />
       <Configurator />
       <Stats />
       <Gallery />
       <AutoHausLive />
-      <Quiz />
       <ContactForm />
       <Footer />
     </main>
