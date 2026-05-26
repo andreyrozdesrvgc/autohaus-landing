@@ -160,55 +160,30 @@ export default function Configurator() {
         </div>
 
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-3 md:gap-4">
-          {/* PREVIEW — floating composition, more negative space */}
-          <div className="lg:col-span-6 relative bg-[#0A0A0A] border border-white/10 overflow-hidden">
-            {/* Subtle radial spotlight for floating effect */}
-            <div
-              className="absolute inset-0 pointer-events-none"
-              style={{
-                background:
-                  "radial-gradient(ellipse 60% 60% at 50% 60%, rgba(255,255,255,0.06) 0%, rgba(255,255,255,0) 60%)",
-              }}
+          {/* PREVIEW — full-bleed cinematic */}
+          <div className="lg:col-span-6 relative bg-[#0A0A0A] border border-white/10 overflow-hidden min-h-[420px]">
+            <motion.img
+              key={finish.id}
+              src={CAR_VARIANTS[finish.id]}
+              alt="Car preview"
+              initial={{ opacity: 0, scale: 1.05 }}
+              animate={{ opacity: 1, scale: 1 }}
+              transition={{ duration: 1, ease: [0.16, 1, 0.3, 1] }}
+              className={`absolute inset-0 w-full h-full object-cover grayscale ${
+                darkout ? "brightness-[0.6] contrast-110" : ""
+              } ${finish.id === "matte" ? "contrast-110" : ""}`}
             />
-            <div className="relative aspect-[16/11] lg:aspect-auto lg:h-full lg:min-h-[460px] flex items-center justify-center p-8 md:p-10">
-              {/* Floating car image with halo glow */}
-              <div className="relative w-full max-w-[520px]">
-                <div
-                  className="absolute -inset-10 pointer-events-none opacity-70"
-                  style={{
-                    background:
-                      "radial-gradient(ellipse at center, rgba(255,255,255,0.08) 0%, rgba(255,255,255,0) 70%)",
-                  }}
-                />
-                <motion.img
-                  key={finish.id}
-                  src={CAR_VARIANTS[finish.id]}
-                  alt="Car preview"
-                  initial={{ opacity: 0, scale: 1.04, y: 8 }}
-                  animate={{ opacity: 1, scale: 1, y: 0 }}
-                  transition={{ duration: 1, ease: [0.16, 1, 0.3, 1] }}
-                  className={`relative w-full h-auto object-contain grayscale ${
-                    darkout ? "brightness-[0.65] contrast-110" : ""
-                  } ${finish.id === "matte" ? "contrast-110" : ""}`}
-                  style={{ aspectRatio: "16/10" }}
-                />
-                {/* Soft reflection underneath */}
-                <div
-                  className="absolute left-1/2 bottom-[-6%] -translate-x-1/2 w-[70%] h-3 rounded-[50%] blur-md"
-                  style={{ background: "rgba(255,255,255,0.08)" }}
-                />
-              </div>
-            </div>
+            <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/10 to-transparent" />
             <div className="absolute inset-0 grain pointer-events-none" />
 
             {/* Top meta */}
             <div className="absolute top-6 left-6 right-6 flex items-start justify-between">
               <div>
                 <div className="text-[10px] tracking-[0.4em] uppercase text-white/50">Preview</div>
-                <div className="mt-2 text-xl md:text-2xl tracking-tight font-medium">
+                <div className="mt-2 text-2xl md:text-3xl tracking-tight font-medium">
                   {film.label}
                 </div>
-                <div className="text-[#BDBDBD] text-xs md:text-sm mt-1">
+                <div className="text-[#BDBDBD] text-sm mt-1">
                   {finish.label} · {coverage.label}
                 </div>
               </div>
@@ -219,7 +194,7 @@ export default function Configurator() {
             </div>
 
             {/* Bottom option chips */}
-            <div className="absolute bottom-6 left-6 right-6 flex flex-wrap items-center gap-2 text-[10px] tracking-[0.3em] uppercase text-white/60">
+            <div className="absolute bottom-6 left-6 right-6 flex flex-wrap items-center gap-3 text-[10px] tracking-[0.3em] uppercase text-white/60">
               {antichrome && <span className="px-3 py-2 border border-white/20 bg-black/40">Антихром</span>}
               {darkout && <span className="px-3 py-2 border border-white/20 bg-black/40">Чёрные элементы</span>}
               {headlights && <span className="px-3 py-2 border border-white/20 bg-black/40">Бронь оптики</span>}
