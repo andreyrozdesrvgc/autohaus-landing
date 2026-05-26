@@ -15,6 +15,7 @@ const services = [
     title: "Смена цвета винилом",
     desc: "От матового сатина до жидкого металла. Полная трансформация без покраски.",
     img: "https://images.unsplash.com/photo-1605036242577-8ee228902af1?auto=format&fit=crop&w=1200&q=80",
+    span: "md:col-span-2",
   },
   {
     n: "03",
@@ -33,12 +34,7 @@ const services = [
     title: "Бронирование оптики",
     desc: "Защита фар от помутнения и сколов. Прозрачный или лёгкий тон.",
     img: "https://images.pexels.com/photos/35712082/pexels-photo-35712082.jpeg?auto=compress&cs=tinysrgb&w=1200",
-  },
-  {
-    n: "06",
-    title: "Детейлинг кузова",
-    desc: "Подготовка поверхности до студийного блеска перед оклейкой.",
-    img: "https://images.unsplash.com/photo-1607860108855-64acf2078ed9?auto=format&fit=crop&w=1200&q=80",
+    span: "md:col-span-2",
   },
 ];
 
@@ -98,7 +94,7 @@ export default function Services() {
               003 — Services
             </span>
             <h2 className="mt-4 text-4xl md:text-6xl lg:text-7xl tracking-tighter font-medium leading-[0.95]">
-              Шесть направлений.<br />
+              Пять направлений.<br />
               <span className="text-[#BDBDBD]">Один</span> стандарт качества.
             </h2>
           </div>

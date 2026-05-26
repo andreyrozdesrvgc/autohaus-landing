@@ -284,12 +284,15 @@ export default function Configurator() {
           <div className="lg:col-span-12 bg-[#0A0A0A] border border-white/10 p-6 md:p-10">
             <div className="grid grid-cols-1 md:grid-cols-12 gap-8 items-end">
               <div className="md:col-span-5">
-                <div className="text-[11px] tracking-[0.32em] uppercase text-white/50 mb-2">Ориентировочная стоимость</div>
-                <div data-testid="config-total" className="text-5xl md:text-7xl tracking-tighter font-medium leading-none">
-                  {fmt(total)} <span className="text-2xl md:text-3xl text-[#BDBDBD]">₽</span>
+                <div className="text-[11px] tracking-[0.32em] uppercase text-white/50 mb-3">
+                  Заявка на расчёт
                 </div>
-                <p className="mt-3 text-xs text-white/50 max-w-sm">
-                  Финальная цена рассчитывается после диагностики кузова. Срок работ 5–14 дней.
+                <div className="text-2xl md:text-3xl tracking-tight font-medium leading-tight text-white">
+                  Получите персональное предложение в течение&nbsp;30&nbsp;минут.
+                </div>
+                <p className="mt-4 text-sm text-white/50 max-w-sm font-light leading-relaxed">
+                  Точная цена формируется после диагностики кузова и согласования
+                  плёнки. Срок работ — 5–14 дней.
                 </p>
               </div>
 

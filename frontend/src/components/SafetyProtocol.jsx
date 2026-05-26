@@ -52,31 +52,106 @@ const STAGES = [
   },
 ];
 
-function StageCard({ s, i, total, variant = "desktop" }) {
+/* Desktop card — absolutely positioned, driven by scroll progress */
+function DesktopStage({ s, range, total, progress, index }) {
+  // Each stage gets a window in [0, 1] scroll progress.
+  // We fade in at range[0], hold at range[1], fade out at range[2].
+  const opacity = useTransform(progress, [range[0], range[1], range[2], range[3]], [0, 1, 1, 0]);
+  const y = useTransform(progress, [range[0], range[1], range[2], range[3]], [40, 0, 0, -40]);
+  const scale = useTransform(progress, [range[0], range[1], range[2], range[3]], [1.04, 1, 1, 0.98]);
+  const blurPx = useTransform(progress, [range[0], range[1], range[2], range[3]], [8, 0, 0, 6]);
+  const filter = useTransform(blurPx, (b) => `blur(${b}px)`);
+
+  return (
+    <motion.article
+      data-testid={`protocol-stage-${s.n}`}
+      style={{ opacity, y, scale, filter }}
+      className="absolute inset-0 flex items-center justify-center px-10 will-change-transform"
+    >
+      <div className="relative w-full max-w-[1200px] h-[78vh] bg-[#0A0A0A] border border-white/10 overflow-hidden">
+        <video
+          autoPlay
+          loop
+          muted
+          playsInline
+          poster={s.poster}
+          className="absolute inset-0 w-full h-full object-cover grayscale brightness-[0.55]"
+        >
+          <source src={s.video} type="video/mp4" />
+        </video>
+
+        <div
+          className="absolute inset-0"
+          style={{
+            background:
+              "linear-gradient(180deg, rgba(0,0,0,0.4) 0%, rgba(0,0,0,0.2) 40%, rgba(0,0,0,0.85) 100%)",
+          }}
+        />
+        <div className="absolute inset-0 grain pointer-events-none" />
+
+        {/* Top meta strip */}
+        <div className="absolute top-0 inset-x-0 px-10 py-6 flex items-center justify-between text-[10px] tracking-[0.4em] uppercase text-white/60 border-b border-white/10">
+          <span>{s.overline}</span>
+          <span>
+            {s.n} / {String(total).padStart(2, "0")}
+          </span>
+        </div>
+
+        {/* Watermark number */}
+        <div className="absolute -bottom-4 -right-2 select-none pointer-events-none text-white/[0.06] font-medium leading-none tracking-tighter text-[clamp(10rem,28vw,24rem)]">
+          {s.n}
+        </div>
+
+        {/* Content */}
+        <div className="absolute inset-0 px-10 pb-12 pt-24 flex flex-col justify-end">
+          <div className="max-w-2xl">
+            <div className="flex items-center gap-4 mb-6">
+              <span className="block w-16 h-px bg-white/40" />
+              <span className="text-[11px] tracking-[0.32em] uppercase text-white/60">
+                Protocol · 0{index + 1}
+              </span>
+            </div>
+            <h3 className="text-4xl md:text-5xl lg:text-6xl tracking-tighter font-medium leading-[0.95] text-white">
+              {s.title}
+            </h3>
+            <p className="mt-5 text-[#BDBDBD] text-base md:text-lg leading-relaxed max-w-xl font-light">
+              {s.desc}
+            </p>
+            <ul className="mt-8 grid grid-cols-2 gap-x-8 gap-y-2.5 max-w-xl">
+              {s.points.map((p) => (
+                <li
+                  key={p}
+                  className="flex items-start gap-3 text-[13px] tracking-[0.04em] text-white/75"
+                >
+                  <span className="mt-[8px] block w-1.5 h-px bg-white/50" />
+                  {p}
+                </li>
+              ))}
+            </ul>
+          </div>
+        </div>
+      </div>
+    </motion.article>
+  );
+}
+
+function MobileStage({ s, total, index }) {
   const ref = useRef(null);
   const inView = useInView(ref, { once: true, margin: "-15%" });
   return (
     <motion.article
       ref={ref}
-      initial={{ opacity: 0, y: 60 }}
+      initial={{ opacity: 0, y: 40 }}
       animate={inView ? { opacity: 1, y: 0 } : {}}
-      transition={{ duration: 1, ease: [0.16, 1, 0.3, 1], delay: i * 0.1 }}
-      data-testid={`protocol-stage-${s.n}${variant === "mobile" ? "-mobile" : ""}`}
-      className="relative flex-shrink-0 w-[88vw] md:w-[78vw] max-w-[1100px] h-[78vh] md:h-[82vh] bg-[#0A0A0A] border border-white/10 overflow-hidden group"
+      transition={{ duration: 0.9, ease: [0.16, 1, 0.3, 1], delay: index * 0.08 }}
+      data-testid={`protocol-stage-${s.n}-mobile`}
+      className="relative w-full h-[78vh] bg-[#0A0A0A] border border-white/10 overflow-hidden"
     >
-      {/* Background video */}
-      <video
-        autoPlay
-        loop
-        muted
-        playsInline
-        poster={s.poster}
+      <img
+        src={s.poster}
+        alt={s.title}
         className="absolute inset-0 w-full h-full object-cover grayscale brightness-[0.55]"
-      >
-        <source src={s.video} type="video/mp4" />
-      </video>
-
-      {/* Overlays */}
+      />
       <div
         className="absolute inset-0"
         style={{
@@ -84,50 +159,54 @@ function StageCard({ s, i, total, variant = "desktop" }) {
             "linear-gradient(180deg, rgba(0,0,0,0.4) 0%, rgba(0,0,0,0.2) 40%, rgba(0,0,0,0.85) 100%)",
         }}
       />
-      <div className="absolute inset-0 grain pointer-events-none" />
-
-      {/* Top meta strip */}
-      <div className="absolute top-0 inset-x-0 px-8 md:px-12 py-6 flex items-center justify-between text-[10px] tracking-[0.4em] uppercase text-white/60 border-b border-white/10">
+      <div className="absolute top-0 inset-x-0 px-6 py-5 flex items-center justify-between text-[10px] tracking-[0.4em] uppercase text-white/60 border-b border-white/10">
         <span>{s.overline}</span>
-        <span>{s.n} / {String(total).padStart(2, "0")}</span>
+        <span>
+          {s.n} / {String(total).padStart(2, "0")}
+        </span>
       </div>
-
-      {/* Huge number watermark */}
-      <div className="absolute -bottom-4 -right-2 md:-right-4 select-none pointer-events-none text-white/5 font-medium leading-none tracking-tighter text-[clamp(10rem,30vw,26rem)]">
+      <div className="absolute -bottom-2 -right-2 select-none pointer-events-none text-white/[0.06] font-medium leading-none tracking-tighter text-[clamp(8rem,40vw,16rem)]">
         {s.n}
       </div>
-
-      {/* Content */}
-      <div className="absolute inset-0 px-8 md:px-12 pb-10 pt-24 flex flex-col justify-end">
-        <div className="max-w-2xl">
-          <div className="flex items-center gap-4 mb-6">
-            <span className="block w-10 md:w-16 h-px bg-white/40" />
-            <span className="text-[11px] tracking-[0.32em] uppercase text-white/60">
-              Protocol
-            </span>
-          </div>
-          <h3 className="text-3xl md:text-5xl lg:text-6xl tracking-tighter font-medium leading-[0.95] text-white">
-            {s.title}
-          </h3>
-          <p className="mt-5 text-[#BDBDBD] text-sm md:text-base leading-relaxed max-w-xl font-light">
-            {s.desc}
-          </p>
-
-          <ul className="mt-7 grid grid-cols-1 sm:grid-cols-2 gap-x-6 gap-y-2 max-w-xl">
-            {s.points.map((p) => (
-              <li
-                key={p}
-                className="flex items-start gap-3 text-[12px] md:text-[13px] tracking-[0.04em] text-white/75"
-              >
-                <span className="mt-[7px] block w-1.5 h-px bg-white/50" />
-                {p}
-              </li>
-            ))}
-          </ul>
-        </div>
+      <div className="absolute inset-0 px-6 pb-8 pt-20 flex flex-col justify-end">
+        <h3 className="text-3xl tracking-tighter font-medium leading-[0.95] text-white">
+          {s.title}
+        </h3>
+        <p className="mt-4 text-[#BDBDBD] text-sm leading-relaxed font-light">{s.desc}</p>
+        <ul className="mt-5 space-y-2">
+          {s.points.map((p) => (
+            <li key={p} className="flex items-start gap-3 text-[13px] text-white/75">
+              <span className="mt-[8px] block w-1.5 h-px bg-white/50" />
+              {p}
+            </li>
+          ))}
+        </ul>
       </div>
     </motion.article>
   );
+}
+
+function RailStep({ n, index, activeIdx }) {
+  const dotOpacity = useTransform(activeIdx, (v) => (v === index + 1 ? 1 : 0.3));
+  const lineOpacity = useTransform(activeIdx, (v) => (v === index + 1 ? 1 : 0.15));
+  return (
+    <div className="flex items-center gap-3">
+      <motion.span
+        style={{ opacity: dotOpacity }}
+        className="block w-2 h-2 rounded-full bg-white shadow-[0_0_12px_rgba(255,255,255,0.5)]"
+      />
+      <motion.span
+        style={{ opacity: lineOpacity }}
+        className="block w-8 h-px bg-white"
+      />
+      <span className="text-[10px] tracking-[0.36em] uppercase text-white/40">{n}</span>
+    </div>
+  );
+}
+
+function ActiveCounter({ activeIdx }) {
+  const text = useTransform(activeIdx, (v) => String(v).padStart(2, "0"));
+  return <motion.span>{text}</motion.span>;
 }
 
 export default function SafetyProtocol() {
@@ -139,11 +218,25 @@ export default function SafetyProtocol() {
     target: wrapper,
     offset: ["start start", "end end"],
   });
-  // On desktop: translate horizontally. End position calibrated so the last
-  // card ends near the right edge (2 cards * (78vw + gap) ≈ 162vw)
-  const x = useTransform(scrollYProgress, [0, 1], ["0vw", "-130vw"]);
-  const lineScale = useTransform(scrollYProgress, [0, 1], [0, 1]);
-  const dotX = useTransform(scrollYProgress, [0, 1], ["0%", "100%"]);
+
+  // Three stages, each held for ~33% of scroll progress with smooth overlaps.
+  // Values must be within [0, 1] and monotonically non-decreasing per stage.
+  const ranges = [
+    [0.00, 0.02, 0.30, 0.36], // Stage 01
+    [0.32, 0.40, 0.62, 0.68], // Stage 02
+    [0.64, 0.72, 1.00, 1.00], // Stage 03
+  ];
+
+  // Progress bar fill across the section
+  const barScale = useTransform(scrollYProgress, [0, 1], [0, 1]);
+  const dotLeft = useTransform(scrollYProgress, [0, 1], ["0%", "100%"]);
+
+  // Active-stage index for the side counter (computed via discrete transforms)
+  const activeIdx = useTransform(scrollYProgress, (v) => {
+    if (v < 0.35) return 1;
+    if (v < 0.69) return 2;
+    return 3;
+  });
 
   return (
     <section
@@ -152,7 +245,10 @@ export default function SafetyProtocol() {
       className="relative w-full bg-black border-t border-white/5"
     >
       {/* HEADER */}
-      <div ref={headerRef} className="mx-auto max-w-[1400px] px-6 md:px-10 pt-24 md:pt-36 pb-10 md:pb-14">
+      <div
+        ref={headerRef}
+        className="mx-auto max-w-[1400px] px-6 md:px-10 pt-24 md:pt-36 pb-10 md:pb-14"
+      >
         <div className="flex flex-col md:flex-row md:items-end md:justify-between gap-6">
           <div>
             <span className="text-[11px] tracking-[0.4em] uppercase text-white/50">
@@ -175,7 +271,6 @@ export default function SafetyProtocol() {
           </p>
         </div>
 
-        {/* Thin animated under-line */}
         <div className="mt-10 h-px w-full bg-white/10 overflow-hidden">
           <motion.div
             initial={{ scaleX: 0 }}
@@ -185,49 +280,60 @@ export default function SafetyProtocol() {
             className="h-full w-full bg-white/60"
           />
         </div>
-
-        {/* Indicator row */}
-        <div className="mt-6 flex items-center justify-between text-[10px] tracking-[0.4em] uppercase text-white/40">
-          <span className="flex items-center gap-3">
-            <span className="block w-1.5 h-1.5 rounded-full bg-white" />
-            Stage 01 — Surface
-          </span>
-          <span className="hidden md:inline">Stage 02 — Paint</span>
-          <span>Stage 03 — Precision</span>
-        </div>
       </div>
 
-      {/* DESKTOP HORIZONTAL SCROLL */}
-      <div ref={wrapper} className="relative hidden md:block h-[220vh]">
-        <div className="sticky top-0 h-screen overflow-hidden flex items-center">
-          <motion.div
-            style={{ x }}
-            className="flex items-center gap-6 lg:gap-8 px-10 will-change-transform"
-          >
-            {STAGES.map((s, i) => (
-              <StageCard key={s.n} s={s} i={i} total={STAGES.length} />
-            ))}
-            <div className="flex-shrink-0 w-[20vw]" />
-          </motion.div>
+      {/* DESKTOP STICKY SCROLL STORYTELLING */}
+      <div ref={wrapper} className="relative hidden md:block h-[320vh]">
+        <div className="sticky top-0 h-screen w-full overflow-hidden">
+          {/* Background ambient layer */}
+          <div className="absolute inset-0 bg-black" />
 
-          {/* Progress connector bar at bottom */}
-          <div className="absolute bottom-10 left-10 right-10 h-px bg-white/10 overflow-hidden">
-            <motion.div
-              style={{ scaleX: lineScale, originX: 0 }}
-              className="h-full bg-white/70"
-            />
+          {/* Stage cards stacked, opacity-driven */}
+          <div className="absolute inset-0">
+            {STAGES.map((s, i) => (
+              <DesktopStage
+                key={s.n}
+                s={s}
+                range={ranges[i]}
+                total={STAGES.length}
+                progress={scrollYProgress}
+                index={i}
+              />
+            ))}
           </div>
-          <motion.div
-            style={{ left: dotX }}
-            className="absolute bottom-10 -translate-x-1/2 -translate-y-1/2 w-3 h-3 rounded-full bg-white shadow-[0_0_18px_rgba(255,255,255,0.7)]"
-          />
+
+          {/* Left rail step indicator */}
+          <div className="pointer-events-none absolute left-6 lg:left-10 top-1/2 -translate-y-1/2 flex flex-col gap-6">
+            {STAGES.map((s, i) => (
+              <RailStep key={s.n} n={s.n} index={i} activeIdx={activeIdx} />
+            ))}
+          </div>
+
+          {/* Bottom progress bar */}
+          <div className="absolute bottom-8 left-10 right-10 flex items-center gap-6 text-[10px] tracking-[0.4em] uppercase text-white/40">
+            <span className="whitespace-nowrap">Protocol</span>
+            <div className="flex-1 h-px bg-white/10 overflow-hidden relative">
+              <motion.div
+                style={{ scaleX: barScale, originX: 0 }}
+                className="absolute inset-0 bg-white/70"
+              />
+              <motion.div
+                style={{ left: dotLeft }}
+                className="absolute top-1/2 -translate-x-1/2 -translate-y-1/2 w-2.5 h-2.5 rounded-full bg-white shadow-[0_0_15px_rgba(255,255,255,0.7)]"
+              />
+            </div>
+            <span className="whitespace-nowrap">
+              <motion.span>{useTransform(activeIdx, (v) => String(v).padStart(2, "0"))}</motion.span>
+              {" / 03"}
+            </span>
+          </div>
         </div>
       </div>
 
       {/* MOBILE VERTICAL CARDS */}
       <div className="md:hidden px-6 pb-10 space-y-6">
         {STAGES.map((s, i) => (
-          <StageCard key={s.n} s={s} i={i} total={STAGES.length} variant="mobile" />
+          <MobileStage key={s.n} s={s} total={STAGES.length} index={i} />
         ))}
       </div>
 
@@ -236,8 +342,7 @@ export default function SafetyProtocol() {
         <div className="border-t border-white/10 pt-8 flex flex-col md:flex-row md:items-center md:justify-between gap-4 text-[11px] tracking-[0.32em] uppercase text-white/45">
           <span>Technology · Attention · Precision</span>
           <span className="text-white/60 max-w-md text-right md:normal-case md:tracking-normal md:text-sm md:font-light leading-relaxed">
-            Технология, внимание к деталям и precision-подход —
-            основа безупречной оклейки.
+            Технология, внимание к деталям и precision-подход — основа безупречной оклейки.
           </span>
         </div>
       </div>
