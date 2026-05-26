@@ -128,7 +128,7 @@ function ProgressBar({ progress }) {
 function ExpertCard({ q, contextKey }) {
   const message = (q.step_messages && q.step_messages[contextKey]) || q.expert_quote;
   return (
-    <aside data-testid="quiz-expert" className="relative bg-[#0A0A0A] border border-white/10 overflow-hidden flex flex-col">
+    <aside data-testid="quiz-expert" className="relative bg-[#0A0A0A] border border-white/10 flex flex-col h-full">
       {/* Top trust ribbon */}
       <div className="px-5 md:px-6 py-4 flex items-center justify-between text-[10px] tracking-[0.4em] uppercase text-white/65 border-b border-white/10">
         <span className="flex items-center gap-2">
@@ -162,11 +162,13 @@ function ExpertCard({ q, contextKey }) {
         </div>
       </div>
 
-      {/* Dynamic chat-bubble message (changes per step) */}
+      {/* Chat area — grows to fill, pushes footer to bottom */}
       <div className="px-5 md:px-6 py-5 md:py-6 flex-1 flex flex-col">
         <div className="text-[10px] tracking-[0.32em] uppercase text-white/35 mb-3">
           {q.expert_name} пишет:
         </div>
+
+        {/* Bubble + arrow */}
         <div className="relative">
           <AnimatePresence mode="wait" initial={false}>
             <motion.div
@@ -177,7 +179,7 @@ function ExpertCard({ q, contextKey }) {
               transition={{ duration: 0.45, ease: [0.16, 1, 0.3, 1] }}
               className="relative bg-white/[0.04] border border-white/10 px-4 py-4 md:px-5 md:py-5 text-sm md:text-[15px] text-[#DCDCDC] font-light leading-relaxed"
             >
-              {/* Tail */}
+              {/* Top-left bubble tail */}
               <span
                 aria-hidden="true"
                 className="absolute -top-1.5 left-6 w-3 h-3 bg-white/[0.04] border-l border-t border-white/10 rotate-45"
@@ -185,38 +187,75 @@ function ExpertCard({ q, contextKey }) {
               {message}
             </motion.div>
           </AnimatePresence>
-        </div>
 
-        {/* Stats strip */}
-        <div className="mt-6 grid grid-cols-3 border-t border-white/10 pt-4 gap-2 md:gap-3">
-          {[
-            { v: q.expert_stat_1_value, l: q.expert_stat_1_label },
-            { v: q.expert_stat_2_value, l: q.expert_stat_2_label },
-            { v: q.expert_stat_3_value, l: q.expert_stat_3_label },
-          ].map((s, i) => (
-            <div key={i} className={i === 1 ? "border-x border-white/10 px-2 md:px-3" : ""}>
-              <div className="text-sm md:text-lg tracking-tighter font-medium text-white leading-none truncate">{s.v}</div>
-              <div className="mt-1.5 text-[9px] tracking-[0.18em] md:tracking-[0.28em] uppercase text-white/45 leading-tight">{s.l}</div>
-            </div>
-          ))}
-        </div>
-
-        {/* Call button */}
-        {q.call_phone_link ? (
-          <a
-            href={`tel:${q.call_phone_link}`}
-            data-testid="quiz-call"
-            className="group mt-6 inline-flex items-center justify-between gap-3 px-5 py-3.5 border border-white/15 hover:border-white/40 hover:bg-white hover:text-black text-[10px] tracking-[0.3em] uppercase transition-all"
+          {/* Thin curved arrow → points across the gap to the quiz question (desktop only) */}
+          <svg
+            aria-hidden="true"
+            className="hidden lg:block absolute pointer-events-none text-white/30"
+            style={{
+              top: "50%",
+              right: 0,
+              transform: "translate(calc(100% + 12px), -50%)",
+              width: "180px",
+              height: "120px",
+              overflow: "visible",
+            }}
+            viewBox="0 0 180 120"
+            fill="none"
           >
-            <span className="flex items-center gap-3">
-              <Phone size={14} strokeWidth={1.5} />
-              {q.call_button_label || "Позвонить"}
-            </span>
-            <span className="text-white/45 group-hover:text-black/60 normal-case tracking-normal text-xs">
-              {q.call_phone_display}
-            </span>
-          </a>
-        ) : null}
+            {/* Curve from bubble → up and right → ending near quiz question */}
+            <path
+              d="M 0 80 C 60 80, 80 20, 170 22"
+              stroke="currentColor"
+              strokeWidth="1"
+              strokeDasharray="3 4"
+              strokeLinecap="round"
+            />
+            {/* Arrowhead */}
+            <path
+              d="M 163 17 L 172 22 L 165 28"
+              stroke="currentColor"
+              strokeWidth="1"
+              strokeLinecap="round"
+              strokeLinejoin="round"
+              fill="none"
+            />
+          </svg>
+        </div>
+
+        {/* Footer block — pinned to bottom */}
+        <div className="mt-auto pt-6">
+          {/* Stats strip */}
+          <div className="grid grid-cols-3 border-t border-white/10 pt-4 gap-2 md:gap-3">
+            {[
+              { v: q.expert_stat_1_value, l: q.expert_stat_1_label },
+              { v: q.expert_stat_2_value, l: q.expert_stat_2_label },
+              { v: q.expert_stat_3_value, l: q.expert_stat_3_label },
+            ].map((s, i) => (
+              <div key={i} className={i === 1 ? "border-x border-white/10 px-2 md:px-3" : ""}>
+                <div className="text-sm md:text-lg tracking-tighter font-medium text-white leading-none truncate">{s.v}</div>
+                <div className="mt-1.5 text-[9px] tracking-[0.18em] md:tracking-[0.28em] uppercase text-white/45 leading-tight">{s.l}</div>
+              </div>
+            ))}
+          </div>
+
+          {/* Call button */}
+          {q.call_phone_link ? (
+            <a
+              href={`tel:${q.call_phone_link}`}
+              data-testid="quiz-call"
+              className="group mt-5 inline-flex w-full items-center justify-between gap-3 px-5 py-3.5 border border-white/15 hover:border-white/40 hover:bg-white hover:text-black text-[10px] tracking-[0.3em] uppercase transition-all"
+            >
+              <span className="flex items-center gap-3">
+                <Phone size={14} strokeWidth={1.5} />
+                {q.call_button_label || "Позвонить"}
+              </span>
+              <span className="text-white/45 group-hover:text-black/60 normal-case tracking-normal text-xs">
+                {q.call_phone_display}
+              </span>
+            </a>
+          ) : null}
+        </div>
       </div>
     </aside>
   );
@@ -436,7 +475,7 @@ export default function Quiz() {
       <div className="mx-auto max-w-[1240px] px-6 md:px-10">
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-4 md:gap-6 items-stretch">
           {/* Expert / manager sidebar */}
-          <div className="lg:col-span-5">
+          <div className="lg:col-span-5 relative">
             <ExpertCard q={q} contextKey={contextKey} />
           </div>
 
