@@ -1,6 +1,6 @@
 import React, { useMemo, useRef, useState } from "react";
 import { motion, AnimatePresence, useInView } from "framer-motion";
-import { Check, ChevronLeft, ArrowRight, Gift, Shield, Sparkles, Lightbulb, Send } from "lucide-react";
+import { Check, ChevronLeft, ArrowRight, Gift, Shield, Sparkles, Lightbulb, Send, Phone } from "lucide-react";
 import axios from "axios";
 import { toast } from "sonner";
 import { useContent } from "@/context/ContentContext";
@@ -31,7 +31,7 @@ const STEPS = [
       { id: "ppf", title: "Защита от сколов", sub: "Полиуретан PPF, 200 мкм, самовосстановление" },
       { id: "color", title: "Смена цвета", sub: "Винил: мат, сатин, металлик" },
       { id: "antichrome", title: "Чёрные элементы", sub: "Антихром, dark-out" },
-      { id: "advise", title: "Не знаю — посоветуйте", sub: "Бесплатная консультация Артёма" },
+      { id: "advise", title: "Не знаю — посоветуйте", sub: "Бесплатная консультация Владимира" },
     ],
   },
   {
@@ -125,56 +125,98 @@ function ProgressBar({ progress }) {
   );
 }
 
-function ExpertCard({ q }) {
+function ExpertCard({ q, contextKey }) {
+  const message = (q.step_messages && q.step_messages[contextKey]) || q.expert_quote;
   return (
-    <aside data-testid="quiz-expert" className="relative bg-[#0A0A0A] border border-white/10 overflow-hidden">
-      <div className="relative aspect-[4/5] lg:aspect-auto lg:h-full">
-        <img
-          src={resolveMedia(q.expert_image)}
-          alt={`${q.expert_name} — ${q.expert_role}`}
-          className="absolute inset-0 w-full h-full object-cover grayscale brightness-[0.7]"
-          loading="lazy"
-          decoding="async"
-        />
-        <div className="absolute inset-0 bg-gradient-to-t from-black via-black/60 to-transparent" />
-        <div className="absolute inset-0 grain pointer-events-none" />
-
-        {/* Top trust ribbon */}
-        <div className="absolute top-0 inset-x-0 px-6 py-5 flex items-center justify-between text-[10px] tracking-[0.4em] uppercase text-white/70 border-b border-white/10">
-          <span className="flex items-center gap-2">
-            <span className="relative flex h-1.5 w-1.5">
-              <span className="absolute inline-flex h-full w-full rounded-full bg-white opacity-60 animate-ping" />
-              <span className="relative inline-flex rounded-full h-1.5 w-1.5 bg-white" />
-            </span>
-            Online
+    <aside data-testid="quiz-expert" className="relative bg-[#0A0A0A] border border-white/10 overflow-hidden flex flex-col">
+      {/* Top trust ribbon */}
+      <div className="px-5 md:px-6 py-4 flex items-center justify-between text-[10px] tracking-[0.4em] uppercase text-white/65 border-b border-white/10">
+        <span className="flex items-center gap-2">
+          <span className="relative flex h-1.5 w-1.5">
+            <span className="absolute inline-flex h-full w-full rounded-full bg-white opacity-60 animate-ping" />
+            <span className="relative inline-flex rounded-full h-1.5 w-1.5 bg-white" />
           </span>
-          <span>{q.trust_badge}</span>
-        </div>
+          Online
+        </span>
+        <span className="hidden md:inline">{q.trust_badge}</span>
+      </div>
 
-        {/* Bottom content */}
-        <div className="absolute bottom-0 inset-x-0 p-6 md:p-8 lg:p-10">
-          <div className="text-[11px] tracking-[0.32em] uppercase text-white/60">{q.expert_role}</div>
-          <div className="mt-2 text-2xl md:text-3xl tracking-tighter font-medium text-white">
+      {/* Manager identity row */}
+      <div className="px-5 md:px-6 pt-5 pb-4 flex items-center gap-4 border-b border-white/10">
+        <div className="relative w-14 h-14 md:w-16 md:h-16 shrink-0 overflow-hidden border border-white/15 bg-black">
+          <img
+            src={resolveMedia(q.expert_image)}
+            alt={`${q.expert_name} — ${q.expert_role}`}
+            className="absolute inset-0 w-full h-full object-cover grayscale"
+            loading="lazy"
+            decoding="async"
+          />
+        </div>
+        <div className="min-w-0">
+          <div className="text-[10px] tracking-[0.32em] uppercase text-white/45 mb-1 truncate">
+            {q.expert_role}
+          </div>
+          <div className="text-lg md:text-xl tracking-tight font-medium text-white">
             {q.expert_name}
           </div>
-          <p className="mt-4 text-sm md:text-base text-[#DCDCDC] font-light leading-relaxed max-w-md">
-            «{q.expert_quote}»
-          </p>
-
-          {/* Stats strip */}
-          <div className="mt-7 grid grid-cols-3 border-t border-white/15 pt-5 gap-3">
-            {[
-              { v: q.expert_stat_1_value, l: q.expert_stat_1_label },
-              { v: q.expert_stat_2_value, l: q.expert_stat_2_label },
-              { v: q.expert_stat_3_value, l: q.expert_stat_3_label },
-            ].map((s, i) => (
-              <div key={i} className={i === 1 ? "border-x border-white/10 px-3" : i === 0 ? "" : ""}>
-                <div className="text-xl md:text-2xl tracking-tighter font-medium text-white leading-none">{s.v}</div>
-                <div className="mt-1.5 text-[10px] tracking-[0.28em] uppercase text-white/45 leading-tight">{s.l}</div>
-              </div>
-            ))}
-          </div>
         </div>
+      </div>
+
+      {/* Dynamic chat-bubble message (changes per step) */}
+      <div className="px-5 md:px-6 py-5 md:py-6 flex-1 flex flex-col">
+        <div className="text-[10px] tracking-[0.32em] uppercase text-white/35 mb-3">
+          {q.expert_name} пишет:
+        </div>
+        <div className="relative">
+          <AnimatePresence mode="wait" initial={false}>
+            <motion.div
+              key={contextKey}
+              initial={{ opacity: 0, y: 10 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0, y: -8 }}
+              transition={{ duration: 0.45, ease: [0.16, 1, 0.3, 1] }}
+              className="relative bg-white/[0.04] border border-white/10 px-4 py-4 md:px-5 md:py-5 text-sm md:text-[15px] text-[#DCDCDC] font-light leading-relaxed"
+            >
+              {/* Tail */}
+              <span
+                aria-hidden="true"
+                className="absolute -top-1.5 left-6 w-3 h-3 bg-white/[0.04] border-l border-t border-white/10 rotate-45"
+              />
+              {message}
+            </motion.div>
+          </AnimatePresence>
+        </div>
+
+        {/* Stats strip */}
+        <div className="mt-6 grid grid-cols-3 border-t border-white/10 pt-4 gap-2 md:gap-3">
+          {[
+            { v: q.expert_stat_1_value, l: q.expert_stat_1_label },
+            { v: q.expert_stat_2_value, l: q.expert_stat_2_label },
+            { v: q.expert_stat_3_value, l: q.expert_stat_3_label },
+          ].map((s, i) => (
+            <div key={i} className={i === 1 ? "border-x border-white/10 px-2 md:px-3" : ""}>
+              <div className="text-sm md:text-lg tracking-tighter font-medium text-white leading-none truncate">{s.v}</div>
+              <div className="mt-1.5 text-[9px] tracking-[0.18em] md:tracking-[0.28em] uppercase text-white/45 leading-tight">{s.l}</div>
+            </div>
+          ))}
+        </div>
+
+        {/* Call button */}
+        {q.call_phone_link ? (
+          <a
+            href={`tel:${q.call_phone_link}`}
+            data-testid="quiz-call"
+            className="group mt-6 inline-flex items-center justify-between gap-3 px-5 py-3.5 border border-white/15 hover:border-white/40 hover:bg-white hover:text-black text-[10px] tracking-[0.3em] uppercase transition-all"
+          >
+            <span className="flex items-center gap-3">
+              <Phone size={14} strokeWidth={1.5} />
+              {q.call_button_label || "Позвонить"}
+            </span>
+            <span className="text-white/45 group-hover:text-black/60 normal-case tracking-normal text-xs">
+              {q.call_phone_display}
+            </span>
+          </a>
+        ) : null}
       </div>
     </aside>
   );
@@ -356,6 +398,9 @@ export default function Quiz() {
   const isContactStep = step === STEPS.length && !done;
   const canSubmit = name.trim() && phone.trim();
 
+  // Determine which chat message the expert shows
+  const contextKey = done ? "thanks" : isContactStep ? "contact" : stepDef.id;
+
   return (
     <section
       ref={ref}
@@ -364,7 +409,7 @@ export default function Quiz() {
       className="relative w-full bg-black py-16 md:py-24 border-t border-white/5"
     >
       {/* HEADER */}
-      <div className="mx-auto max-w-[1400px] px-6 md:px-10 mb-10 md:mb-14">
+      <div className="mx-auto max-w-[1240px] px-6 md:px-10 mb-10 md:mb-14">
         <div className="flex flex-col md:flex-row md:items-end md:justify-between gap-6">
           <div>
             <span className="text-[11px] tracking-[0.4em] uppercase text-white/50">
@@ -387,16 +432,16 @@ export default function Quiz() {
         </div>
       </div>
 
-      {/* BODY: expert | quiz */}
-      <div className="mx-auto max-w-[1400px] px-6 md:px-10">
-        <div className="grid grid-cols-1 lg:grid-cols-12 gap-4 md:gap-6">
-          {/* Expert sidebar */}
-          <div className="lg:col-span-5 xl:col-span-4">
-            <ExpertCard q={q} />
+      {/* BODY: expert | quiz — balanced, centered */}
+      <div className="mx-auto max-w-[1240px] px-6 md:px-10">
+        <div className="grid grid-cols-1 lg:grid-cols-12 gap-4 md:gap-6 items-stretch">
+          {/* Expert / manager sidebar */}
+          <div className="lg:col-span-5">
+            <ExpertCard q={q} contextKey={contextKey} />
           </div>
 
           {/* Quiz card */}
-          <div className="lg:col-span-7 xl:col-span-8 bg-[#0A0A0A] border border-white/10 p-6 md:p-10 flex flex-col min-h-[520px]">
+          <div className="lg:col-span-7 bg-[#0A0A0A] border border-white/10 p-6 md:p-10 flex flex-col min-h-[520px]">
             {/* Progress */}
             <ProgressBar progress={progress} />
 

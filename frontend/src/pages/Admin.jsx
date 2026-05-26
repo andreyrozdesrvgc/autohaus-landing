@@ -181,10 +181,12 @@ const SECTIONS = [
       { k: "title_line_1", label: "Заголовок — строка 1" },
       { k: "title_line_2", label: "Заголовок — строка 2 (серым)" },
       { k: "description", label: "Описание", type: "textarea" },
-      { k: "expert_name", label: "Имя эксперта" },
-      { k: "expert_role", label: "Должность / статус эксперта" },
-      { k: "expert_quote", label: "Цитата эксперта", type: "textarea" },
-      { k: "expert_image", label: "Фото эксперта", type: "image" },
+      { k: "expert_name", label: "Имя менеджера" },
+      { k: "expert_role", label: "Должность / опыт менеджера" },
+      { k: "expert_image", label: "Фото менеджера (аватар)", type: "image" },
+      { k: "call_button_label", label: "Кнопка звонка — подпись" },
+      { k: "call_phone_display", label: "Кнопка звонка — телефон (как видно)" },
+      { k: "call_phone_link", label: "Кнопка звонка — для tel: (только цифры)" },
       { k: "expert_stat_1_value", label: "Бейдж 1 — значение (напр. 1200+)" },
       { k: "expert_stat_1_label", label: "Бейдж 1 — подпись" },
       { k: "expert_stat_2_value", label: "Бейдж 2 — значение" },
@@ -192,6 +194,13 @@ const SECTIONS = [
       { k: "expert_stat_3_value", label: "Бейдж 3 — значение" },
       { k: "expert_stat_3_label", label: "Бейдж 3 — подпись" },
       { k: "trust_badge", label: "Trust-плашка справа сверху" },
+      { k: "expert_quote", label: "Цитата эксперта (fallback)", type: "textarea" },
+      { k: "step_messages.type", label: "Сообщение менеджера — шаг 1 (тип авто)", type: "textarea" },
+      { k: "step_messages.goal", label: "Сообщение менеджера — шаг 2 (цель)", type: "textarea" },
+      { k: "step_messages.coverage", label: "Сообщение менеджера — шаг 3 (зона)", type: "textarea" },
+      { k: "step_messages.urgency", label: "Сообщение менеджера — шаг 4 (срочность)", type: "textarea" },
+      { k: "step_messages.contact", label: "Сообщение менеджера — шаг 5 (контакты)", type: "textarea" },
+      { k: "step_messages.thanks", label: "Сообщение менеджера — финал (спасибо)", type: "textarea" },
       { k: "bonus_overline", label: "Заголовок над бонусами" },
       { k: "thanks_title", label: "Финальный экран — заголовок" },
       { k: "thanks_subtitle", label: "Финальный экран — подпись", type: "textarea" },
@@ -260,6 +269,15 @@ const SECTIONS = [
     ],
   },
 ];
+
+function getIn(obj, path) {
+  let cur = obj;
+  for (const k of path) {
+    if (cur == null) return undefined;
+    cur = cur[k];
+  }
+  return cur;
+}
 
 function setIn(obj, path, value) {
   // path is a list like ["hero", "title_line_1"] or ["protocol","stages",0,"title"]
@@ -495,14 +513,18 @@ export default function Admin() {
           <div className="bg-[#0A0A0A] border border-white/10 p-6 md:p-8">
             <h2 className="text-xl tracking-tight font-medium mb-6">{activeSection.label}</h2>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
-              {activeSection.fields.map((f) => (
-                <Field
-                  key={f.k}
-                  field={f}
-                  value={sectionData[f.k]}
-                  onChange={(v) => updateField([activeSection.key, f.k], v)}
-                />
-              ))}
+              {activeSection.fields.map((f) => {
+                const subPath = f.k.split(".");
+                const fullPath = [activeSection.key, ...subPath];
+                return (
+                  <Field
+                    key={f.k}
+                    field={f}
+                    value={getIn(sectionData, subPath)}
+                    onChange={(v) => updateField(fullPath, v)}
+                  />
+                );
+              })}
             </div>
           </div>
 
