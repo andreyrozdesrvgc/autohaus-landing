@@ -21,13 +21,24 @@ export default function BeforeAfter() {
 
   const onPointerDown = (e) => {
     dragging.current = true;
+    // Capture pointer so we keep receiving move/up even when finger leaves bounds
+    if (e.currentTarget && e.pointerId !== undefined) {
+      try { e.currentTarget.setPointerCapture(e.pointerId); } catch (_) {}
+    }
     setFromClientX(e.clientX);
   };
   const onPointerMove = (e) => {
     if (!dragging.current) return;
+    // Prevent native gestures (page scroll / pull-to-refresh) from stealing the drag
+    if (e.cancelable) e.preventDefault();
     setFromClientX(e.clientX);
   };
-  const onPointerUp = () => { dragging.current = false; };
+  const onPointerUp = (e) => {
+    dragging.current = false;
+    if (e && e.currentTarget && e.pointerId !== undefined) {
+      try { e.currentTarget.releasePointerCapture(e.pointerId); } catch (_) {}
+    }
+  };
 
   return (
     <section
@@ -64,12 +75,10 @@ export default function BeforeAfter() {
           onPointerDown={onPointerDown}
           onPointerMove={onPointerMove}
           onPointerUp={onPointerUp}
-          onPointerLeave={onPointerUp}
-          onTouchStart={(e) => onPointerDown(e.touches[0])}
-          onTouchMove={(e) => onPointerMove(e.touches[0])}
-          onTouchEnd={onPointerUp}
+          onPointerCancel={onPointerUp}
           data-testid="before-after-slider"
-          className="relative w-full md:max-w-[1100px] md:mx-auto aspect-[16/9] md:aspect-[21/9] overflow-hidden select-none cursor-ew-resize bg-[#0A0A0A] border border-white/10"
+          style={{ touchAction: "none" }}
+          className="relative w-full md:max-w-[1100px] md:mx-auto aspect-[16/9] md:aspect-[21/9] overflow-hidden select-none cursor-ew-resize bg-[#0A0A0A] border border-white/10 touch-none"
         >
           {/* AFTER (base, full) */}
           <img
