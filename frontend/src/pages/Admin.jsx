@@ -152,6 +152,29 @@ const SECTIONS = [
     ],
   },
   {
+    key: "live",
+    label: "AutoHaus Live (видео)",
+    fields: [
+      { k: "overline", label: "Верхняя плашка" },
+      { k: "title_line_1", label: "Заголовок — строка 1" },
+      { k: "title_line_2", label: "Заголовок — строка 2 (серым)" },
+      { k: "description", label: "Описание", type: "textarea" },
+      { k: "footer_left", label: "Низ — слева" },
+      { k: "footer_right", label: "Низ — справа", type: "textarea" },
+      { k: "cta_default_label", label: "Подпись на кнопке (по умолчанию)" },
+    ],
+    listKey: "items",
+    listLabel: "Ролики (вертикальные 9:16)",
+    listItem: [
+      { k: "title", label: "Название" },
+      { k: "meta", label: "Подпись (услуга · срок)" },
+      { k: "cta_label", label: "Текст на кнопке" },
+      { k: "instagram_url", label: "Ссылка на Instagram-пост" },
+      { k: "poster", label: "Превью (картинка-заглушка)", type: "image" },
+      { k: "src", label: "Видео (вертикальное)", type: "video" },
+    ],
+  },
+  {
     key: "contact",
     label: "Контакты",
     fields: [
