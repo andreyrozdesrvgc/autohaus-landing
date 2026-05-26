@@ -154,57 +154,14 @@ export default function Configurator() {
             </h2>
           </div>
           <p className="text-[#BDBDBD] text-base md:text-lg leading-relaxed max-w-sm">
-            Выберите тип плёнки, финиш и зону оклейки. Видите результат в
-            реальном времени — точная цена после диагностики.
+            Выберите тип плёнки, финиш и зону оклейки — мы пришлём точный расчёт
+            в течение 15 минут.
           </p>
         </div>
 
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-3 md:gap-4">
-          {/* PREVIEW — full-bleed cinematic */}
-          <div className="lg:col-span-6 relative bg-[#0A0A0A] border border-white/10 overflow-hidden min-h-[420px]">
-            <motion.img
-              key={finish.id}
-              src={CAR_VARIANTS[finish.id]}
-              alt={`Превью автомобиля: ${film.label}, финиш ${finish.label}, ${coverage.label} — конфигуратор AUTOHAUS`}
-              loading="lazy"
-              decoding="async"
-              initial={{ opacity: 0, scale: 1.05 }}
-              animate={{ opacity: 1, scale: 1 }}
-              transition={{ duration: 1, ease: [0.16, 1, 0.3, 1] }}
-              className={`absolute inset-0 w-full h-full object-cover grayscale ${
-                darkout ? "brightness-[0.6] contrast-110" : ""
-              } ${finish.id === "matte" ? "contrast-110" : ""}`}
-            />
-            <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/10 to-transparent" />
-            <div className="absolute inset-0 grain pointer-events-none" />
-
-            {/* Top meta */}
-            <div className="absolute top-6 left-6 right-6 flex items-start justify-between">
-              <div>
-                <div className="text-[10px] tracking-[0.4em] uppercase text-white/50">Preview</div>
-                <div className="mt-2 text-2xl md:text-3xl tracking-tight font-medium">
-                  {film.label}
-                </div>
-                <div className="text-[#BDBDBD] text-sm mt-1">
-                  {finish.label} · {coverage.label}
-                </div>
-              </div>
-              <div className="hidden md:flex items-center gap-2 px-3 py-2 border border-white/20 backdrop-blur-md bg-black/40 text-[10px] tracking-[0.3em] uppercase">
-                <span className="w-1.5 h-1.5 bg-white rounded-full animate-pulse" />
-                Live preview
-              </div>
-            </div>
-
-            {/* Bottom option chips */}
-            <div className="absolute bottom-6 left-6 right-6 flex flex-wrap items-center gap-3 text-[10px] tracking-[0.3em] uppercase text-white/60">
-              {antichrome && <span className="px-3 py-2 border border-white/20 bg-black/40">Антихром</span>}
-              {darkout && <span className="px-3 py-2 border border-white/20 bg-black/40">Чёрные элементы</span>}
-              {headlights && <span className="px-3 py-2 border border-white/20 bg-black/40">Бронь оптики</span>}
-            </div>
-          </div>
-
-          {/* CONTROLS */}
-          <div className="lg:col-span-6 bg-[#0A0A0A] border border-white/10 p-6 md:p-8 flex flex-col gap-8">
+          {/* LEFT — CONTROLS */}
+          <div className="lg:col-span-7 bg-[#0A0A0A] border border-white/10 p-6 md:p-8 flex flex-col gap-8">
             {/* Film type */}
             <div>
               <div className="flex items-center justify-between mb-3">
@@ -297,26 +254,58 @@ export default function Configurator() {
                 <Toggle active={headlights} onChange={setHeadlights} label="Бронирование оптики" sub="Защита фар плёнкой" testid="toggle-headlights" />
               </div>
             </div>
+
+            {/* Current selection summary (subtle, in-card) */}
+            <div className="border-t border-white/10 pt-5 flex flex-wrap items-center gap-2 text-[10px] tracking-[0.3em] uppercase text-white/55">
+              <span className="text-white/40">Ваш выбор:</span>
+              <span className="px-3 py-1.5 border border-white/15 bg-white/[0.03]">{film.label}</span>
+              <span className="px-3 py-1.5 border border-white/15 bg-white/[0.03]">{finish.label}</span>
+              <span className="px-3 py-1.5 border border-white/15 bg-white/[0.03]">{coverage.label}</span>
+              {antichrome && <span className="px-3 py-1.5 border border-white/15 bg-white/[0.03]">Антихром</span>}
+              {darkout && <span className="px-3 py-1.5 border border-white/15 bg-white/[0.03]">Чёрные элементы</span>}
+              {headlights && <span className="px-3 py-1.5 border border-white/15 bg-white/[0.03]">Бронь оптики</span>}
+            </div>
           </div>
 
-          {/* SUMMARY + FORM */}
-          <div className="lg:col-span-12 bg-[#0A0A0A] border border-white/10 p-6 md:p-10">
-            <div className="grid grid-cols-1 md:grid-cols-12 gap-8 items-end">
-              <div className="md:col-span-5">
-                <div className="text-[11px] tracking-[0.32em] uppercase text-white/50 mb-3">
-                  Заявка на расчёт
+          {/* RIGHT — INTENT + FORM (sticky) */}
+          <aside className="lg:col-span-5 relative">
+            <div className="lg:sticky lg:top-24 bg-[#0A0A0A] border border-white/10 p-6 md:p-8 lg:p-10 flex flex-col gap-8">
+              {/* Header */}
+              <div>
+                <div className="flex items-center gap-3 mb-5">
+                  <span className="block w-8 h-px bg-white/40" />
+                  <span className="text-[10px] tracking-[0.4em] uppercase text-white/50">
+                    Заявка на расчёт
+                  </span>
                 </div>
-                <div className="text-2xl md:text-3xl tracking-tight font-medium leading-tight text-white">
-                  Получите персональное предложение в течение&nbsp;30&nbsp;минут.
-                </div>
-                <p className="mt-4 text-sm text-white/50 max-w-sm font-light leading-relaxed">
-                  Точная цена формируется после диагностики кузова и согласования
-                  плёнки. Срок работ — 5–14 дней.
+                <h3 className="text-2xl md:text-3xl lg:text-4xl tracking-tighter font-medium leading-[1.05] text-white">
+                  Подберите необходимый вариант — а мы пришлём стоимость в течение&nbsp;15&nbsp;минут.
+                </h3>
+                <p className="mt-5 text-sm md:text-base text-[#BDBDBD] font-light leading-relaxed">
+                  Без обязательств и навязчивых звонков. Свяжемся только по делу
+                  и предложим лучший вариант под ваш автомобиль.
                 </p>
               </div>
 
-              <form onSubmit={handleSubmit} className="md:col-span-7 grid grid-cols-1 md:grid-cols-7 gap-3">
-                {/* Honeypot — hidden from real users, bots tend to fill it */}
+              {/* Trust strip */}
+              <div className="grid grid-cols-3 gap-2 text-center border-y border-white/10 py-4">
+                <div>
+                  <div className="text-[10px] tracking-[0.3em] uppercase text-white/40">Ответ</div>
+                  <div className="mt-1 text-sm font-medium tracking-tight">~15 мин</div>
+                </div>
+                <div className="border-x border-white/10">
+                  <div className="text-[10px] tracking-[0.3em] uppercase text-white/40">Гарантия</div>
+                  <div className="mt-1 text-sm font-medium tracking-tight">до 10 лет</div>
+                </div>
+                <div>
+                  <div className="text-[10px] tracking-[0.3em] uppercase text-white/40">Опыт</div>
+                  <div className="mt-1 text-sm font-medium tracking-tight">15+ лет</div>
+                </div>
+              </div>
+
+              {/* Form */}
+              <form onSubmit={handleSubmit} className="flex flex-col gap-5">
+                {/* Honeypot */}
                 <input
                   type="text"
                   name="website"
@@ -325,42 +314,51 @@ export default function Configurator() {
                   value={website}
                   onChange={(e) => setWebsite(e.target.value)}
                   aria-hidden="true"
-                  style={{
-                    position: "absolute",
-                    left: "-9999px",
-                    width: "1px",
-                    height: "1px",
-                    opacity: 0,
-                  }}
+                  style={{ position: "absolute", left: "-9999px", width: "1px", height: "1px", opacity: 0 }}
                 />
-                <input
-                  data-testid="config-name-input"
-                  value={name}
-                  onChange={(e) => setName(e.target.value)}
-                  placeholder="Имя"
-                  className="md:col-span-2 bg-transparent border-b border-white/15 focus:border-white px-2 py-4 text-sm tracking-wide outline-none transition-colors duration-300 placeholder:text-white/40"
-                />
-                <input
-                  data-testid="config-phone-input"
-                  value={phone}
-                  onChange={(e) => setPhone(formatRuPhone(e.target.value))}
-                  onFocus={(e) => { if (!phone) setPhone("+7 ("); }}
-                  inputMode="tel"
-                  maxLength={18}
-                  placeholder="+7 (___) ___-__-__"
-                  className="md:col-span-3 bg-transparent border-b border-white/15 focus:border-white px-2 py-4 text-sm tracking-wide outline-none transition-colors duration-300 placeholder:text-white/40"
-                />
+
+                <div>
+                  <label className="block text-[10px] tracking-[0.32em] uppercase text-white/40 mb-3">Имя</label>
+                  <input
+                    data-testid="config-name-input"
+                    value={name}
+                    onChange={(e) => setName(e.target.value)}
+                    placeholder="Александр"
+                    className="w-full bg-transparent border-b border-white/15 focus:border-white py-3 text-base outline-none placeholder:text-white/30 transition-colors"
+                  />
+                </div>
+
+                <div>
+                  <label className="block text-[10px] tracking-[0.32em] uppercase text-white/40 mb-3">Телефон</label>
+                  <input
+                    data-testid="config-phone-input"
+                    value={phone}
+                    onChange={(e) => setPhone(formatRuPhone(e.target.value))}
+                    onFocus={() => { if (!phone) setPhone("+7 ("); }}
+                    inputMode="tel"
+                    maxLength={18}
+                    placeholder="+7 (___) ___-__-__"
+                    className="w-full bg-transparent border-b border-white/15 focus:border-white py-3 text-base outline-none placeholder:text-white/30 transition-colors"
+                  />
+                </div>
+
                 <button
                   data-testid="config-submit"
                   type="submit"
                   disabled={sending}
-                  className="md:col-span-2 group inline-flex items-center justify-center gap-3 px-6 py-4 bg-white text-black text-[11px] tracking-[0.3em] uppercase hover:bg-[#EDEDED] disabled:opacity-60 transition-all duration-300 shine"
+                  className="mt-2 group inline-flex items-center justify-center gap-4 px-6 py-5 bg-white text-black text-[11px] tracking-[0.3em] uppercase hover:bg-[#EDEDED] disabled:opacity-60 transition-all duration-300 shine"
                 >
                   {sending ? "Отправка…" : "Получить расчёт"}
+                  <span className="block w-8 h-px bg-current transition-all duration-500 group-hover:w-12" />
                 </button>
+
+                <p className="text-xs text-white/35 leading-relaxed">
+                  Отправляя форму, вы соглашаетесь на обработку персональных данных.
+                  Точная цена формируется после диагностики кузова.
+                </p>
               </form>
             </div>
-          </div>
+          </aside>
         </div>
       </div>
       <SuccessOverlay open={success} onClose={() => setSuccess(false)} />
