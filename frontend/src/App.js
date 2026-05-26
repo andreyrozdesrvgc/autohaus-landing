@@ -1,10 +1,18 @@
 import "@/App.css";
-import { BrowserRouter, Routes, Route } from "react-router-dom";
+import { BrowserRouter, Routes, Route, useLocation } from "react-router-dom";
 import { Toaster } from "sonner";
 import Landing from "@/pages/Landing";
 import AdminLogin from "@/pages/AdminLogin";
 import Admin from "@/pages/Admin";
+import ExitIntentPopup from "@/components/ExitIntentPopup";
 import { ContentProvider } from "@/context/ContentContext";
+
+function GlobalExitIntent() {
+  const loc = useLocation();
+  // Disable on admin routes
+  if (loc.pathname.startsWith("/admin")) return null;
+  return <ExitIntentPopup />;
+}
 
 function App() {
   return (
@@ -16,6 +24,7 @@ function App() {
             <Route path="/admin/login" element={<AdminLogin />} />
             <Route path="/admin" element={<Admin />} />
           </Routes>
+          <GlobalExitIntent />
         </BrowserRouter>
       </ContentProvider>
       <Toaster

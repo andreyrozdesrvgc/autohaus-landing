@@ -8,6 +8,7 @@ import Configurator from "@/components/Configurator";
 import Stats from "@/components/Stats";
 import Gallery from "@/components/Gallery";
 import AutoHausLive from "@/components/AutoHausLive";
+import Quiz from "@/components/Quiz";
 import ContactForm from "@/components/ContactForm";
 import Footer from "@/components/Footer";
 
@@ -23,6 +24,7 @@ export default function Landing() {
       <Stats />
       <Gallery />
       <AutoHausLive />
+      <Quiz />
       <ContactForm />
       <Footer />
     </main>
