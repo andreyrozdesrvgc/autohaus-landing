@@ -6,6 +6,7 @@ import { toast } from "sonner";
 import { getAnalyticsPayload } from "@/lib/analytics";
 import { formatRuPhone, isValidRuPhone } from "@/lib/phone";
 import SuccessOverlay from "@/components/SuccessOverlay";
+import { useContent } from "@/context/ContentContext";
 
 const FILM_TYPES = [
   { id: "ppf", label: "Полиуретан (PPF)", price: 260000, sub: "Самовосстанавливающаяся защита 200 мкм" },
@@ -39,6 +40,7 @@ function fmt(n) {
 }
 
 export default function Configurator() {
+  const { configurator: cfg } = useContent();
   const [film, setFilm] = useState(FILM_TYPES[0]);
   const [finish, setFinish] = useState(FINISHES[1]);
   const [coverage, setCoverage] = useState(COVERAGE[2]);
@@ -146,16 +148,15 @@ export default function Configurator() {
         <div className="flex flex-col md:flex-row md:items-end md:justify-between gap-6 mb-10 md:mb-14">
           <div>
             <span className="text-[11px] tracking-[0.4em] uppercase text-white/50">
-              004 — Configurator
+              {cfg.overline}
             </span>
             <h2 className="mt-4 text-4xl md:text-6xl lg:text-7xl tracking-tighter font-medium leading-[0.95]">
-              Соберите свой<br />
-              автомобиль в новом цвете.
+              {cfg.title_line_1}<br />
+              {cfg.title_line_2}
             </h2>
           </div>
           <p className="text-[#BDBDBD] text-base md:text-lg leading-relaxed max-w-sm">
-            Выберите тип плёнки, финиш и зону оклейки — мы пришлём точный расчёт
-            в течение 15 минут.
+            {cfg.description}
           </p>
         </div>
 
@@ -279,27 +280,26 @@ export default function Configurator() {
                   </span>
                 </div>
                 <h3 className="text-2xl md:text-3xl lg:text-4xl tracking-tighter font-medium leading-[1.05] text-white">
-                  Подберите необходимый вариант — а мы пришлём стоимость в течение&nbsp;15&nbsp;минут.
+                  {cfg.form_heading}
                 </h3>
                 <p className="mt-5 text-sm md:text-base text-[#BDBDBD] font-light leading-relaxed">
-                  Без обязательств и навязчивых звонков. Свяжемся только по делу
-                  и предложим лучший вариант под ваш автомобиль.
+                  {cfg.form_description}
                 </p>
               </div>
 
               {/* Trust strip */}
               <div className="grid grid-cols-3 gap-2 text-center border-y border-white/10 py-4">
                 <div>
-                  <div className="text-[10px] tracking-[0.3em] uppercase text-white/40">Ответ</div>
-                  <div className="mt-1 text-sm font-medium tracking-tight">~15 мин</div>
+                  <div className="text-[10px] tracking-[0.3em] uppercase text-white/40">{cfg.trust_response_label}</div>
+                  <div className="mt-1 text-sm font-medium tracking-tight">{cfg.trust_response_value}</div>
                 </div>
                 <div className="border-x border-white/10">
-                  <div className="text-[10px] tracking-[0.3em] uppercase text-white/40">Гарантия</div>
-                  <div className="mt-1 text-sm font-medium tracking-tight">до 10 лет</div>
+                  <div className="text-[10px] tracking-[0.3em] uppercase text-white/40">{cfg.trust_warranty_label}</div>
+                  <div className="mt-1 text-sm font-medium tracking-tight">{cfg.trust_warranty_value}</div>
                 </div>
                 <div>
-                  <div className="text-[10px] tracking-[0.3em] uppercase text-white/40">Опыт</div>
-                  <div className="mt-1 text-sm font-medium tracking-tight">15+ лет</div>
+                  <div className="text-[10px] tracking-[0.3em] uppercase text-white/40">{cfg.trust_experience_label}</div>
+                  <div className="mt-1 text-sm font-medium tracking-tight">{cfg.trust_experience_value}</div>
                 </div>
               </div>
 

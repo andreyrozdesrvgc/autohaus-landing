@@ -1,39 +1,8 @@
 import React, { useRef } from "react";
 import { motion, useInView } from "framer-motion";
 import { ArrowUpRight } from "lucide-react";
-
-const services = [
-  {
-    n: "01",
-    title: "Полная оклейка полиуретаном",
-    desc: "Невидимая броня PPF толщиной 200 мкм. Self-healing покрытие, защита от сколов и царапин на 10+ лет.",
-    img: "https://images.pexels.com/photos/10126666/pexels-photo-10126666.jpeg?auto=compress&cs=tinysrgb&w=1400",
-    alt: "Полная оклейка автомобиля полиуретановой плёнкой PPF в Калининграде",
-    span: "md:col-span-2 md:row-span-2",
-  },
-  {
-    n: "02",
-    title: "Смена цвета винилом",
-    desc: "От матового сатина до жидкого металла. Полная трансформация без покраски.",
-    img: "https://images.unsplash.com/photo-1605036242577-8ee228902af1?auto=format&fit=crop&w=1200&q=80",
-    alt: "Смена цвета автомобиля виниловой плёнкой — премиальный детейлинг Калининград",
-    span: "md:col-span-2",
-  },
-  {
-    n: "03",
-    title: "Антихром",
-    desc: "Превращаем все хромированные элементы в чёрный матовый или глянцевый.",
-    img: "https://images.unsplash.com/photo-1680844540129-48dacc7d5d88?auto=format&fit=crop&w=1200&q=80",
-    alt: "Антихром Mercedes-Benz BMW в Калининграде — затемнение хрома плёнкой",
-  },
-  {
-    n: "04",
-    title: "Защита зон риска",
-    desc: "Капот, бампера, фары, пороги, ручки. Частичная оклейка от 1 дня.",
-    img: "https://images.unsplash.com/photo-1592198084033-aade902d1aae?auto=format&fit=crop&w=1200&q=80",
-    alt: "Антигравийная защита капота и бамперов автомобиля в Калининграде",
-  },
-];
+import { useContent } from "@/context/ContentContext";
+import { resolveMedia } from "@/lib/contentDefaults";
 
 function ServiceCard({ s, i }) {
   const ref = useRef(null);
@@ -49,7 +18,7 @@ function ServiceCard({ s, i }) {
     >
       <div className="relative aspect-[4/3] md:aspect-auto md:h-full overflow-hidden">
         <img
-          src={s.img}
+          src={resolveMedia(s.img)}
           alt={s.alt || s.title}
           loading="lazy"
           decoding="async"
@@ -58,9 +27,7 @@ function ServiceCard({ s, i }) {
         <div className="absolute inset-0 bg-gradient-to-t from-black via-black/50 to-transparent" />
         <div className="absolute inset-0 p-6 md:p-8 flex flex-col justify-between">
           <div className="flex items-start justify-between">
-            <span className="text-[11px] tracking-[0.32em] uppercase text-white/60">
-              {s.n}
-            </span>
+            <span className="text-[11px] tracking-[0.32em] uppercase text-white/60">{s.n}</span>
             <span className="opacity-0 group-hover:opacity-100 -translate-y-1 group-hover:translate-y-0 transition-all duration-500">
               <ArrowUpRight size={18} strokeWidth={1.5} className="text-white" />
             </span>
@@ -80,6 +47,7 @@ function ServiceCard({ s, i }) {
 }
 
 export default function Services() {
+  const { services } = useContent();
   return (
     <section
       id="services"
@@ -90,22 +58,21 @@ export default function Services() {
         <div className="flex flex-col md:flex-row md:items-end md:justify-between gap-6 mb-10 md:mb-14">
           <div className="max-w-3xl">
             <span className="text-[11px] tracking-[0.4em] uppercase text-white/50">
-              003 — Services
+              {services.overline}
             </span>
             <h2 className="mt-4 text-4xl md:text-6xl lg:text-7xl tracking-tighter font-medium leading-[0.95]">
-              Четыре направления.<br />
-              <span className="text-[#BDBDBD]">Один</span> стандарт качества.
+              {services.title_line_1}<br />
+              <span className="text-[#BDBDBD]">{services.title_line_2_grey}</span>{services.title_line_2_white}
             </h2>
           </div>
           <p className="text-[#BDBDBD] text-base md:text-lg leading-relaxed max-w-sm">
-            Каждая услуга — отдельный технологический процесс. Мы не делаем
-            «всё подряд», поэтому делаем безупречно.
+            {services.description}
           </p>
         </div>
 
         <div className="grid grid-cols-1 md:grid-cols-4 md:auto-rows-[280px] gap-3 md:gap-4">
-          {services.map((s, i) => (
-            <ServiceCard key={s.n} s={s} i={i} />
+          {(services.items || []).map((s, i) => (
+            <ServiceCard key={s.n || i} s={s} i={i} />
           ))}
         </div>
       </div>

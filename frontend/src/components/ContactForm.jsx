@@ -5,16 +5,18 @@ import { toast } from "sonner";
 import { getAnalyticsPayload } from "@/lib/analytics";
 import { formatRuPhone, isValidRuPhone } from "@/lib/phone";
 import SuccessOverlay from "@/components/SuccessOverlay";
+import { useContent } from "@/context/ContentContext";
 
 const API = `${process.env.REACT_APP_BACKEND_URL}/api`;
 
 export default function ContactForm() {
+  const { contact } = useContent();
   const [form, setForm] = useState({
     name: "",
     phone: "",
     car: "",
     message: "",
-    website: "", // honeypot
+    website: "",
   });
   const [sending, setSending] = useState(false);
   const [success, setSuccess] = useState(false);
@@ -64,7 +66,7 @@ export default function ContactForm() {
         <div className="grid grid-cols-1 md:grid-cols-12 gap-12 md:gap-16">
           <div className="md:col-span-5">
             <span className="text-[11px] tracking-[0.4em] uppercase text-white/50">
-              009 — Contact
+              {contact.overline}
             </span>
             <motion.h2
               initial={{ opacity: 0, y: 30 }}
@@ -73,26 +75,26 @@ export default function ContactForm() {
               transition={{ duration: 0.9, ease: [0.16, 1, 0.3, 1] }}
               className="mt-4 text-4xl md:text-6xl lg:text-7xl tracking-tighter font-medium leading-[0.95]"
             >
-              Запишитесь<br />
-              <span className="text-[#BDBDBD]">на бесплатный осмотр.</span>
+              {contact.title_line_1}<br />
+              <span className="text-[#BDBDBD]">{contact.title_line_2_grey}</span>
             </motion.h2>
 
             <div className="mt-12 space-y-8">
               <div>
-                <div className="text-[11px] tracking-[0.32em] uppercase text-white/40 mb-2">Адрес</div>
-                <div className="text-lg text-white">Калининград, ул. Премиальная, 1</div>
-                <div className="text-sm text-[#BDBDBD] mt-1">Цех — закрытая территория</div>
+                <div className="text-[11px] tracking-[0.32em] uppercase text-white/40 mb-2">{contact.address_label}</div>
+                <div className="text-lg text-white">{contact.address}</div>
+                <div className="text-sm text-[#BDBDBD] mt-1">{contact.address_sub}</div>
               </div>
               <div>
-                <div className="text-[11px] tracking-[0.32em] uppercase text-white/40 mb-2">Телефон</div>
-                <a href="tel:+70000000000" className="text-lg text-white hover:text-[#BDBDBD] transition-colors">
-                  +7 (XXX) XXX-XX-XX
+                <div className="text-[11px] tracking-[0.32em] uppercase text-white/40 mb-2">{contact.phone_label}</div>
+                <a href={`tel:${contact.phone_link}`} className="text-lg text-white hover:text-[#BDBDBD] transition-colors">
+                  {contact.phone_display}
                 </a>
               </div>
               <div>
-                <div className="text-[11px] tracking-[0.32em] uppercase text-white/40 mb-2">Контакты</div>
+                <div className="text-[11px] tracking-[0.32em] uppercase text-white/40 mb-2">{contact.socials_label}</div>
                 <div className="flex flex-wrap gap-3">
-                  {["Instagram", "Telegram", "WhatsApp"].map((s) => (
+                  {(contact.socials || []).map((s) => (
                     <span key={s} className="px-4 py-2 border border-white/15 text-[11px] tracking-[0.28em] uppercase text-white/80 hover:text-white hover:border-white/40 cursor-pointer transition-all">
                       {s}
                     </span>
@@ -107,7 +109,6 @@ export default function ContactForm() {
             data-testid="contact-form"
             className="md:col-span-7 bg-[#0A0A0A] border border-white/10 p-8 md:p-12 flex flex-col gap-8"
           >
-            {/* Honeypot */}
             <input
               type="text"
               name="website"
@@ -178,8 +179,7 @@ export default function ContactForm() {
 
             <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pt-2">
               <p className="text-xs text-white/40 max-w-md">
-                Отправляя форму, вы соглашаетесь на обработку персональных данных.
-                Звоним и пишем только по делу.
+                {contact.form_consent}
               </p>
               <button
                 type="submit"
@@ -187,7 +187,7 @@ export default function ContactForm() {
                 data-testid="contact-submit"
                 className="group inline-flex items-center justify-center gap-4 px-8 py-5 bg-white text-black text-[11px] tracking-[0.3em] uppercase disabled:opacity-60 hover:bg-[#EDEDED] transition-all duration-300 shine"
               >
-                {sending ? "Отправка…" : "Отправить заявку"}
+                {sending ? "Отправка…" : contact.submit_label}
                 <span className="block w-8 h-px bg-current transition-all duration-500 group-hover:w-12" />
               </button>
             </div>

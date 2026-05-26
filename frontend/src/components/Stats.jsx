@@ -1,12 +1,6 @@
 import React, { useEffect, useRef, useState } from "react";
 import { motion, useInView } from "framer-motion";
-
-const STATS = [
-  { value: 15, suffix: "+", label: "Лет precision-детейлинга" },
-  { value: 300, suffix: "+", label: "Оклеенных автомобилей" },
-  { value: 100, suffix: "%", label: "Контроль качества" },
-  { value: 7, suffix: "", label: "Этапов процесса" },
-];
+import { useContent } from "@/context/ContentContext";
 
 function CountUp({ value, suffix, start, duration = 1800 }) {
   const [n, setN] = useState(0);
@@ -25,17 +19,15 @@ function CountUp({ value, suffix, start, duration = 1800 }) {
     return () => cancelAnimationFrame(raf);
   }, [start, value, duration]);
 
-  return (
-    <span>
-      {n}
-      {suffix}
-    </span>
-  );
+  return <span>{n}{suffix}</span>;
 }
 
 export default function Stats() {
+  const { stats } = useContent();
   const ref = useRef(null);
   const inView = useInView(ref, { once: true, amount: 0.2 });
+  const items = stats.items || [];
+
   return (
     <section
       ref={ref}
@@ -46,7 +38,7 @@ export default function Stats() {
         <div className="grid grid-cols-1 md:grid-cols-12 gap-6 mb-10">
           <div className="md:col-span-7">
             <span className="text-[11px] tracking-[0.4em] uppercase text-white/50">
-              007 — Numbers
+              {stats.overline}
             </span>
             <motion.h2
               initial={{ opacity: 0, y: 30 }}
@@ -54,25 +46,24 @@ export default function Stats() {
               transition={{ duration: 0.9, ease: [0.16, 1, 0.3, 1] }}
               className="mt-4 text-4xl md:text-6xl lg:text-7xl tracking-tighter font-medium leading-[0.95]"
             >
-              Почему <span className="text-[#BDBDBD]">мы.</span><br />
-              Без воды.
+              {stats.title_line_1_white}<span className="text-[#BDBDBD]">{stats.title_line_1_grey}</span><br />
+              {stats.title_line_2}
             </motion.h2>
           </div>
           <p className="md:col-span-5 text-[#BDBDBD] text-base md:text-lg leading-relaxed self-end">
-            Студия с командой мастеров, чьи руки видели больше углов, кромок и
-            фар, чем некоторые целые сервисы.
+            {stats.description}
           </p>
         </div>
 
         <div className="grid grid-cols-2 md:grid-cols-4 border-t border-white/10">
-          {STATS.map((s, i) => (
+          {items.map((s, i) => (
             <div
               key={i}
               data-testid={`stat-${i}`}
-              className={`p-6 md:p-10 border-white/10 ${i < STATS.length - 1 ? "md:border-r" : ""} ${i % 2 === 0 ? "border-r" : ""} ${i < 2 ? "border-b md:border-b-0" : ""}`}
+              className={`p-6 md:p-10 border-white/10 ${i < items.length - 1 ? "md:border-r" : ""} ${i % 2 === 0 ? "border-r" : ""} ${i < 2 ? "border-b md:border-b-0" : ""}`}
             >
               <div className="text-[clamp(2.5rem,6vw,5.5rem)] tracking-tighter font-medium leading-none text-white">
-                <CountUp value={s.value} suffix={s.suffix} start={inView} />
+                <CountUp value={Number(s.value) || 0} suffix={s.suffix || ""} start={inView} />
               </div>
               <div className="mt-4 text-[#BDBDBD] text-sm md:text-base leading-relaxed font-light max-w-[14ch]">
                 {s.label}

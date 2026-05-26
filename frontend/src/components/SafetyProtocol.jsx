@@ -1,7 +1,9 @@
 import React, { useRef } from "react";
 import { motion, useScroll, useTransform, useInView } from "framer-motion";
+import { useContent } from "@/context/ContentContext";
+import { resolveMedia } from "@/lib/contentDefaults";
 
-const STAGES = [
+const STAGES_FALLBACK = [
   {
     n: "01",
     title: "Подготовка автомобиля",
@@ -17,38 +19,6 @@ const STAGES = [
     video: "https://assets.mixkit.co/videos/35230/35230-720.mp4",
     poster:
       "https://images.unsplash.com/photo-1606664515524-ed2f786a0bd6?auto=format&fit=crop&w=2000&q=85",
-  },
-  {
-    n: "02",
-    title: "Безопасная подготовка кузова",
-    overline: "Stage two — Paint",
-    desc:
-      "Анализируем состояние ЛКП, устраняем мелкие дефекты, выполняем безопасную полировку. Работаем только профессиональным оборудованием — без перегрева и риска.",
-    points: [
-      "Анализ толщины ЛКП",
-      "Устранение мелких дефектов",
-      "Деликатная полировка",
-      "Подготовка под оклейку",
-    ],
-    video: "https://assets.mixkit.co/videos/35205/35205-720.mp4",
-    poster:
-      "https://images.unsplash.com/photo-1503376780353-7e6692767b70?auto=format&fit=crop&w=2000&q=85",
-  },
-  {
-    n: "03",
-    title: "Точная оклейка и контроль",
-    overline: "Stage three — Precision",
-    desc:
-      "Каждый элемент клеится вручную. Работаем по технологии: завод под кромки, отсутствие натяжений, контроль качества каждого узла перед выдачей автомобиля.",
-    points: [
-      "Заход плёнки под кромки",
-      "Без натяжений и клеевых растяжек",
-      "Покомпонентный QC",
-      "Финальная проверка покрытия",
-    ],
-    video: "https://assets.mixkit.co/videos/35540/35540-720.mp4",
-    poster:
-      "https://images.unsplash.com/photo-1492144534655-ae79c964c9d7?auto=format&fit=crop&w=2000&q=85",
   },
 ];
 
@@ -92,11 +62,11 @@ function DesktopStage({ s, range, total, progress, index }) {
           muted
           playsInline
           preload="metadata"
-          poster={s.poster}
+          poster={resolveMedia(s.poster)}
           aria-label={`${s.title} — видеоиллюстрация этапа`}
           className="absolute inset-0 w-full h-full object-cover grayscale brightness-[0.55]"
         >
-          <source src={s.video} type="video/mp4" />
+          <source src={resolveMedia(s.video)} type="video/mp4" />
         </video>
 
         <div
@@ -167,7 +137,7 @@ function MobileStage({ s, total, index }) {
       className="relative w-full h-[78vh] bg-[#0A0A0A] border border-white/10 overflow-hidden"
     >
       <img
-        src={s.poster}
+        src={resolveMedia(s.poster)}
         alt={`${s.title} — премиальный детейлинг AUTOHAUS Калининград`}
         loading="lazy"
         decoding="async"
@@ -231,6 +201,8 @@ function ActiveCounter({ activeIdx }) {
 }
 
 export default function SafetyProtocol() {
+  const { protocol } = useContent();
+  const STAGES = (protocol.stages && protocol.stages.length) ? protocol.stages : STAGES_FALLBACK;
   const wrapper = useRef(null);
   const headerRef = useRef(null);
   const headerIn = useInView(headerRef, { once: true, margin: "-15%" });
@@ -241,11 +213,10 @@ export default function SafetyProtocol() {
   });
 
   // Three stages, each held for ~33% of scroll progress with smooth overlaps.
-  // Values must be within [0, 1] and monotonically non-decreasing per stage.
   const ranges = [
-    [0.00, 0.02, 0.30, 0.36], // Stage 01
-    [0.32, 0.40, 0.62, 0.68], // Stage 02
-    [0.64, 0.72, 1.00, 1.00], // Stage 03
+    [0.00, 0.02, 0.30, 0.36],
+    [0.32, 0.40, 0.62, 0.68],
+    [0.64, 0.72, 1.00, 1.00],
   ];
 
   // Progress bar fill across the section
@@ -273,7 +244,7 @@ export default function SafetyProtocol() {
         <div className="flex flex-col md:flex-row md:items-end md:justify-between gap-6">
           <div>
             <span className="text-[11px] tracking-[0.4em] uppercase text-white/50">
-              001.5 — Protocol
+              {protocol.overline}
             </span>
             <motion.h2
               initial={{ opacity: 0, y: 30 }}
@@ -282,13 +253,12 @@ export default function SafetyProtocol() {
               data-testid="protocol-heading"
               className="mt-3 text-3xl md:text-5xl lg:text-6xl tracking-tighter font-medium leading-[0.95]"
             >
-              Протокол<br />
-              <span className="text-[#BDBDBD]">безопасной</span> оклейки.
+              {protocol.title_line_1}<br />
+              <span className="text-[#BDBDBD]">{protocol.title_line_2_grey}</span>{protocol.title_line_2_white}
             </motion.h2>
           </div>
           <p className="text-[#BDBDBD] text-sm md:text-base leading-relaxed max-w-md">
-            Каждый автомобиль проходит многоэтапную подготовку и контроль
-            качества перед оклейкой. Не «наклеить плёнку» — а инженерный процесс.
+            {protocol.description}
           </p>
         </div>
 
@@ -361,9 +331,9 @@ export default function SafetyProtocol() {
       {/* MICRO TEXT */}
       <div className="mx-auto max-w-[1400px] px-6 md:px-10 pb-16 md:pb-20 pt-8 md:pt-10">
         <div className="border-t border-white/10 pt-6 flex flex-col md:flex-row md:items-center md:justify-between gap-4 text-[11px] tracking-[0.32em] uppercase text-white/45">
-          <span>Technology · Attention · Precision</span>
+          <span>{protocol.footer_left}</span>
           <span className="text-white/60 max-w-md text-right md:normal-case md:tracking-normal md:text-sm md:font-light leading-relaxed">
-            Технология, внимание к деталям и precision-подход — основа безупречной оклейки.
+            {protocol.footer_right}
           </span>
         </div>
       </div>

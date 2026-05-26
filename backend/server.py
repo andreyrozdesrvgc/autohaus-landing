@@ -1,4 +1,5 @@
-from fastapi import FastAPI, APIRouter, HTTPException, Request
+from fastapi import FastAPI, APIRouter, HTTPException, Request, Response, Depends, UploadFile, File
+from fastapi.responses import StreamingResponse
 from dotenv import load_dotenv
 from starlette.middleware.cors import CORSMiddleware
 from motor.motor_asyncio import AsyncIOMotorClient
@@ -13,6 +14,23 @@ import uuid
 from datetime import datetime, timezone
 
 from telegram_service import send_lead_to_telegram
+from auth import (
+    verify_password,
+    create_access_token,
+    set_auth_cookie,
+    clear_auth_cookie,
+    get_current_admin,
+    seed_admin,
+)
+from content_service import get_content, save_content
+from media_service import (
+    ALLOWED_MIME_PREFIXES,
+    MAX_UPLOAD_BYTES,
+    save_file,
+    open_file,
+    stream_chunks,
+    guess_content_type,
+)
 
 
 ROOT_DIR = Path(__file__).parent
@@ -192,7 +210,7 @@ async def list_leads():
 
 
 # Include the router in the main app
-app.include_router(api_router)
+# NOTE: include_router must come AFTER all @api_router decorators below (admin/content/media).
 
 app.add_middleware(
     CORSMiddleware,
@@ -210,6 +228,96 @@ logging.basicConfig(
 logger = logging.getLogger(__name__)
 
 
+# --- Admin auth -------------------------------------------------------------
+class AdminLoginIn(BaseModel):
+    email: str
+    password: str
+
+
+@api_router.post("/admin/login")
+async def admin_login(payload: AdminLoginIn, response: Response):
+    email = (payload.email or "").strip().lower()
+    expected_email = (os.environ.get("ADMIN_EMAIL") or "").strip().lower()
+    if not email or not payload.password:
+        raise HTTPException(status_code=400, detail="Email and password required")
+    if email != expected_email:
+        raise HTTPException(status_code=401, detail="Invalid credentials")
+
+    admin_doc = await db.admins.find_one({"email": expected_email})
+    if not admin_doc or not verify_password(payload.password, admin_doc.get("password_hash", "")):
+        raise HTTPException(status_code=401, detail="Invalid credentials")
+
+    token = create_access_token(expected_email)
+    set_auth_cookie(response, token)
+    return {"email": expected_email, "role": "admin", "token": token}
+
+
+@api_router.post("/admin/logout")
+async def admin_logout(response: Response, admin: dict = Depends(get_current_admin)):
+    clear_auth_cookie(response)
+    return {"ok": True}
+
+
+@api_router.get("/admin/me")
+async def admin_me(admin: dict = Depends(get_current_admin)):
+    return admin
+
+
+# --- CMS content ------------------------------------------------------------
+@api_router.get("/content")
+async def fetch_content():
+    return await get_content(db)
+
+
+@api_router.put("/admin/content")
+async def update_content(payload: dict, admin: dict = Depends(get_current_admin)):
+    return await save_content(db, payload or {})
+
+
+# --- Media upload / serve ---------------------------------------------------
+@api_router.post("/admin/media")
+async def upload_media(file: UploadFile = File(...), admin: dict = Depends(get_current_admin)):
+    content_type = file.content_type or guess_content_type(file.filename)
+    if not any(content_type.startswith(p) for p in ALLOWED_MIME_PREFIXES):
+        raise HTTPException(status_code=400, detail="Only image/* and video/* uploads are allowed")
+    payload = await file.read()
+    if len(payload) > MAX_UPLOAD_BYTES:
+        raise HTTPException(status_code=413, detail="File too large (max 80 MB)")
+    if not payload:
+        raise HTTPException(status_code=400, detail="Empty file")
+    file_id = await save_file(db, file.filename or "upload.bin", content_type, payload)
+    return {
+        "id": file_id,
+        "url": f"/api/media/{file_id}",
+        "filename": file.filename,
+        "content_type": content_type,
+        "size": len(payload),
+    }
+
+
+@api_router.get("/media/{file_id}")
+async def get_media(file_id: str):
+    stream = await open_file(db, file_id)
+    if stream is None:
+        raise HTTPException(status_code=404, detail="Media not found")
+    content_type = (stream.metadata or {}).get("content_type") or guess_content_type(stream.filename or "")
+    headers = {"Cache-Control": "public, max-age=31536000, immutable"}
+    return StreamingResponse(stream_chunks(stream), media_type=content_type, headers=headers)
+
+
+@app.on_event("startup")
+async def _startup():
+    try:
+        await seed_admin(db)
+        logger.info("Admin seeded / verified")
+    except Exception as e:
+        logger.exception("Failed to seed admin: %s", e)
+
+
 @app.on_event("shutdown")
 async def shutdown_db_client():
     client.close()
+
+
+# Include the router AFTER all @api_router endpoints have been registered.
+app.include_router(api_router)
