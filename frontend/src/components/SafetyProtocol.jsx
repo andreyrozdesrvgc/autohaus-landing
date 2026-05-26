@@ -54,12 +54,29 @@ const STAGES = [
 
 /* Desktop card — absolutely positioned, driven by scroll progress */
 function DesktopStage({ s, range, total, progress, index }) {
-  // Each stage gets a window in [0, 1] scroll progress.
-  // We fade in at range[0], hold at range[1], fade out at range[2].
-  const opacity = useTransform(progress, [range[0], range[1], range[2], range[3]], [0, 1, 1, 0]);
-  const y = useTransform(progress, [range[0], range[1], range[2], range[3]], [40, 0, 0, -40]);
-  const scale = useTransform(progress, [range[0], range[1], range[2], range[3]], [1.04, 1, 1, 0.98]);
-  const blurPx = useTransform(progress, [range[0], range[1], range[2], range[3]], [8, 0, 0, 6]);
+  // Stage 01 (index 0) shows immediately at full opacity — no entrance animation.
+  // Stages 02/03 fade in cinematically as before.
+  const isFirst = index === 0;
+  const opacity = useTransform(
+    progress,
+    [range[0], range[1], range[2], range[3]],
+    [isFirst ? 1 : 0, 1, 1, 0]
+  );
+  const y = useTransform(
+    progress,
+    [range[0], range[1], range[2], range[3]],
+    [isFirst ? 0 : 40, 0, 0, -40]
+  );
+  const scale = useTransform(
+    progress,
+    [range[0], range[1], range[2], range[3]],
+    [isFirst ? 1 : 1.04, 1, 1, 0.98]
+  );
+  const blurPx = useTransform(
+    progress,
+    [range[0], range[1], range[2], range[3]],
+    [isFirst ? 0 : 8, 0, 0, 6]
+  );
   const filter = useTransform(blurPx, (b) => `blur(${b}px)`);
 
   return (
