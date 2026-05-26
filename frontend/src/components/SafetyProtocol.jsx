@@ -52,7 +52,7 @@ const STAGES = [
   },
 ];
 
-function StageCard({ s, i, total }) {
+function StageCard({ s, i, total, variant = "desktop" }) {
   const ref = useRef(null);
   const inView = useInView(ref, { once: true, margin: "-15%" });
   return (
@@ -61,7 +61,7 @@ function StageCard({ s, i, total }) {
       initial={{ opacity: 0, y: 60 }}
       animate={inView ? { opacity: 1, y: 0 } : {}}
       transition={{ duration: 1, ease: [0.16, 1, 0.3, 1], delay: i * 0.1 }}
-      data-testid={`protocol-stage-${s.n}`}
+      data-testid={`protocol-stage-${s.n}${variant === "mobile" ? "-mobile" : ""}`}
       className="relative flex-shrink-0 w-[88vw] md:w-[78vw] max-w-[1100px] h-[78vh] md:h-[82vh] bg-[#0A0A0A] border border-white/10 overflow-hidden group"
     >
       {/* Background video */}
@@ -227,7 +227,7 @@ export default function SafetyProtocol() {
       {/* MOBILE VERTICAL CARDS */}
       <div className="md:hidden px-6 pb-10 space-y-6">
         {STAGES.map((s, i) => (
-          <StageCard key={s.n} s={s} i={i} total={STAGES.length} />
+          <StageCard key={s.n} s={s} i={i} total={STAGES.length} variant="mobile" />
         ))}
       </div>
 
