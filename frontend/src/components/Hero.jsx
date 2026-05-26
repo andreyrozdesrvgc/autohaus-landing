@@ -25,14 +25,8 @@ export default function Hero() {
         playsInline
         poster="https://images.unsplash.com/photo-1626381958625-f4e4ea343925?auto=format&fit=crop&w=1920&q=80"
       >
-        <source
-          src="https://assets.mixkit.co/videos/4694/4694-720.mp4"
-          type="video/mp4"
-        />
-        <source
-          src="https://assets.mixkit.co/videos/2010/2010-720.mp4"
-          type="video/mp4"
-        />
+        <source src="https://assets.mixkit.co/videos/4694/4694-720.mp4" type="video/mp4" />
+        <source src="https://assets.mixkit.co/videos/2010/2010-720.mp4" type="video/mp4" />
       </video>
 
       {/* Vignette and overlay */}
@@ -46,23 +40,23 @@ export default function Hero() {
       />
       <div className="absolute inset-0 grain pointer-events-none" />
 
-      {/* Top thin meta line */}
-      <div className="absolute top-28 inset-x-0 px-6 md:px-10 z-10">
-        <div className="mx-auto max-w-[1400px] flex items-center justify-between text-[10px] md:text-[11px] tracking-[0.4em] uppercase text-white/60">
-          <span className="hidden md:inline">№ 001 — Premium Wrapping</span>
-          <span className="hidden md:inline">54.71° N / 20.51° E</span>
-          <span className="md:hidden">Kaliningrad — Premium Wrapping</span>
-        </div>
-      </div>
-
-      {/* Hero content */}
+      {/* Hero content - single grid for perfect alignment */}
       <div className="relative z-10 h-full w-full">
-        <div className="mx-auto max-w-[1400px] h-full px-6 md:px-10 flex flex-col justify-end pb-16 md:pb-20">
+        <div className="mx-auto max-w-[1400px] h-full px-6 md:px-10 flex flex-col pt-28 pb-16 md:pb-20">
+          {/* Top meta line — same container as content for strict left alignment */}
+          <div className="flex items-center justify-between text-[10px] md:text-[11px] tracking-[0.4em] uppercase text-white/60">
+            <span>№ 001 — Premium Wrapping</span>
+            <span className="hidden md:inline">54.71° N / 20.51° E</span>
+          </div>
+
+          {/* Spacer pushes the main block to the bottom */}
+          <div className="flex-1" />
+
           <motion.span
             {...fadeUp(0.1)}
             className="text-[11px] tracking-[0.4em] uppercase text-[#EDEDED]/70 mb-8"
           >
-            Detailing Studio — Established 2019
+            Detailing Studio
           </motion.span>
 
           <motion.h1
@@ -94,7 +88,7 @@ export default function Hero() {
                 <span className="block w-8 h-px bg-current transition-all duration-500 group-hover:w-14" />
               </a>
               <a
-                href="#asmr"
+                href="#protocol"
                 data-testid="hero-cta-secondary"
                 className="inline-flex items-center gap-3 px-6 py-5 border border-white/20 text-[12px] tracking-[0.3em] uppercase text-white/80 hover:text-white hover:border-white/40 transition-all duration-300"
               >
@@ -106,7 +100,7 @@ export default function Hero() {
 
           <motion.div
             {...fadeUp(0.75)}
-            className="mt-14 pt-6 border-t border-white/10 flex items-center justify-between text-[10px] md:text-[11px] tracking-[0.32em] uppercase text-white/50"
+            className="mt-10 pt-6 border-t border-white/10 flex items-center justify-between text-[10px] md:text-[11px] tracking-[0.32em] uppercase text-white/50"
           >
             <span className="flex items-center gap-3">
               <ArrowDown size={14} strokeWidth={1.5} className="animate-bounce" />

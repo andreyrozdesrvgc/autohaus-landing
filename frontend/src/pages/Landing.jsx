@@ -5,8 +5,6 @@ import SafetyProtocol from "@/components/SafetyProtocol";
 import BeforeAfter from "@/components/BeforeAfter";
 import Services from "@/components/Services";
 import Configurator from "@/components/Configurator";
-import Process from "@/components/Process";
-import AsmrVideo from "@/components/AsmrVideo";
 import Stats from "@/components/Stats";
 import Gallery from "@/components/Gallery";
 import ContactForm from "@/components/ContactForm";
@@ -21,8 +19,6 @@ export default function Landing() {
       <BeforeAfter />
       <Services />
       <Configurator />
-      <Process />
-      <AsmrVideo />
       <Stats />
       <Gallery />
       <ContactForm />

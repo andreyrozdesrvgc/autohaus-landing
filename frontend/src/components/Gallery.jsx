@@ -27,7 +27,7 @@ export default function Gallery() {
       data-testid="gallery-section"
       className="relative w-full bg-black"
     >
-      <div ref={headerRef} className="mx-auto max-w-[1400px] px-6 md:px-10 pt-24 md:pt-36 pb-12">
+      <div ref={headerRef} className="mx-auto max-w-[1400px] px-6 md:px-10 pt-16 md:pt-24 pb-10">
         <div className="flex flex-col md:flex-row md:items-end md:justify-between gap-6">
           <div>
             <span className="text-[11px] tracking-[0.4em] uppercase text-white/50">
@@ -84,7 +84,7 @@ export default function Gallery() {
       </div>
 
       {/* Mobile: vertical fallback */}
-      <div className="md:hidden px-6 pb-24 space-y-4">
+      <div className="md:hidden px-6 pb-16 space-y-4">
         {IMAGES.map((img, i) => (
           <div key={i} className="relative aspect-[4/5] bg-[#0A0A0A] border border-white/10 overflow-hidden">
             <img src={img.src} alt={img.title} className="absolute inset-0 w-full h-full object-cover grayscale" />

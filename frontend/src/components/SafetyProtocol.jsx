@@ -247,7 +247,7 @@ export default function SafetyProtocol() {
       {/* HEADER */}
       <div
         ref={headerRef}
-        className="mx-auto max-w-[1400px] px-6 md:px-10 pt-24 md:pt-36 pb-10 md:pb-14"
+        className="mx-auto max-w-[1400px] px-6 md:px-10 pt-16 md:pt-24 pb-8 md:pb-10"
       >
         <div className="flex flex-col md:flex-row md:items-end md:justify-between gap-6">
           <div>
@@ -323,7 +323,7 @@ export default function SafetyProtocol() {
               />
             </div>
             <span className="whitespace-nowrap">
-              <motion.span>{useTransform(activeIdx, (v) => String(v).padStart(2, "0"))}</motion.span>
+              <ActiveCounter activeIdx={activeIdx} />
               {" / 03"}
             </span>
           </div>
@@ -338,8 +338,8 @@ export default function SafetyProtocol() {
       </div>
 
       {/* MICRO TEXT */}
-      <div className="mx-auto max-w-[1400px] px-6 md:px-10 pb-24 md:pb-32 pt-10 md:pt-16">
-        <div className="border-t border-white/10 pt-8 flex flex-col md:flex-row md:items-center md:justify-between gap-4 text-[11px] tracking-[0.32em] uppercase text-white/45">
+      <div className="mx-auto max-w-[1400px] px-6 md:px-10 pb-16 md:pb-20 pt-8 md:pt-10">
+        <div className="border-t border-white/10 pt-6 flex flex-col md:flex-row md:items-center md:justify-between gap-4 text-[11px] tracking-[0.32em] uppercase text-white/45">
           <span>Technology · Attention · Precision</span>
           <span className="text-white/60 max-w-md text-right md:normal-case md:tracking-normal md:text-sm md:font-light leading-relaxed">
             Технология, внимание к деталям и precision-подход — основа безупречной оклейки.

@@ -29,13 +29,6 @@ const services = [
     desc: "Капот, бампера, фары, пороги, ручки. Частичная оклейка от 1 дня.",
     img: "https://images.unsplash.com/photo-1592198084033-aade902d1aae?auto=format&fit=crop&w=1200&q=80",
   },
-  {
-    n: "05",
-    title: "Бронирование оптики",
-    desc: "Защита фар от помутнения и сколов. Прозрачный или лёгкий тон.",
-    img: "https://images.pexels.com/photos/35712082/pexels-photo-35712082.jpeg?auto=compress&cs=tinysrgb&w=1200",
-    span: "md:col-span-2",
-  },
 ];
 
 function ServiceCard({ s, i }) {
@@ -85,16 +78,16 @@ export default function Services() {
     <section
       id="services"
       data-testid="services-section"
-      className="relative w-full bg-black py-24 md:py-36"
+      className="relative w-full bg-black py-16 md:py-24"
     >
       <div className="mx-auto max-w-[1400px] px-6 md:px-10">
-        <div className="flex flex-col md:flex-row md:items-end md:justify-between gap-6 mb-14 md:mb-20">
+        <div className="flex flex-col md:flex-row md:items-end md:justify-between gap-6 mb-10 md:mb-14">
           <div className="max-w-3xl">
             <span className="text-[11px] tracking-[0.4em] uppercase text-white/50">
               003 — Services
             </span>
             <h2 className="mt-4 text-4xl md:text-6xl lg:text-7xl tracking-tighter font-medium leading-[0.95]">
-              Пять направлений.<br />
+              Четыре направления.<br />
               <span className="text-[#BDBDBD]">Один</span> стандарт качества.
             </h2>
           </div>

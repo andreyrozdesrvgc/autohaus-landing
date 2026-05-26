@@ -44,7 +44,7 @@ export default function Navigation() {
         >
           <span className="block w-2 h-2 rounded-full bg-white" />
           <span className="text-[15px] tracking-[0.32em] font-medium uppercase">
-            M.STUDIO
+            AUTOHAUS
           </span>
           <span className="hidden md:inline ml-2 text-[10px] tracking-[0.4em] uppercase text-[#BDBDBD]">
             Kaliningrad

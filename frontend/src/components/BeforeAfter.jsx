@@ -33,10 +33,10 @@ export default function BeforeAfter() {
     <section
       ref={ref}
       data-testid="before-after-section"
-      className="relative w-full bg-black py-24 md:py-36"
+      className="relative w-full bg-black py-16 md:py-24"
     >
       <div className="mx-auto max-w-[1400px] px-6 md:px-10">
-        <div className="flex flex-col md:flex-row md:items-end md:justify-between gap-6 mb-12 md:mb-20">
+        <div className="flex flex-col md:flex-row md:items-end md:justify-between gap-6 mb-10 md:mb-14">
           <div>
             <span className="text-[11px] tracking-[0.4em] uppercase text-white/50">
               002 — Result
@@ -69,7 +69,7 @@ export default function BeforeAfter() {
           onTouchMove={(e) => onPointerMove(e.touches[0])}
           onTouchEnd={onPointerUp}
           data-testid="before-after-slider"
-          className="relative w-full aspect-[16/9] overflow-hidden select-none cursor-ew-resize bg-[#0A0A0A] border border-white/10"
+          className="relative w-full md:max-w-[1100px] md:mx-auto aspect-[16/9] md:aspect-[21/9] overflow-hidden select-none cursor-ew-resize bg-[#0A0A0A] border border-white/10"
         >
           {/* AFTER (base, full) */}
           <img

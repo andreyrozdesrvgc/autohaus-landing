@@ -33,7 +33,7 @@ export default function ContactForm() {
     <section
       id="contact"
       data-testid="contact-section"
-      className="relative w-full bg-black py-24 md:py-36 border-t border-white/5"
+      className="relative w-full bg-black py-16 md:py-20 border-t border-white/5"
     >
       <div className="mx-auto max-w-[1400px] px-6 md:px-10">
         <div className="grid grid-cols-1 md:grid-cols-12 gap-12 md:gap-16">
@@ -49,7 +49,7 @@ export default function ContactForm() {
               className="mt-4 text-4xl md:text-6xl lg:text-7xl tracking-tighter font-medium leading-[0.95]"
             >
               Запишитесь<br />
-              <span className="text-[#BDBDBD]">на диагностику.</span>
+              <span className="text-[#BDBDBD]">на бесплатный осмотр.</span>
             </motion.h2>
 
             <div className="mt-12 space-y-8">

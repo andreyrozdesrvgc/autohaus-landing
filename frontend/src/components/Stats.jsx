@@ -42,10 +42,10 @@ export default function Stats() {
     <section
       ref={ref}
       data-testid="stats-section"
-      className="relative w-full bg-[#050505] py-24 md:py-36 border-y border-white/5"
+      className="relative w-full bg-[#050505] py-16 md:py-24 border-y border-white/5"
     >
       <div className="mx-auto max-w-[1400px] px-6 md:px-10">
-        <div className="grid grid-cols-1 md:grid-cols-12 gap-6 mb-14">
+        <div className="grid grid-cols-1 md:grid-cols-12 gap-6 mb-10">
           <div className="md:col-span-7">
             <span className="text-[11px] tracking-[0.4em] uppercase text-white/50">
               007 — Numbers
