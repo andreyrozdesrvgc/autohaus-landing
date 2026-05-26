@@ -168,8 +168,7 @@ const SECTIONS = [
     listItem: [
       { k: "title", label: "Название" },
       { k: "meta", label: "Подпись (услуга · срок)" },
-      { k: "cta_label", label: "Текст на кнопке" },
-      { k: "instagram_url", label: "Ссылка на Instagram-пост" },
+      { k: "cta_label", label: "Текст кнопки (напр. «Хочу так же», «Запросить смету», «Узнать стоимость»)" },
       { k: "poster", label: "Превью (картинка-заглушка)", type: "image" },
       { k: "src", label: "Видео (вертикальное)", type: "video" },
     ],

@@ -109,11 +109,11 @@ export const FALLBACK_CONTENT = {
     footer_right: "Свайпните в сторону — это ваш будущий проект.",
     cta_default_label: "Хочу так же",
     items: [
-      { title: "BMW M4 · PPF Stealth", meta: "Полная оклейка · 5 дней", src: "https://assets.mixkit.co/videos/35540/35540-720.mp4", poster: "https://images.unsplash.com/photo-1555215695-3004980ad54e?auto=format&fit=crop&w=900&q=85", instagram_url: "https://instagram.com/autohaus", cta_label: "Хочу так же" },
-      { title: "BMW M5 · Vinyl Matte", meta: "Смена цвета · 4 дня", src: "https://assets.mixkit.co/videos/35205/35205-720.mp4", poster: "https://images.unsplash.com/photo-1617814086367-b8cb20edbe98?auto=format&fit=crop&w=900&q=85", instagram_url: "https://instagram.com/autohaus", cta_label: "Хочу так же" },
-      { title: "BMW X5 M · Antichrome", meta: "Антихром · 2 дня", src: "https://assets.mixkit.co/videos/35230/35230-720.mp4", poster: "https://images.unsplash.com/photo-1606664515524-ed2f786a0bd6?auto=format&fit=crop&w=900&q=85", instagram_url: "https://instagram.com/autohaus", cta_label: "Хочу так же" },
-      { title: "BMW G80 · Headlights", meta: "Бронирование оптики · 1 день", src: "https://assets.mixkit.co/videos/35540/35540-720.mp4", poster: "https://images.unsplash.com/photo-1494976388531-d1058494cdd8?auto=format&fit=crop&w=900&q=85", instagram_url: "https://instagram.com/autohaus", cta_label: "Хочу так же" },
-      { title: "BMW M3 · Satin Wrap", meta: "Сатиновая плёнка · 5 дней", src: "https://assets.mixkit.co/videos/35205/35205-720.mp4", poster: "https://images.unsplash.com/photo-1503376780353-7e6692767b70?auto=format&fit=crop&w=900&q=85", instagram_url: "https://instagram.com/autohaus", cta_label: "Хочу так же" },
+      { title: "BMW M4 · PPF Stealth", meta: "Полная оклейка · 5 дней", src: "https://assets.mixkit.co/videos/35540/35540-720.mp4", poster: "https://images.unsplash.com/photo-1555215695-3004980ad54e?auto=format&fit=crop&w=900&q=85", cta_label: "Хочу так же" },
+      { title: "BMW M5 · Vinyl Matte", meta: "Смена цвета · 4 дня", src: "https://assets.mixkit.co/videos/35205/35205-720.mp4", poster: "https://images.unsplash.com/photo-1617814086367-b8cb20edbe98?auto=format&fit=crop&w=900&q=85", cta_label: "Запросить смету" },
+      { title: "BMW X5 M · Antichrome", meta: "Антихром · 2 дня", src: "https://assets.mixkit.co/videos/35230/35230-720.mp4", poster: "https://images.unsplash.com/photo-1606664515524-ed2f786a0bd6?auto=format&fit=crop&w=900&q=85", cta_label: "Узнать стоимость" },
+      { title: "BMW G80 · Headlights", meta: "Бронирование оптики · 1 день", src: "https://assets.mixkit.co/videos/35540/35540-720.mp4", poster: "https://images.unsplash.com/photo-1494976388531-d1058494cdd8?auto=format&fit=crop&w=900&q=85", cta_label: "Заказать защиту" },
+      { title: "BMW M3 · Satin Wrap", meta: "Сатиновая плёнка · 5 дней", src: "https://assets.mixkit.co/videos/35205/35205-720.mp4", poster: "https://images.unsplash.com/photo-1503376780353-7e6692767b70?auto=format&fit=crop&w=900&q=85", cta_label: "Подобрать цвет" },
     ],
   },
   contact: {

@@ -1,10 +1,11 @@
-import React, { useEffect, useRef, useCallback } from "react";
+import React, { useEffect, useRef, useCallback, useState } from "react";
 import { motion, useInView } from "framer-motion";
-import { Instagram, ArrowUpRight, ChevronLeft, ChevronRight } from "lucide-react";
+import { ArrowUpRight, ChevronLeft, ChevronRight, Play } from "lucide-react";
 import { useContent } from "@/context/ContentContext";
 import { resolveMedia } from "@/lib/contentDefaults";
+import VideoLightbox from "@/components/VideoLightbox";
 
-function LiveCard({ item, index, total }) {
+function LiveCard({ item, index, total, onOpen }) {
   const videoRef = useRef(null);
 
   // Autoplay only when the card is visible. Saves bandwidth + battery on mobile.
@@ -30,7 +31,13 @@ function LiveCard({ item, index, total }) {
       data-testid={`live-card-${index}`}
       className="relative flex-shrink-0 snap-center w-[82vw] sm:w-[55vw] md:w-[300px] lg:w-[340px] flex flex-col gap-3"
     >
-      <div className="relative aspect-[9/16] bg-[#0A0A0A] border border-white/10 overflow-hidden group">
+      <button
+        type="button"
+        onClick={onOpen}
+        aria-label={`Открыть видео: ${item.title || `ролик ${index + 1}`}`}
+        data-testid={`live-card-open-${index}`}
+        className="relative aspect-[9/16] bg-[#0A0A0A] border border-white/10 overflow-hidden group cursor-pointer text-left"
+      >
         <video
           ref={videoRef}
           src={resolveMedia(item.src)}
@@ -40,7 +47,7 @@ function LiveCard({ item, index, total }) {
           playsInline
           preload="metadata"
           aria-label={`AutoHaus Live — ${item.title || `видео ${index + 1}`}`}
-          className="absolute inset-0 w-full h-full object-cover"
+          className="absolute inset-0 w-full h-full object-cover transition-transform duration-700 group-hover:scale-[1.03]"
         />
 
         {/* Cinematic overlays */}
@@ -52,6 +59,13 @@ function LiveCard({ item, index, total }) {
           }}
         />
         <div className="absolute inset-0 grain pointer-events-none" />
+
+        {/* Play indicator (centered, appears on hover) */}
+        <div className="absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity duration-300 pointer-events-none">
+          <span className="w-14 h-14 rounded-full bg-white/95 text-black flex items-center justify-center shadow-[0_0_30px_rgba(255,255,255,0.5)]">
+            <Play size={22} strokeWidth={2} fill="currentColor" />
+          </span>
+        </div>
 
         {/* Live pulse + counter */}
         <div className="absolute top-4 inset-x-4 flex items-center justify-between text-[10px] tracking-[0.32em] uppercase text-white/80">
@@ -76,30 +90,17 @@ function LiveCard({ item, index, total }) {
             {item.title}
           </h3>
         </div>
-      </div>
+      </button>
 
-      {/* CTA row under the video */}
-      <div className="flex items-stretch gap-2">
-        <a
-          href="#configurator"
-          data-testid={`live-cta-${index}`}
-          className="flex-1 group inline-flex items-center justify-between gap-3 px-4 py-3 bg-white text-black text-[10px] tracking-[0.28em] uppercase hover:bg-[#EDEDED] transition-all"
-        >
-          {item.cta_label || "Хочу так же"}
-          <ArrowUpRight size={14} strokeWidth={1.5} className="transition-transform group-hover:translate-x-0.5 group-hover:-translate-y-0.5" />
-        </a>
-        {item.instagram_url ? (
-          <a
-            href={item.instagram_url}
-            target="_blank"
-            rel="noopener noreferrer"
-            aria-label="Открыть в Instagram"
-            className="inline-flex items-center justify-center px-4 py-3 border border-white/15 hover:border-white/40 text-white/80 hover:text-white transition-all"
-          >
-            <Instagram size={16} strokeWidth={1.5} />
-          </a>
-        ) : null}
-      </div>
+      {/* CTA — single full-width button per video, label is per-item */}
+      <a
+        href="#configurator"
+        data-testid={`live-cta-${index}`}
+        className="group inline-flex items-center justify-between gap-3 px-5 py-3.5 bg-white text-black text-[10px] tracking-[0.28em] uppercase hover:bg-[#EDEDED] transition-all shine"
+      >
+        {item.cta_label || "Хочу так же"}
+        <ArrowUpRight size={14} strokeWidth={1.5} className="transition-transform group-hover:translate-x-0.5 group-hover:-translate-y-0.5" />
+      </a>
     </article>
   );
 }
@@ -110,6 +111,8 @@ export default function AutoHausLive() {
   const trackRef = useRef(null);
   const headerIn = useInView(headerRef, { once: true, margin: "-15%" });
   const items = (live && live.items) || [];
+  const [activeIdx, setActiveIdx] = useState(null);
+  const active = activeIdx != null ? items[activeIdx] : null;
 
   const scrollByCards = useCallback((dir) => {
     const track = trackRef.current;
@@ -200,7 +203,7 @@ export default function AutoHausLive() {
         style={{ scrollPaddingLeft: "24px", scrollPaddingRight: "24px" }}
       >
         {items.map((item, i) => (
-          <LiveCard key={i} item={item} index={i} total={items.length} />
+          <LiveCard key={i} item={item} index={i} total={items.length} onOpen={() => setActiveIdx(i)} />
         ))}
         <div className="flex-shrink-0 w-2" aria-hidden="true" />
       </div>
@@ -221,6 +224,15 @@ export default function AutoHausLive() {
           </span>
         </div>
       </div>
+
+      <VideoLightbox
+        open={active != null}
+        src={active?.src}
+        poster={active?.poster}
+        title={active?.title}
+        meta={active?.meta}
+        onClose={() => setActiveIdx(null)}
+      />
     </section>
   );
 }
