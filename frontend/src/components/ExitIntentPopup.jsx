@@ -27,54 +27,15 @@ export default function ExitIntentPopup() {
     if (typeof window !== "undefined" && window.location.pathname.startsWith("/admin")) return;
     if (sessionStorage.getItem(SESSION_KEY) === "1") return;
 
-    const minDelay = (ei.delay_seconds ?? 10) * 1000;
-    const mountedAt = Date.now();
-
-    const trigger = () => {
+    const delayMs = (ei.delay_seconds ?? 90) * 1000;
+    const t = setTimeout(() => {
       if (triggered.current) return;
-      if (Date.now() - mountedAt < minDelay) return;
       triggered.current = true;
       sessionStorage.setItem(SESSION_KEY, "1");
       setOpen(true);
-    };
+    }, delayMs);
 
-    // Desktop: mouse leaves toward URL bar
-    const onMouseOut = (e) => {
-      if (e.clientY <= 0 && (!e.relatedTarget && !e.toElement)) trigger();
-    };
-
-    // Mobile: page goes hidden (tab switch / minimize) — secondary trigger
-    let mobileTimer;
-    const onVisibilityChange = () => {
-      if (document.visibilityState === "hidden") {
-        mobileTimer = setTimeout(() => {
-          // Fire on return only — don't show right when hidden
-          if (document.visibilityState === "visible") trigger();
-        }, 200);
-      } else if (document.visibilityState === "visible" && mobileTimer == null) {
-        // user just came back, give them a moment then trigger
-        setTimeout(trigger, 600);
-      }
-    };
-
-    // Back-button on mobile / desktop
-    const onPopState = () => trigger();
-
-    document.addEventListener("mouseout", onMouseOut);
-    document.addEventListener("visibilitychange", onVisibilityChange);
-    window.addEventListener("popstate", onPopState);
-    // Push a dummy state so a back press fires popstate without leaving the site
-    try {
-      if (!window.history.state || window.history.state.__exitGuard !== true) {
-        window.history.pushState({ __exitGuard: true }, "");
-      }
-    } catch {}
-
-    return () => {
-      document.removeEventListener("mouseout", onMouseOut);
-      document.removeEventListener("visibilitychange", onVisibilityChange);
-      window.removeEventListener("popstate", onPopState);
-    };
+    return () => clearTimeout(t);
   }, [ei]);
 
   useEffect(() => {
