@@ -188,34 +188,35 @@ function ExpertCard({ q, contextKey }) {
             </motion.div>
           </AnimatePresence>
 
-          {/* Thin curved arrow → points across the gap to the quiz question (desktop only) */}
+          {/* Thin curved arrow → points across the gap to the question heading (desktop only) */}
           <svg
             aria-hidden="true"
-            className="hidden lg:block absolute pointer-events-none text-white/30"
+            className="hidden lg:block absolute pointer-events-none text-white/90"
             style={{
-              top: "50%",
+              top: "-120px",
               right: 0,
-              transform: "translate(calc(100% + 12px), -50%)",
-              width: "180px",
-              height: "120px",
+              transform: "translate(calc(100% + 16px), 0)",
+              width: "240px",
+              height: "210px",
               overflow: "visible",
+              zIndex: 30,
             }}
-            viewBox="0 0 180 120"
+            viewBox="0 0 240 210"
             fill="none"
           >
-            {/* Curve from bubble → up and right → ending near quiz question */}
+            {/* Arc: from top of bubble — up and over the gap — ending pointing down at the question heading */}
             <path
-              d="M 0 80 C 60 80, 80 20, 170 22"
+              d="M 4 190 C 4 60, 150 -10, 215 30"
               stroke="currentColor"
-              strokeWidth="1"
-              strokeDasharray="3 4"
+              strokeWidth="1.2"
               strokeLinecap="round"
+              fill="none"
             />
-            {/* Arrowhead */}
+            {/* Down-pointing arrowhead */}
             <path
-              d="M 163 17 L 172 22 L 165 28"
+              d="M 207 22 L 217 33 L 224 18"
               stroke="currentColor"
-              strokeWidth="1"
+              strokeWidth="1.2"
               strokeLinecap="round"
               strokeLinejoin="round"
               fill="none"
@@ -475,12 +476,12 @@ export default function Quiz() {
       <div className="mx-auto max-w-[1240px] px-6 md:px-10">
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-4 md:gap-6 items-stretch">
           {/* Expert / manager sidebar */}
-          <div className="lg:col-span-5 relative">
+          <div className="lg:col-span-5 relative z-20">
             <ExpertCard q={q} contextKey={contextKey} />
           </div>
 
           {/* Quiz card */}
-          <div className="lg:col-span-7 bg-[#0A0A0A] border border-white/10 p-6 md:p-10 flex flex-col min-h-[520px]">
+          <div className="lg:col-span-7 relative z-10 bg-[#0A0A0A] border border-white/10 p-6 md:p-10 flex flex-col min-h-[520px]">
             {/* Progress */}
             <ProgressBar progress={progress} />
 
