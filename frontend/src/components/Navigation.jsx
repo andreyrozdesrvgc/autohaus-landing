@@ -5,7 +5,6 @@ const links = [
   { label: "Протокол", href: "#protocol" },
   { label: "Услуги", href: "#services" },
   { label: "Конфигуратор", href: "#configurator" },
-  { label: "Процесс", href: "#process" },
   { label: "Работы", href: "#gallery" },
   { label: "Контакты", href: "#contact" },
 ];
