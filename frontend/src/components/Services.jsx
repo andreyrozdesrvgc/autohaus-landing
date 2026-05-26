@@ -8,6 +8,7 @@ const services = [
     title: "Полная оклейка полиуретаном",
     desc: "Невидимая броня PPF толщиной 200 мкм. Self-healing покрытие, защита от сколов и царапин на 10+ лет.",
     img: "https://images.pexels.com/photos/10126666/pexels-photo-10126666.jpeg?auto=compress&cs=tinysrgb&w=1400",
+    alt: "Полная оклейка автомобиля полиуретановой плёнкой PPF в Калининграде",
     span: "md:col-span-2 md:row-span-2",
   },
   {
@@ -15,6 +16,7 @@ const services = [
     title: "Смена цвета винилом",
     desc: "От матового сатина до жидкого металла. Полная трансформация без покраски.",
     img: "https://images.unsplash.com/photo-1605036242577-8ee228902af1?auto=format&fit=crop&w=1200&q=80",
+    alt: "Смена цвета автомобиля виниловой плёнкой — премиальный детейлинг Калининград",
     span: "md:col-span-2",
   },
   {
@@ -22,12 +24,14 @@ const services = [
     title: "Антихром",
     desc: "Превращаем все хромированные элементы в чёрный матовый или глянцевый.",
     img: "https://images.unsplash.com/photo-1680844540129-48dacc7d5d88?auto=format&fit=crop&w=1200&q=80",
+    alt: "Антихром Mercedes-Benz BMW в Калининграде — затемнение хрома плёнкой",
   },
   {
     n: "04",
     title: "Защита зон риска",
     desc: "Капот, бампера, фары, пороги, ручки. Частичная оклейка от 1 дня.",
     img: "https://images.unsplash.com/photo-1592198084033-aade902d1aae?auto=format&fit=crop&w=1200&q=80",
+    alt: "Антигравийная защита капота и бамперов автомобиля в Калининграде",
   },
 ];
 
@@ -46,7 +50,9 @@ function ServiceCard({ s, i }) {
       <div className="relative aspect-[4/3] md:aspect-auto md:h-full overflow-hidden">
         <img
           src={s.img}
-          alt={s.title}
+          alt={s.alt || s.title}
+          loading="lazy"
+          decoding="async"
           className="absolute inset-0 w-full h-full object-cover grayscale group-hover:grayscale-[60%] scale-105 group-hover:scale-110 transition-all duration-[1200ms] ease-[cubic-bezier(0.16,1,0.3,1)]"
         />
         <div className="absolute inset-0 bg-gradient-to-t from-black via-black/50 to-transparent" />

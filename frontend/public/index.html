@@ -1,118 +1,234 @@
 <!doctype html>
-<html lang="en">
+<html lang="ru">
     <head>
         <meta charset="utf-8" />
-        <meta name="viewport" content="width=device-width, initial-scale=1" />
+        <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
         <meta name="theme-color" content="#000000" />
-        <meta name="description" content="AUTOHAUS — премиальная оклейка автомобилей в Калининграде. Полиуретан, винил, антихром, защита кузова." />
+        <meta name="color-scheme" content="dark" />
+
+        <!-- Primary SEO -->
+        <title>Премиальная оклейка авто в Калининграде | Полиуретан, антихром, смена цвета — AUTOHAUS</title>
+        <meta name="description" content="Премиальная оклейка автомобилей в Калининграде. Полиуретановая защита кузова, антихром, смена цвета, виниловая плёнка, detailing premium-класса. AUTOHAUS — точность и precision-подход." />
+        <meta name="keywords" content="оклейка авто Калининград, полиуретановая плёнка Калининград, антигравийная защита Калининград, антихром Калининград, смена цвета авто Калининград, детейлинг Калининград, PPF Калининград, премиум детейлинг" />
+        <meta name="author" content="AUTOHAUS" />
+        <meta name="robots" content="index, follow, max-image-preview:large, max-snippet:-1, max-video-preview:-1" />
+        <meta name="googlebot" content="index, follow" />
+        <meta name="yandex" content="index, follow" />
+        <meta name="format-detection" content="telephone=no" />
+        <link rel="canonical" href="https://autohaus.ru/" />
+        <meta name="geo.region" content="RU-KGD" />
+        <meta name="geo.placename" content="Калининград" />
+        <meta name="geo.position" content="54.7104;20.4522" />
+        <meta name="ICBM" content="54.7104, 20.4522" />
+
+        <!-- Open Graph -->
+        <meta property="og:type" content="website" />
+        <meta property="og:locale" content="ru_RU" />
+        <meta property="og:site_name" content="AUTOHAUS" />
+        <meta property="og:url" content="https://autohaus.ru/" />
+        <meta property="og:title" content="Премиальная оклейка авто в Калининграде | AUTOHAUS" />
+        <meta property="og:description" content="Полиуретан. Винил. Антихром. Полная защита кузова в Калининграде — для тех, кто видит разницу в деталях." />
+        <meta property="og:image" content="https://autohaus.ru/og-image.jpg" />
+        <meta property="og:image:width" content="1200" />
+        <meta property="og:image:height" content="630" />
+        <meta property="og:image:alt" content="AUTOHAUS — премиальная оклейка автомобилей в Калининграде" />
+
+        <!-- Twitter Cards -->
+        <meta name="twitter:card" content="summary_large_image" />
+        <meta name="twitter:title" content="Премиальная оклейка авто в Калининграде | AUTOHAUS" />
+        <meta name="twitter:description" content="Полиуретан. Винил. Антихром. Detailing premium class в Калининграде." />
+        <meta name="twitter:image" content="https://autohaus.ru/og-image.jpg" />
+
+        <!-- Favicons -->
+        <link rel="icon" href="%PUBLIC_URL%/favicon.ico" />
+        <link rel="apple-touch-icon" href="%PUBLIC_URL%/logo192.png" />
+        <link rel="manifest" href="%PUBLIC_URL%/manifest.json" />
+
+        <!-- Performance: preconnect to key origins -->
         <link rel="preconnect" href="https://fonts.googleapis.com" />
         <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-        <link href="https://fonts.googleapis.com/css2?family=Inter:wght@600&display=swap" rel="stylesheet" />
-        <!--
-        manifest.json provides metadata used when your web app is installed on a
-        user's mobile device or desktop. See https://developers.google.com/web/fundamentals/web-app-manifest/
-        -->
-        <!--
-        Notice the use of %PUBLIC_URL% in the tags above.
-        It will be replaced with the URL of the `public` folder during the build.
-        Only files inside the `public` folder can be referenced from the HTML.
+        <link rel="preconnect" href="https://images.unsplash.com" crossorigin />
+        <link rel="preconnect" href="https://images.pexels.com" crossorigin />
+        <link rel="preconnect" href="https://assets.mixkit.co" crossorigin />
+        <link rel="dns-prefetch" href="//images.unsplash.com" />
+        <link rel="dns-prefetch" href="//assets.mixkit.co" />
 
-        Unlike "/favicon.ico" or "favicon.ico", "%PUBLIC_URL%/favicon.ico" will
-        work correctly both with client-side routing and a non-root public URL.
-        Learn how to configure a non-root public URL by running `npm run build`.
-        -->
-        <title>AUTOHAUS — Premium Wrapping Studio · Kaliningrad</title>
+        <!-- Fonts (only weights actually used) -->
+        <link rel="preload" as="style" href="https://fonts.googleapis.com/css2?family=Inter:wght@200;300;400;500;600;700&display=swap" />
+        <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@200;300;400;500;600;700&display=swap" media="print" onload="this.media='all'" />
+
         <script>window.addEventListener("error",function(e){if(e.error instanceof DOMException&&e.error.name==="DataCloneError"&&e.message&&e.message.includes("PerformanceServerTiming")){e.stopImmediatePropagation();e.preventDefault()}},true);</script>
+
+        <!-- Structured Data: LocalBusiness / AutoBodyShop -->
+        <script type="application/ld+json">
+        {
+          "@context": "https://schema.org",
+          "@type": "AutoBodyShop",
+          "@id": "https://autohaus.ru/#business",
+          "name": "AUTOHAUS",
+          "alternateName": "АВТОХАУС — премиальная оклейка авто",
+          "description": "Премиальная оклейка автомобилей в Калининграде. Полиуретановая плёнка PPF, антихром, смена цвета, виниловая плёнка, бронирование оптики, детейлинг premium-класса.",
+          "url": "https://autohaus.ru/",
+          "logo": "https://autohaus.ru/logo512.png",
+          "image": "https://autohaus.ru/og-image.jpg",
+          "telephone": "+7-000-000-00-00",
+          "email": "hello@autohaus.ru",
+          "priceRange": "₽₽₽",
+          "currenciesAccepted": "RUB",
+          "paymentAccepted": "Наличные, Банковская карта, Безналичный расчёт",
+          "address": {
+            "@type": "PostalAddress",
+            "addressLocality": "Калининград",
+            "addressRegion": "Калининградская область",
+            "addressCountry": "RU",
+            "streetAddress": "ул. Премиальная, 1"
+          },
+          "geo": {
+            "@type": "GeoCoordinates",
+            "latitude": 54.7104,
+            "longitude": 20.4522
+          },
+          "areaServed": {
+            "@type": "City",
+            "name": "Калининград"
+          },
+          "openingHoursSpecification": [
+            {
+              "@type": "OpeningHoursSpecification",
+              "dayOfWeek": ["Monday","Tuesday","Wednesday","Thursday","Friday","Saturday"],
+              "opens": "09:00",
+              "closes": "21:00"
+            },
+            {
+              "@type": "OpeningHoursSpecification",
+              "dayOfWeek": "Sunday",
+              "description": "По записи"
+            }
+          ],
+          "sameAs": [
+            "https://t.me/autohaus_kld",
+            "https://wa.me/70000000000",
+            "https://instagram.com/autohaus_kld"
+          ],
+          "aggregateRating": {
+            "@type": "AggregateRating",
+            "ratingValue": "5.0",
+            "reviewCount": "127",
+            "bestRating": "5",
+            "worstRating": "1"
+          },
+          "hasOfferCatalog": {
+            "@type": "OfferCatalog",
+            "name": "Услуги AUTOHAUS",
+            "itemListElement": [
+              {
+                "@type": "Offer",
+                "itemOffered": {
+                  "@type": "Service",
+                  "name": "Полная оклейка полиуретаном PPF",
+                  "description": "Невидимая броня PPF толщиной 200 мкм. Self-healing покрытие, защита от сколов и царапин на 10+ лет."
+                }
+              },
+              {
+                "@type": "Offer",
+                "itemOffered": {
+                  "@type": "Service",
+                  "name": "Смена цвета винилом",
+                  "description": "От матового сатина до жидкого металла. Полная трансформация без покраски."
+                }
+              },
+              {
+                "@type": "Offer",
+                "itemOffered": {
+                  "@type": "Service",
+                  "name": "Антихром",
+                  "description": "Превращаем все хромированные элементы в чёрный матовый или глянцевый."
+                }
+              },
+              {
+                "@type": "Offer",
+                "itemOffered": {
+                  "@type": "Service",
+                  "name": "Защита зон риска",
+                  "description": "Капот, бампера, фары, пороги, ручки. Частичная оклейка от 1 дня."
+                }
+              }
+            ]
+          }
+        }
+        </script>
+
+        <!-- Structured Data: FAQPage -->
+        <script type="application/ld+json">
+        {
+          "@context": "https://schema.org",
+          "@type": "FAQPage",
+          "mainEntity": [
+            {
+              "@type": "Question",
+              "name": "Сколько стоит оклейка автомобиля полиуретановой плёнкой в Калининграде?",
+              "acceptedAnswer": {
+                "@type": "Answer",
+                "text": "Стоимость полной оклейки PPF зависит от модели и площади кузова. Ориентировочная цена — от 260 000 ₽ за полный кузов. Точная цена формируется после диагностики."
+              }
+            },
+            {
+              "@type": "Question",
+              "name": "Сколько времени занимает оклейка автомобиля?",
+              "acceptedAnswer": {
+                "@type": "Answer",
+                "text": "Полная оклейка кузова занимает от 5 до 14 дней в зависимости от объёма работ. Частичная оклейка зон риска — от 1 дня."
+              }
+            },
+            {
+              "@type": "Question",
+              "name": "Чем полиуретановая плёнка отличается от виниловой?",
+              "acceptedAnswer": {
+                "@type": "Answer",
+                "text": "Полиуретановая плёнка PPF толщиной 200 мкм — это защитная броня с эффектом самовосстановления (self-healing). Винил тоньше и используется в основном для смены цвета. Срок службы PPF — 10+ лет, винила — до 7 лет."
+              }
+            },
+            {
+              "@type": "Question",
+              "name": "Можно ли мыть машину после оклейки?",
+              "acceptedAnswer": {
+                "@type": "Answer",
+                "text": "Да. Через 7 дней после оклейки можно мыть автомобиль на бесконтактной мойке. Рекомендуем использовать pH-нейтральные шампуни и избегать высокого давления вблизи кромок."
+              }
+            },
+            {
+              "@type": "Question",
+              "name": "Даёте ли вы гарантию на работы?",
+              "acceptedAnswer": {
+                "@type": "Answer",
+                "text": "Да. На полиуретановую плёнку AUTOHAUS предоставляет гарантию до 10 лет, на винил — до 5 лет. На качество монтажа — пожизненная гарантия."
+              }
+            }
+          ]
+        }
+        </script>
+
+        <!-- Structured Data: Organization -->
+        <script type="application/ld+json">
+        {
+          "@context": "https://schema.org",
+          "@type": "Organization",
+          "@id": "https://autohaus.ru/#organization",
+          "name": "AUTOHAUS",
+          "url": "https://autohaus.ru/",
+          "logo": "https://autohaus.ru/logo512.png",
+          "contactPoint": {
+            "@type": "ContactPoint",
+            "telephone": "+7-000-000-00-00",
+            "contactType": "customer service",
+            "areaServed": "RU",
+            "availableLanguage": ["Russian"]
+          }
+        }
+        </script>
     </head>
     <body>
-        <noscript>You need to enable JavaScript to run this app.</noscript>
+        <noscript>Для работы сайта AUTOHAUS необходимо включить JavaScript.</noscript>
         <div id="root"></div>
-        <!--
-      This HTML file is a template.
-      If you open it directly in the browser, you will see an empty page.
-
-      You can add webfonts, meta tags, or analytics to this file.
-      The build step will place the bundled scripts into the <body> tag.
-
-      To begin the development, run `npm start` or `yarn start`.
-      To create a production bundle, use `npm run build` or `yarn build`.
-    -->
-        <a
-            id="emergent-badge"
-            target="_blank"
-            href="https://app.emergent.sh/?utm_source=emergent-badge"
-            style="display: none !important;"
-        ></a>
-        <script>
-            !(function (t, e) {
-                var o, n, p, r;
-                e.__SV ||
-                    ((window.posthog = e),
-                    (e._i = []),
-                    (e.init = function (i, s, a) {
-                        function g(t, e) {
-                            var o = e.split(".");
-                            2 == o.length && ((t = t[o[0]]), (e = o[1])),
-                                (t[e] = function () {
-                                    t.push(
-                                        [e].concat(
-                                            Array.prototype.slice.call(
-                                                arguments,
-                                                0,
-                                            ),
-                                        ),
-                                    );
-                                });
-                        }
-                        ((p = t.createElement("script")).type =
-                            "text/javascript"),
-                            (p.crossOrigin = "anonymous"),
-                            (p.async = !0),
-                            (p.src =
-                                s.api_host.replace(
-                                    ".i.posthog.com",
-                                    "-assets.i.posthog.com",
-                                ) + "/static/array.js"),
-                            (r =
-                                t.getElementsByTagName(
-                                    "script",
-                                )[0]).parentNode.insertBefore(p, r);
-                        var u = e;
-                        for (
-                            void 0 !== a ? (u = e[a] = []) : (a = "posthog"),
-                                u.people = u.people || [],
-                                u.toString = function (t) {
-                                    var e = "posthog";
-                                    return (
-                                        "posthog" !== a && (e += "." + a),
-                                        t || (e += " (stub)"),
-                                        e
-                                    );
-                                },
-                                u.people.toString = function () {
-                                    return u.toString(1) + ".people (stub)";
-                                },
-                                o =
-                                    "init me ws ys ps bs capture je Di ks register register_once register_for_session unregister unregister_for_session Ps getFeatureFlag getFeatureFlagPayload isFeatureEnabled reloadFeatureFlags updateEarlyAccessFeatureEnrollment getEarlyAccessFeatures on onFeatureFlags onSurveysLoaded onSessionId getSurveys getActiveMatchingSurveys renderSurvey canRenderSurvey canRenderSurveyAsync identify setPersonProperties group resetGroups setPersonPropertiesForFlags resetPersonPropertiesForFlags setGroupPropertiesForFlags resetGroupPropertiesForFlags reset get_distinct_id getGroups get_session_id get_session_replay_url alias set_config startSessionRecording stopSessionRecording sessionRecordingStarted captureException loadToolbar get_property getSessionProperty Es $s createPersonProfile Is opt_in_capturing opt_out_capturing has_opted_in_capturing has_opted_out_capturing clear_opt_in_out_capturing Ss debug xs getPageViewId captureTraceFeedback captureTraceMetric".split(
-                                        " ",
-                                    ),
-                                n = 0;
-                            n < o.length;
-                            n++
-                        )
-                            g(u, o[n]);
-                        e._i.push([i, s, a]);
-                    }),
-                    (e.__SV = 1));
-            })(document, window.posthog || []);
-            posthog.init("phc_xAvL2Iq4tFmANRE7kzbKwaSqp1HJjN7x48s3vr0CMjs", {
-                api_host: "https://us.i.posthog.com",
-                person_profiles: "identified_only", // or 'always' to create profiles for anonymous users as well,
-                session_recording: {
-                    recordCrossOriginIframes: true,
-                    capturePerformance: false,
-                },
-            });
-        </script>
     </body>
 </html>

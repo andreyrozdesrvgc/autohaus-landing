@@ -165,7 +165,9 @@ export default function Configurator() {
             <motion.img
               key={finish.id}
               src={CAR_VARIANTS[finish.id]}
-              alt="Car preview"
+              alt={`Превью автомобиля: ${film.label}, финиш ${finish.label}, ${coverage.label} — конфигуратор AUTOHAUS`}
+              loading="lazy"
+              decoding="async"
               initial={{ opacity: 0, scale: 1.05 }}
               animate={{ opacity: 1, scale: 1 }}
               transition={{ duration: 1, ease: [0.16, 1, 0.3, 1] }}

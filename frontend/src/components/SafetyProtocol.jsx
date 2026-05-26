@@ -74,7 +74,9 @@ function DesktopStage({ s, range, total, progress, index }) {
           loop
           muted
           playsInline
+          preload="metadata"
           poster={s.poster}
+          aria-label={`${s.title} — видеоиллюстрация этапа`}
           className="absolute inset-0 w-full h-full object-cover grayscale brightness-[0.55]"
         >
           <source src={s.video} type="video/mp4" />
@@ -149,7 +151,9 @@ function MobileStage({ s, total, index }) {
     >
       <img
         src={s.poster}
-        alt={s.title}
+        alt={`${s.title} — премиальный детейлинг AUTOHAUS Калининград`}
+        loading="lazy"
+        decoding="async"
         className="absolute inset-0 w-full h-full object-cover grayscale brightness-[0.55]"
       />
       <div

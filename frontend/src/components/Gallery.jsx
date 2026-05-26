@@ -2,12 +2,12 @@ import React, { useRef } from "react";
 import { motion, useScroll, useTransform, useInView } from "framer-motion";
 
 const IMAGES = [
-  { src: "https://images.unsplash.com/photo-1555215695-3004980ad54e?auto=format&fit=crop&w=2000&q=85", title: "BMW M4", meta: "PPF · Gloss" },
-  { src: "https://images.unsplash.com/photo-1617814086367-b8cb20edbe98?auto=format&fit=crop&w=2000&q=85", title: "BMW M5", meta: "Vinyl · Matte" },
-  { src: "https://images.unsplash.com/photo-1606664515524-ed2f786a0bd6?auto=format&fit=crop&w=2000&q=85", title: "BMW X5 M", meta: "PPF · Stealth" },
-  { src: "https://images.unsplash.com/photo-1494976388531-d1058494cdd8?auto=format&fit=crop&w=2000&q=85", title: "BMW G80", meta: "Anti-chrome" },
-  { src: "https://images.unsplash.com/photo-1503376780353-7e6692767b70?auto=format&fit=crop&w=2000&q=85", title: "BMW M3 Touring", meta: "Vinyl · Satin" },
-  { src: "https://images.unsplash.com/photo-1492144534655-ae79c964c9d7?auto=format&fit=crop&w=2000&q=85", title: "BMW i7", meta: "Full Wrap" },
+  { src: "https://images.unsplash.com/photo-1555215695-3004980ad54e?auto=format&fit=crop&w=2000&q=85", title: "BMW M4", meta: "PPF · Gloss", alt: "Оклейка BMW M4 полиуретановой плёнкой PPF в Калининграде" },
+  { src: "https://images.unsplash.com/photo-1617814086367-b8cb20edbe98?auto=format&fit=crop&w=2000&q=85", title: "BMW M5", meta: "Vinyl · Matte", alt: "Смена цвета BMW M5 матовым винилом — премиум детейлинг" },
+  { src: "https://images.unsplash.com/photo-1606664515524-ed2f786a0bd6?auto=format&fit=crop&w=2000&q=85", title: "BMW X5 M", meta: "PPF · Stealth", alt: "BMW X5 M в плёнке stealth — полная защита кузова Калининград" },
+  { src: "https://images.unsplash.com/photo-1494976388531-d1058494cdd8?auto=format&fit=crop&w=2000&q=85", title: "BMW G80", meta: "Anti-chrome", alt: "Антихром BMW G80 — затемнение хромированных элементов" },
+  { src: "https://images.unsplash.com/photo-1503376780353-7e6692767b70?auto=format&fit=crop&w=2000&q=85", title: "BMW M3 Touring", meta: "Vinyl · Satin", alt: "BMW M3 Touring в сатиновом виниле — смена цвета авто Калининград" },
+  { src: "https://images.unsplash.com/photo-1492144534655-ae79c964c9d7?auto=format&fit=crop&w=2000&q=85", title: "BMW i7", meta: "Full Wrap", alt: "BMW i7 — полная оклейка кузова виниловой плёнкой AUTOHAUS" },
 ];
 
 export default function Gallery() {
@@ -61,7 +61,9 @@ export default function Gallery() {
               >
                 <img
                   src={img.src}
-                  alt={img.title}
+                  alt={img.alt || img.title}
+                  loading="lazy"
+                  decoding="async"
                   className="absolute inset-0 w-full h-full object-cover grayscale group-hover:grayscale-0 transition-all duration-1000"
                 />
                 <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-transparent to-transparent" />
@@ -87,7 +89,7 @@ export default function Gallery() {
       <div className="md:hidden px-6 pb-16 space-y-4">
         {IMAGES.map((img, i) => (
           <div key={i} className="relative aspect-[4/5] bg-[#0A0A0A] border border-white/10 overflow-hidden">
-            <img src={img.src} alt={img.title} className="absolute inset-0 w-full h-full object-cover grayscale" />
+            <img src={img.src} alt={img.alt || img.title} loading="lazy" decoding="async" className="absolute inset-0 w-full h-full object-cover grayscale" />
             <div className="absolute inset-0 bg-gradient-to-t from-black/70 to-transparent" />
             <div className="absolute bottom-6 left-6 right-6 flex items-end justify-between">
               <div>

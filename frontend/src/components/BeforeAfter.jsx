@@ -74,9 +74,11 @@ export default function BeforeAfter() {
           {/* AFTER (base, full) */}
           <img
             src={AFTER}
-            alt="After"
+            alt="Автомобиль после премиальной оклейки полиуретановой плёнкой в AUTOHAUS Калининград"
             className="absolute inset-0 w-full h-full object-cover"
             draggable={false}
+            loading="lazy"
+            decoding="async"
           />
           {/* BEFORE (clipped) */}
           <div
@@ -85,9 +87,11 @@ export default function BeforeAfter() {
           >
             <img
               src={BEFORE}
-              alt="Before"
+              alt="Автомобиль до оклейки — состояние кузова перед premium detailing"
               className="w-full h-full object-cover grayscale"
               draggable={false}
+              loading="lazy"
+              decoding="async"
             />
           </div>
 
