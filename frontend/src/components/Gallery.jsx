@@ -86,7 +86,7 @@ export default function Gallery() {
       </div>
 
       {/* Mobile: vertical fallback */}
-      <div className="md:hidden px-6 pb-16 space-y-4">
+      <div className="md:hidden px-6 pb-10 space-y-4">
         {IMAGES.map((img, i) => (
           <div key={i} className="relative aspect-[4/5] bg-[#0A0A0A] border border-white/10 overflow-hidden">
             <img src={img.src} alt={img.alt || img.title} loading="lazy" decoding="async" className="absolute inset-0 w-full h-full object-cover grayscale" />
@@ -102,6 +102,26 @@ export default function Gallery() {
             </div>
           </div>
         ))}
+      </div>
+
+      {/* Inline CTA — second conversion moment, right after the cases */}
+      <div className="mx-auto max-w-[1400px] px-6 md:px-10 pb-16 md:pb-20">
+        <div className="border-t border-white/10 pt-6 md:pt-8 flex flex-col md:flex-row md:items-center md:justify-end gap-5">
+          {/* Supporting line — mobile only */}
+          <p className="md:hidden text-[#BDBDBD] text-sm font-light leading-relaxed">
+            Хотите также?{" "}
+            <span className="text-white">Приезжайте на осмотр</span> — подберём
+            решение под Ваш автомобиль.
+          </p>
+          <a
+            href="#contact"
+            data-testid="gallery-cta"
+            className="group inline-flex items-center justify-center gap-4 px-6 py-4 bg-white text-black text-[11px] tracking-[0.3em] uppercase hover:bg-[#EDEDED] transition-all duration-300 shine"
+          >
+            Записаться на осмотр
+            <span className="block w-8 h-px bg-current transition-all duration-500 group-hover:w-12" />
+          </a>
+        </div>
       </div>
     </section>
   );

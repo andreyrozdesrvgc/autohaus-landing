@@ -132,16 +132,14 @@ export default function BeforeAfter() {
           initial={{ opacity: 0, y: 20 }}
           animate={inView ? { opacity: 1, y: 0 } : {}}
           transition={{ duration: 0.9, ease: [0.16, 1, 0.3, 1], delay: 0.35 }}
-          className="mt-8 md:mt-10 md:max-w-[1100px] md:mx-auto border-t border-white/10 pt-6 md:pt-8 flex flex-col md:flex-row md:items-center md:justify-between gap-5"
+          className="mt-8 md:mt-10 md:max-w-[1100px] md:mx-auto border-t border-white/10 pt-6 md:pt-8 flex flex-col md:flex-row md:items-center md:justify-end gap-5"
         >
-          <div className="flex items-center gap-4">
-            <span className="hidden md:block w-10 h-px bg-white/40" />
-            <p className="text-[#BDBDBD] text-sm md:text-base font-light leading-relaxed">
-              Хочу так же —{" "}
-              <span className="text-white">расчёт за&nbsp;15&nbsp;минут</span>{" "}
-              под мой автомобиль.
-            </p>
-          </div>
+          {/* Supporting line — visible on mobile only */}
+          <p className="md:hidden text-[#BDBDBD] text-sm font-light leading-relaxed">
+            Хотите также?{" "}
+            <span className="text-white">Расчёт за&nbsp;15&nbsp;минут</span>{" "}
+            под Ваш автомобиль.
+          </p>
           <a
             href="#configurator"
             data-testid="before-after-cta"
