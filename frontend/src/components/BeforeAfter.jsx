@@ -126,6 +126,31 @@ export default function BeforeAfter() {
             <span className="text-xl leading-none">‹›</span>
           </div>
         </motion.div>
+
+        {/* Inline CTA — captures the post-"wow" intent right after the slider */}
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          animate={inView ? { opacity: 1, y: 0 } : {}}
+          transition={{ duration: 0.9, ease: [0.16, 1, 0.3, 1], delay: 0.35 }}
+          className="mt-8 md:mt-10 md:max-w-[1100px] md:mx-auto border-t border-white/10 pt-6 md:pt-8 flex flex-col md:flex-row md:items-center md:justify-between gap-5"
+        >
+          <div className="flex items-center gap-4">
+            <span className="hidden md:block w-10 h-px bg-white/40" />
+            <p className="text-[#BDBDBD] text-sm md:text-base font-light leading-relaxed">
+              Хочу так же —{" "}
+              <span className="text-white">расчёт за&nbsp;15&nbsp;минут</span>{" "}
+              под мой автомобиль.
+            </p>
+          </div>
+          <a
+            href="#configurator"
+            data-testid="before-after-cta"
+            className="group inline-flex items-center justify-center gap-4 px-6 py-4 bg-white text-black text-[11px] tracking-[0.3em] uppercase hover:bg-[#EDEDED] transition-all duration-300 shine"
+          >
+            Получить расчёт
+            <span className="block w-8 h-px bg-current transition-all duration-500 group-hover:w-12" />
+          </a>
+        </motion.div>
       </div>
     </section>
   );
