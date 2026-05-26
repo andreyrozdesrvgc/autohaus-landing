@@ -251,7 +251,7 @@ export default function SafetyProtocol() {
       {/* HEADER */}
       <div
         ref={headerRef}
-        className="mx-auto max-w-[1400px] px-6 md:px-10 pt-16 md:pt-24 pb-8 md:pb-10"
+        className="mx-auto max-w-[1400px] px-6 md:px-10 pt-8 md:pt-12 pb-4 md:pb-6"
       >
         <div className="flex flex-col md:flex-row md:items-end md:justify-between gap-6">
           <div>
@@ -263,19 +263,19 @@ export default function SafetyProtocol() {
               animate={headerIn ? { opacity: 1, y: 0 } : {}}
               transition={{ duration: 0.9, ease: [0.16, 1, 0.3, 1] }}
               data-testid="protocol-heading"
-              className="mt-4 text-4xl md:text-6xl lg:text-7xl tracking-tighter font-medium leading-[0.95]"
+              className="mt-3 text-3xl md:text-5xl lg:text-6xl tracking-tighter font-medium leading-[0.95]"
             >
               Протокол<br />
               <span className="text-[#BDBDBD]">безопасной</span> оклейки.
             </motion.h2>
           </div>
-          <p className="text-[#BDBDBD] text-base md:text-lg leading-relaxed max-w-md">
+          <p className="text-[#BDBDBD] text-sm md:text-base leading-relaxed max-w-md">
             Каждый автомобиль проходит многоэтапную подготовку и контроль
             качества перед оклейкой. Не «наклеить плёнку» — а инженерный процесс.
           </p>
         </div>
 
-        <div className="mt-10 h-px w-full bg-white/10 overflow-hidden">
+        <div className="mt-6 h-px w-full bg-white/10 overflow-hidden">
           <motion.div
             initial={{ scaleX: 0 }}
             animate={headerIn ? { scaleX: 1 } : {}}

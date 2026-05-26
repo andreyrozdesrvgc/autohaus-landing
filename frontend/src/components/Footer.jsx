@@ -40,7 +40,7 @@ export default function Footer() {
             <ul className="space-y-2 text-sm text-[#BDBDBD]">
               <li>Калининград,<br />ул. Премиальная, 1</li>
               <li><a href="tel:+70000000000" className="hover:text-white">+7 (XXX) XXX-XX-XX</a></li>
-              <li><a href="mailto:hello@autohaus.ru" className="hover:text-white">hello@autohaus.ru</a></li>
+              <li><a href="mailto:hello@detailing-autohaus.ru" className="hover:text-white">hello@detailing-autohaus.ru</a></li>
             </ul>
           </div>
 

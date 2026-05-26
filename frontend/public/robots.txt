@@ -28,5 +28,5 @@ Disallow: /
 User-agent: DotBot
 Disallow: /
 
-Sitemap: https://autohaus.ru/sitemap.xml
-Host: https://autohaus.ru
+Sitemap: https://detailing-autohaus.ru/sitemap.xml
+Host: https://detailing-autohaus.ru
