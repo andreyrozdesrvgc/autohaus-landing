@@ -3,6 +3,8 @@ import { motion } from "framer-motion";
 import { Check } from "lucide-react";
 import axios from "axios";
 import { toast } from "sonner";
+import { getAnalyticsPayload } from "@/lib/analytics";
+import SuccessOverlay from "@/components/SuccessOverlay";
 
 const FILM_TYPES = [
   { id: "ppf", label: "Полиуретан (PPF)", price: 260000, sub: "Самовосстанавливающаяся защита 200 мкм" },
@@ -46,7 +48,9 @@ export default function Configurator() {
 
   const [name, setName] = useState("");
   const [phone, setPhone] = useState("");
+  const [website, setWebsite] = useState(""); // honeypot
   const [sending, setSending] = useState(false);
+  const [success, setSuccess] = useState(false);
 
   const total = useMemo(() => {
     let t = film.price * finish.mult * coverage.mult;
@@ -67,6 +71,7 @@ export default function Configurator() {
       await axios.post(`${API}/leads`, {
         name,
         phone,
+        website, // honeypot — must be empty
         car: "—",
         message: "Заявка из конфигуратора",
         source: "configurator",
@@ -79,12 +84,18 @@ export default function Configurator() {
           headlights,
           estimated_price: Math.round(total),
         },
+        ...getAnalyticsPayload(),
       });
-      toast.success("Заявка отправлена. Мы свяжемся в течение 30 минут.");
       setName("");
       setPhone("");
+      setSuccess(true);
     } catch (err) {
-      toast.error("Ошибка отправки. Попробуйте позже.");
+      const status = err?.response?.status;
+      if (status === 429) {
+        toast.error("Слишком много запросов. Попробуйте через минуту.");
+      } else {
+        toast.error("Ошибка отправки. Попробуйте позже.");
+      }
     } finally {
       setSending(false);
     }
@@ -324,6 +335,23 @@ export default function Configurator() {
               </div>
 
               <form onSubmit={handleSubmit} className="md:col-span-7 grid grid-cols-1 md:grid-cols-7 gap-3">
+                {/* Honeypot — hidden from real users, bots tend to fill it */}
+                <input
+                  type="text"
+                  name="website"
+                  tabIndex={-1}
+                  autoComplete="off"
+                  value={website}
+                  onChange={(e) => setWebsite(e.target.value)}
+                  aria-hidden="true"
+                  style={{
+                    position: "absolute",
+                    left: "-9999px",
+                    width: "1px",
+                    height: "1px",
+                    opacity: 0,
+                  }}
+                />
                 <input
                   data-testid="config-name-input"
                   value={name}
@@ -351,6 +379,7 @@ export default function Configurator() {
           </div>
         </div>
       </div>
+      <SuccessOverlay open={success} onClose={() => setSuccess(false)} />
     </section>
   );
 }

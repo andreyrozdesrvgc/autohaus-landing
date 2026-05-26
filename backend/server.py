@@ -1,14 +1,18 @@
-from fastapi import FastAPI, APIRouter, HTTPException
+from fastapi import FastAPI, APIRouter, HTTPException, Request
 from dotenv import load_dotenv
 from starlette.middleware.cors import CORSMiddleware
 from motor.motor_asyncio import AsyncIOMotorClient
 import os
 import logging
+import time
+from collections import deque
 from pathlib import Path
 from pydantic import BaseModel, Field, ConfigDict
-from typing import List, Optional
+from typing import List, Optional, Any
 import uuid
 from datetime import datetime, timezone
+
+from telegram_service import send_lead_to_telegram
 
 
 ROOT_DIR = Path(__file__).parent
@@ -26,7 +30,25 @@ app = FastAPI()
 api_router = APIRouter(prefix="/api")
 
 
-# Define Models
+# --- Simple in-memory rate limiter (per IP) ---------------------------------
+# Allows up to RATE_LIMIT_MAX leads per RATE_LIMIT_WINDOW seconds per IP.
+RATE_LIMIT_MAX = 5
+RATE_LIMIT_WINDOW = 60.0  # seconds
+_rate_buckets: dict[str, deque] = {}
+
+
+def _check_rate_limit(ip: str) -> bool:
+    now = time.monotonic()
+    bucket = _rate_buckets.setdefault(ip, deque())
+    while bucket and (now - bucket[0]) > RATE_LIMIT_WINDOW:
+        bucket.popleft()
+    if len(bucket) >= RATE_LIMIT_MAX:
+        return False
+    bucket.append(now)
+    return True
+
+
+# Models ---------------------------------------------------------------------
 class StatusCheck(BaseModel):
     model_config = ConfigDict(extra="ignore")
 
@@ -47,6 +69,19 @@ class LeadCreate(BaseModel):
     configuration: Optional[dict] = None
     source: Optional[str] = "landing"
 
+    # Anti-spam honeypot — must remain empty.
+    website: Optional[str] = ""
+
+    # UTM / analytics
+    utm_source: Optional[str] = None
+    utm_medium: Optional[str] = None
+    utm_campaign: Optional[str] = None
+    utm_content: Optional[str] = None
+    utm_term: Optional[str] = None
+    referrer: Optional[str] = None
+    device: Optional[str] = None
+    page_url: Optional[str] = None
+
 
 class Lead(BaseModel):
     model_config = ConfigDict(extra="ignore")
@@ -58,9 +93,21 @@ class Lead(BaseModel):
     message: Optional[str] = None
     configuration: Optional[dict] = None
     source: Optional[str] = "landing"
+
+    utm_source: Optional[str] = None
+    utm_medium: Optional[str] = None
+    utm_campaign: Optional[str] = None
+    utm_content: Optional[str] = None
+    utm_term: Optional[str] = None
+    referrer: Optional[str] = None
+    device: Optional[str] = None
+    page_url: Optional[str] = None
+
+    telegram_sent: bool = False
     created_at: datetime = Field(default_factory=lambda: datetime.now(timezone.utc))
 
 
+# Routes ---------------------------------------------------------------------
 @api_router.get("/")
 async def root():
     return {"message": "Hello World"}
@@ -84,14 +131,51 @@ async def get_status_checks():
     return status_checks
 
 
+def _phone_is_valid(phone: str) -> bool:
+    digits = sum(c.isdigit() for c in phone)
+    return digits >= 7
+
+
 @api_router.post("/leads", response_model=Lead)
-async def create_lead(payload: LeadCreate):
-    if not payload.name.strip() or not payload.phone.strip():
+async def create_lead(payload: LeadCreate, request: Request):
+    # 1) Honeypot — silently 200 to avoid signalling bots.
+    if (payload.website or "").strip():
+        logger.warning("Honeypot triggered, dropping lead")
+        return Lead(name=payload.name or "spam", phone=payload.phone or "spam", source=payload.source)
+
+    # 2) Validation
+    name = (payload.name or "").strip()
+    phone = (payload.phone or "").strip()
+    if not name or not phone:
         raise HTTPException(status_code=400, detail="Name and phone are required")
-    lead = Lead(**payload.model_dump())
+    if len(name) > 200 or len(phone) > 64:
+        raise HTTPException(status_code=400, detail="Name or phone too long")
+    if not _phone_is_valid(phone):
+        raise HTTPException(status_code=400, detail="Phone number looks invalid")
+
+    # 3) Rate limit
+    client_ip = (
+        (request.headers.get("x-forwarded-for") or "").split(",")[0].strip()
+        or (request.client.host if request.client else "unknown")
+    )
+    if not _check_rate_limit(client_ip):
+        raise HTTPException(status_code=429, detail="Too many requests, slow down")
+
+    # 4) Persist
+    data = payload.model_dump()
+    data.pop("website", None)  # never store honeypot
+    lead = Lead(**data)
     doc = lead.model_dump()
     doc['created_at'] = doc['created_at'].isoformat()
     await db.leads.insert_one(doc)
+
+    # 5) Notify Telegram (best-effort, doesn't fail the request)
+    notify_payload: dict[str, Any] = {**data, "id": lead.id}
+    telegram_sent = await send_lead_to_telegram(notify_payload)
+    if telegram_sent:
+        lead.telegram_sent = True
+        await db.leads.update_one({"id": lead.id}, {"$set": {"telegram_sent": True}})
+
     return lead
 
 

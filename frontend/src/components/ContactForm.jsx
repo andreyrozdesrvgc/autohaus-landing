@@ -2,12 +2,21 @@ import React, { useState } from "react";
 import { motion } from "framer-motion";
 import axios from "axios";
 import { toast } from "sonner";
+import { getAnalyticsPayload } from "@/lib/analytics";
+import SuccessOverlay from "@/components/SuccessOverlay";
 
 const API = `${process.env.REACT_APP_BACKEND_URL}/api`;
 
 export default function ContactForm() {
-  const [form, setForm] = useState({ name: "", phone: "", car: "", message: "" });
+  const [form, setForm] = useState({
+    name: "",
+    phone: "",
+    car: "",
+    message: "",
+    website: "", // honeypot
+  });
   const [sending, setSending] = useState(false);
+  const [success, setSuccess] = useState(false);
 
   const set = (k) => (e) => setForm((p) => ({ ...p, [k]: e.target.value }));
 
@@ -19,11 +28,20 @@ export default function ContactForm() {
     }
     setSending(true);
     try {
-      await axios.post(`${API}/leads`, { ...form, source: "contact_form" });
-      toast.success("Заявка отправлена. Свяжемся в течение 30 минут.");
-      setForm({ name: "", phone: "", car: "", message: "" });
-    } catch {
-      toast.error("Ошибка отправки. Попробуйте позже.");
+      await axios.post(`${API}/leads`, {
+        ...form,
+        source: "contact_form",
+        ...getAnalyticsPayload(),
+      });
+      setForm({ name: "", phone: "", car: "", message: "", website: "" });
+      setSuccess(true);
+    } catch (err) {
+      const status = err?.response?.status;
+      if (status === 429) {
+        toast.error("Слишком много запросов. Попробуйте через минуту.");
+      } else {
+        toast.error("Ошибка отправки. Попробуйте позже.");
+      }
     } finally {
       setSending(false);
     }
@@ -82,6 +100,24 @@ export default function ContactForm() {
             data-testid="contact-form"
             className="md:col-span-7 bg-[#0A0A0A] border border-white/10 p-8 md:p-12 flex flex-col gap-8"
           >
+            {/* Honeypot */}
+            <input
+              type="text"
+              name="website"
+              tabIndex={-1}
+              autoComplete="off"
+              value={form.website}
+              onChange={set("website")}
+              aria-hidden="true"
+              style={{
+                position: "absolute",
+                left: "-9999px",
+                width: "1px",
+                height: "1px",
+                opacity: 0,
+              }}
+            />
+
             <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
               <div>
                 <label className="block text-[11px] tracking-[0.32em] uppercase text-white/40 mb-3">Имя</label>
@@ -146,6 +182,7 @@ export default function ContactForm() {
           </form>
         </div>
       </div>
+      <SuccessOverlay open={success} onClose={() => setSuccess(false)} />
     </section>
   );
 }
