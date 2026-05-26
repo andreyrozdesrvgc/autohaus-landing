@@ -31,7 +31,7 @@ export default function Hero() {
       </video>
 
       {/* Vignette and overlay */}
-      <div className="absolute inset-0 bg-black/55" />
+      <div className="absolute inset-0 bg-black/70" />
       <div
         className="absolute inset-0"
         style={{

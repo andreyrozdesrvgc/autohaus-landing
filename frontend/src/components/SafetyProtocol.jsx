@@ -14,7 +14,7 @@ const STAGES = [
       "Обезжиривание поверхности",
       "Очистка труднодоступных зон",
     ],
-    video: "https://assets.mixkit.co/videos/32957/32957-720.mp4",
+    video: "https://assets.mixkit.co/videos/35230/35230-720.mp4",
     poster:
       "https://images.unsplash.com/photo-1606664515524-ed2f786a0bd6?auto=format&fit=crop&w=2000&q=85",
   },

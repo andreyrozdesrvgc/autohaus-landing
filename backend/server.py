@@ -132,8 +132,11 @@ async def get_status_checks():
 
 
 def _phone_is_valid(phone: str) -> bool:
-    digits = sum(c.isdigit() for c in phone)
-    return digits >= 7
+    digits = "".join(c for c in phone if c.isdigit())
+    # Russian mobile format: exactly 11 digits, must start with 7 (or 8 → normalised to 7)
+    if len(digits) == 11 and digits[0] == "8":
+        digits = "7" + digits[1:]
+    return len(digits) == 11 and digits[0] == "7"
 
 
 @api_router.post("/leads", response_model=Lead)

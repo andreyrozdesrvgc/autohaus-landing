@@ -4,6 +4,7 @@ import { Check } from "lucide-react";
 import axios from "axios";
 import { toast } from "sonner";
 import { getAnalyticsPayload } from "@/lib/analytics";
+import { formatRuPhone, isValidRuPhone } from "@/lib/phone";
 import SuccessOverlay from "@/components/SuccessOverlay";
 
 const FILM_TYPES = [
@@ -16,7 +17,6 @@ const FINISHES = [
   { id: "gloss", label: "Глянец", mult: 1.0 },
   { id: "matte", label: "Мат", mult: 1.08 },
   { id: "satin", label: "Сатин", mult: 1.05 },
-  { id: "stealth", label: "Stealth", mult: 1.15 },
 ];
 
 const COVERAGE = [
@@ -64,6 +64,10 @@ export default function Configurator() {
     e.preventDefault();
     if (!name.trim() || !phone.trim()) {
       toast.error("Заполните имя и телефон");
+      return;
+    }
+    if (!isValidRuPhone(phone)) {
+      toast.error("Введите корректный номер: +7 и ещё 10 цифр");
       return;
     }
     setSending(true);
@@ -259,7 +263,7 @@ export default function Configurator() {
                 <span className="text-[11px] tracking-[0.32em] uppercase text-white/50">Финиш</span>
                 <span className="text-[10px] tracking-[0.28em] uppercase text-white/30">02</span>
               </div>
-              <div className="grid grid-cols-4 gap-2">
+              <div className="grid grid-cols-3 gap-2">
                 {FINISHES.map((f) => (
                   <button
                     key={f.id}
@@ -362,7 +366,10 @@ export default function Configurator() {
                 <input
                   data-testid="config-phone-input"
                   value={phone}
-                  onChange={(e) => setPhone(e.target.value)}
+                  onChange={(e) => setPhone(formatRuPhone(e.target.value))}
+                  onFocus={(e) => { if (!phone) setPhone("+7 ("); }}
+                  inputMode="tel"
+                  maxLength={18}
                   placeholder="+7 (___) ___-__-__"
                   className="md:col-span-3 bg-transparent border-b border-white/15 focus:border-white px-2 py-4 text-sm tracking-wide outline-none transition-colors duration-300 placeholder:text-white/40"
                 />

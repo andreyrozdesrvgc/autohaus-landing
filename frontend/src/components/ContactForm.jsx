@@ -3,6 +3,7 @@ import { motion } from "framer-motion";
 import axios from "axios";
 import { toast } from "sonner";
 import { getAnalyticsPayload } from "@/lib/analytics";
+import { formatRuPhone, isValidRuPhone } from "@/lib/phone";
 import SuccessOverlay from "@/components/SuccessOverlay";
 
 const API = `${process.env.REACT_APP_BACKEND_URL}/api`;
@@ -19,11 +20,17 @@ export default function ContactForm() {
   const [success, setSuccess] = useState(false);
 
   const set = (k) => (e) => setForm((p) => ({ ...p, [k]: e.target.value }));
+  const setPhone = (e) =>
+    setForm((p) => ({ ...p, phone: formatRuPhone(e.target.value) }));
 
   const submit = async (e) => {
     e.preventDefault();
     if (!form.name.trim() || !form.phone.trim()) {
       toast.error("Заполните имя и телефон");
+      return;
+    }
+    if (!isValidRuPhone(form.phone)) {
+      toast.error("Введите корректный номер: +7 и ещё 10 цифр");
       return;
     }
     setSending(true);
@@ -134,7 +141,12 @@ export default function ContactForm() {
                 <input
                   data-testid="contact-phone"
                   value={form.phone}
-                  onChange={set("phone")}
+                  onChange={setPhone}
+                  onFocus={() => {
+                    if (!form.phone) setForm((p) => ({ ...p, phone: "+7 (" }));
+                  }}
+                  inputMode="tel"
+                  maxLength={18}
                   placeholder="+7 (XXX) XXX-XX-XX"
                   className="w-full bg-transparent border-b border-white/15 focus:border-white py-3 text-base outline-none placeholder:text-white/30 transition-colors"
                 />
