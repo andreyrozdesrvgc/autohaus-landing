@@ -31,7 +31,7 @@ const STEPS = [
       { id: "ppf", title: "Защита от сколов", sub: "Полиуретан PPF, 200 мкм, самовосстановление" },
       { id: "color", title: "Смена цвета", sub: "Винил: мат, сатин, металлик" },
       { id: "antichrome", title: "Чёрные элементы", sub: "Антихром, dark-out" },
-      { id: "advise", title: "Не знаю — посоветуйте", sub: "Бесплатная консультация Владимира" },
+      { id: "advise", title: "Не знаю — посоветуйте", sub: "Бесплатная консультация Максима" },
     ],
   },
   {
@@ -265,7 +265,12 @@ function ExpertCard({ q, contextKey }) {
 function ContactStep({ q, answers, name, setName, phone, setPhone, bonusId, setBonusId }) {
   return (
     <div className="flex flex-col gap-6">
-      <StepHeader index={4} total={5} label="Куда прислать расчёт?" hint="Артём пришлёт результат в Telegram и перезвонит за 15 минут" />
+      <StepHeader
+        index={4}
+        total={5}
+        label="Куда прислать расчёт?"
+        hint={`${q.expert_name || "Наш мастер"} пришлёт результат в Telegram и перезвонит за 15 минут`}
+      />
 
       <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
         <div>

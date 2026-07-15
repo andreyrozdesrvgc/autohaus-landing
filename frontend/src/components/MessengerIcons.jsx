@@ -21,9 +21,9 @@ export default function MessengerIcons({ telegram, whatsapp, max, variant = "foo
     "border-white/15 text-white/75 hover:text-black hover:bg-white hover:border-white";
 
   const items = [
-    telegram && { href: telegram, label: "Telegram", node: <TelegramIcon /> },
-    whatsapp && { href: whatsapp, label: "WhatsApp", node: <WhatsAppIcon /> },
-    max && { href: max, label: "MAX", node: <MaxIcon /> },
+    telegram && { key: "telegram", href: telegram, label: "Telegram", node: <TelegramIcon /> },
+    whatsapp && { key: "whatsapp", href: whatsapp, label: "WhatsApp", node: <WhatsAppIcon /> },
+    max && { key: "max", href: max, label: "MAX", node: <MaxIcon /> },
   ].filter(Boolean);
 
   if (!items.length) return null;
@@ -38,7 +38,7 @@ export default function MessengerIcons({ telegram, whatsapp, max, variant = "foo
           rel="noopener noreferrer"
           aria-label={it.label}
           data-testid={`messenger-${it.label.toLowerCase()}`}
-          className={`${base} ${sizeCls} ${colorCls}`}
+          className={`group ${base} ${sizeCls} ${colorCls}`}
         >
           {it.node}
         </a>
@@ -88,24 +88,17 @@ function WhatsAppIcon() {
   );
 }
 
-/** MAX (максимум-ру / max.ru) — стилизованная буква "M" в квадратной рамке. */
+/** MAX (max.ru) — brand logo (white on transparent PNG). */
 function MaxIcon() {
   return (
-    <svg
-      width="16"
-      height="16"
-      viewBox="0 0 24 24"
-      fill="none"
-      stroke="currentColor"
-      strokeWidth="1.5"
-      strokeLinecap="round"
-      strokeLinejoin="round"
+    <img
+      src="/img/max-logo.png"
+      alt=""
       aria-hidden="true"
-    >
-      {/* Speech-bubble frame */}
-      <path d="M4 4h16v14a2 2 0 0 1-2 2h-6l-4 3v-3H6a2 2 0 0 1-2-2V4z" />
-      {/* Letter M */}
-      <path d="M8 15V8l4 5 4-5v7" />
-    </svg>
+      width="18"
+      height="18"
+      className="w-[18px] h-[18px] object-contain pointer-events-none group-hover:invert transition-[filter] duration-300"
+      draggable={false}
+    />
   );
 }

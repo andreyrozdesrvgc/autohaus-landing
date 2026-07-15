@@ -2,6 +2,7 @@ import React, { useEffect, useState } from "react";
 import { motion } from "framer-motion";
 import { useContent } from "@/context/ContentContext";
 import MessengerIcons from "@/components/MessengerIcons";
+import LeadPopup from "@/components/LeadPopup";
 
 const links = [
   { label: "Протокол", href: "#protocol" },
@@ -15,6 +16,7 @@ export default function Navigation() {
   const { footer } = useContent();
   const [scrolled, setScrolled] = useState(false);
   const [open, setOpen] = useState(false);
+  const [popupOpen, setPopupOpen] = useState(false);
 
   useEffect(() => {
     const onScroll = () => setScrolled(window.scrollY > 30);
@@ -78,8 +80,9 @@ export default function Navigation() {
           </div>
           <a
             href="#contact"
+            onClick={(e) => { e.preventDefault(); setPopupOpen(true); }}
             data-testid="nav-cta-button"
-            className="hidden md:inline-flex items-center gap-2 px-5 py-3 border border-white/20 text-[11px] tracking-[0.28em] uppercase hover:bg-white hover:text-black transition-all duration-500 shine"
+            className="hidden md:inline-flex items-center gap-2 px-5 py-3 border border-white/20 text-[11px] tracking-[0.28em] uppercase hover:bg-white hover:text-black transition-all duration-500 shine cursor-pointer"
           >
             Записаться
             <span className="block w-3 h-px bg-current" />
@@ -114,8 +117,8 @@ export default function Navigation() {
           ))}
           <a
             href="#contact"
-            onClick={() => setOpen(false)}
-            className="mt-2 inline-flex items-center gap-2 px-5 py-3 border border-white/20 text-[11px] tracking-[0.28em] uppercase"
+            onClick={(e) => { e.preventDefault(); setOpen(false); setPopupOpen(true); }}
+            className="mt-2 inline-flex items-center gap-2 px-5 py-3 border border-white/20 text-[11px] tracking-[0.28em] uppercase cursor-pointer"
           >
             Записаться
           </a>
@@ -132,6 +135,13 @@ export default function Navigation() {
           </div>
         </div>
       )}
+
+      <LeadPopup
+        open={popupOpen}
+        onClose={() => setPopupOpen(false)}
+        source="header_cta"
+        mode="chooser"
+      />
     </motion.header>
   );
 }
