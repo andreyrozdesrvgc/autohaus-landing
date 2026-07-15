@@ -204,11 +204,13 @@ export const FALLBACK_CONTENT = {
   },
 };
 
-// Resolve a media URL: if it's a relative /api/... path, prefix with backend URL.
+// Resolve a media URL: if it's a relative /api/... path, prefix with backend URL
+// (if configured). Empty backend URL is allowed — nginx proxies /api/* on same host.
 export function resolveMedia(url) {
   if (!url) return "";
   if (url.startsWith("/api/")) {
-    return `${process.env.REACT_APP_BACKEND_URL}${url}`;
+    const backend = process.env.REACT_APP_BACKEND_URL || "";
+    return `${backend}${url}`;
   }
   return url;
 }

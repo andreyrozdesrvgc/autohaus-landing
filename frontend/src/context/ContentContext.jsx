@@ -1,7 +1,10 @@
 import React, { createContext, useContext, useEffect, useState, useCallback } from "react";
 import axios from "axios";
 
-const API = `${process.env.REACT_APP_BACKEND_URL}/api`;
+// Fallback to relative path so the build works on any host (VPS, Vercel, etc.)
+// where the backend is proxied under the same domain via /api/*.
+const BACKEND = process.env.REACT_APP_BACKEND_URL || "";
+const API = `${BACKEND}/api`;
 
 // Built-in fallback so the site never renders empty even if the API is unreachable.
 // Must mirror /app/backend/default_content.py.

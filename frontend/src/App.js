@@ -5,6 +5,7 @@ import Landing from "@/pages/Landing";
 import AdminLogin from "@/pages/AdminLogin";
 import Admin from "@/pages/Admin";
 import ExitIntentPopup from "@/components/ExitIntentPopup";
+import ErrorBoundary from "@/components/ErrorBoundary";
 import { ContentProvider } from "@/context/ContentContext";
 
 function GlobalExitIntent() {
@@ -17,16 +18,18 @@ function GlobalExitIntent() {
 function App() {
   return (
     <div className="App">
-      <ContentProvider>
-        <BrowserRouter>
-          <Routes>
-            <Route path="/" element={<Landing />} />
-            <Route path="/admin/login" element={<AdminLogin />} />
-            <Route path="/admin" element={<Admin />} />
-          </Routes>
-          <GlobalExitIntent />
-        </BrowserRouter>
-      </ContentProvider>
+      <ErrorBoundary>
+        <ContentProvider>
+          <BrowserRouter>
+            <Routes>
+              <Route path="/" element={<Landing />} />
+              <Route path="/admin/login" element={<AdminLogin />} />
+              <Route path="/admin" element={<Admin />} />
+            </Routes>
+            <GlobalExitIntent />
+          </BrowserRouter>
+        </ContentProvider>
+      </ErrorBoundary>
       <Toaster
         position="bottom-right"
         theme="dark"

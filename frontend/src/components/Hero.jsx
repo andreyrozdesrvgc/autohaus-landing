@@ -11,7 +11,8 @@ const fadeUp = (delay = 0) => ({
 });
 
 export default function Hero() {
-  const { hero } = useContent();
+  const content = useContent();
+  const hero = content?.hero || {};
   return (
     <section
       id="top"
