@@ -1,5 +1,7 @@
 import React, { useEffect, useState } from "react";
 import { motion } from "framer-motion";
+import { useContent } from "@/context/ContentContext";
+import MessengerIcons from "@/components/MessengerIcons";
 
 const links = [
   { label: "Протокол", href: "#protocol" },
@@ -10,6 +12,7 @@ const links = [
 ];
 
 export default function Navigation() {
+  const { footer } = useContent();
   const [scrolled, setScrolled] = useState(false);
   const [open, setOpen] = useState(false);
 
@@ -64,6 +67,15 @@ export default function Navigation() {
         </nav>
 
         <div className="flex items-center gap-3">
+          {/* Messenger row — desktop */}
+          <div className="hidden lg:block">
+            <MessengerIcons
+              variant="header"
+              telegram={footer?.telegram_url}
+              whatsapp={footer?.whatsapp_url}
+              max={footer?.max_url}
+            />
+          </div>
           <a
             href="#contact"
             data-testid="nav-cta-button"
@@ -107,6 +119,17 @@ export default function Navigation() {
           >
             Записаться
           </a>
+          <div className="mt-3 pt-4 border-t border-white/10">
+            <div className="text-[10px] tracking-[0.32em] uppercase text-white/40 mb-3">
+              Мессенджеры
+            </div>
+            <MessengerIcons
+              variant="header"
+              telegram={footer?.telegram_url}
+              whatsapp={footer?.whatsapp_url}
+              max={footer?.max_url}
+            />
+          </div>
         </div>
       )}
     </motion.header>

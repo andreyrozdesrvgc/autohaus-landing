@@ -1,5 +1,6 @@
 import React from "react";
 import { useContent } from "@/context/ContentContext";
+import MessengerIcons from "@/components/MessengerIcons";
 
 export default function Footer() {
   const { footer } = useContent();
@@ -43,6 +44,14 @@ export default function Footer() {
               <li><a href={`tel:${footer.phone_link}`} className="hover:text-white">{footer.phone_display}</a></li>
               <li><a href={`mailto:${footer.email}`} className="hover:text-white">{footer.email}</a></li>
             </ul>
+            <div className="mt-5">
+              <MessengerIcons
+                variant="footer"
+                telegram={footer.telegram_url}
+                whatsapp={footer.whatsapp_url}
+                max={footer.max_url}
+              />
+            </div>
           </div>
 
           <div>

@@ -7,6 +7,7 @@ import { getAnalyticsPayload } from "@/lib/analytics";
 import { formatRuPhone, isValidRuPhone } from "@/lib/phone";
 import SuccessOverlay from "@/components/SuccessOverlay";
 import { useContent } from "@/context/ContentContext";
+import { MEDIA } from "@/lib/mediaUrls";
 
 const FILM_TYPES = [
   { id: "ppf", label: "Полиуретан (PPF)", price: 260000, sub: "Самовосстанавливающаяся защита 200 мкм" },
@@ -27,10 +28,10 @@ const COVERAGE = [
 ];
 
 const CAR_VARIANTS = {
-  gloss: "https://images.unsplash.com/photo-1555215695-3004980ad54e?auto=format&fit=crop&w=2000&q=85",
-  matte: "https://images.unsplash.com/photo-1503376780353-7e6692767b70?auto=format&fit=crop&w=2000&q=85",
-  satin: "https://images.unsplash.com/photo-1492144534655-ae79c964c9d7?auto=format&fit=crop&w=2000&q=85",
-  stealth: "https://images.unsplash.com/photo-1606664515524-ed2f786a0bd6?auto=format&fit=crop&w=2000&q=85",
+  gloss: MEDIA.configurator.gloss,
+  matte: MEDIA.configurator.matte,
+  satin: MEDIA.configurator.satin,
+  stealth: MEDIA.configurator.stealth,
 };
 
 const API = `${process.env.REACT_APP_BACKEND_URL}/api`;

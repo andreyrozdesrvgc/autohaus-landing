@@ -1,5 +1,11 @@
 // Fallback content — mirrors /app/backend/default_content.py so the UI never renders empty
 // even when the API is unreachable (e.g. CMS not yet deployed).
+//
+// All media URLs (images & videos) are imported from /app/frontend/src/lib/mediaUrls.js
+// You can also override any of these via the admin panel at /admin/login.
+
+import { MEDIA } from "./mediaUrls";
+
 export const FALLBACK_CONTENT = {
   hero: {
     overline: "№ 001 — Premium Wrapping",
@@ -14,8 +20,8 @@ export const FALLBACK_CONTENT = {
     cta_secondary: "Смотреть процесс",
     footer_meta: "PPF · Vinyl · Anti-chrome · Headlight Armor",
     footer_edition: "2026 / Edition 01",
-    poster_url: "https://images.unsplash.com/photo-1503376780353-7e6692767b70?auto=format&fit=crop&w=1920&q=85",
-    video_url: "https://assets.mixkit.co/videos/35540/35540-720.mp4",
+    poster_url: MEDIA.hero.poster,
+    video_url: MEDIA.hero.video,
   },
   protocol: {
     overline: "001.5 — Protocol",
@@ -26,9 +32,9 @@ export const FALLBACK_CONTENT = {
     footer_left: "Technology · Attention · Precision",
     footer_right: "Технология, внимание к деталям и precision-подход — основа безупречной оклейки.",
     stages: [
-      { n: "01", title: "Подготовка автомобиля", overline: "Stage one — Surface", desc: "Многофазная мойка, удаление битума и металлических вкраплений, обезжиривание, очистка труднодоступных зон. Создаём идеально чистую поверхность для адгезии плёнки.", points: ["Многофазная мойка кузова","Удаление битума и вкраплений","Обезжиривание поверхности","Очистка труднодоступных зон"], video: "https://assets.mixkit.co/videos/35230/35230-720.mp4", poster: "https://images.unsplash.com/photo-1606664515524-ed2f786a0bd6?auto=format&fit=crop&w=2000&q=85" },
-      { n: "02", title: "Безопасная подготовка кузова", overline: "Stage two — Paint", desc: "Анализируем состояние ЛКП, устраняем мелкие дефекты, выполняем безопасную полировку. Работаем только профессиональным оборудованием — без перегрева и риска.", points: ["Анализ толщины ЛКП","Устранение мелких дефектов","Деликатная полировка","Подготовка под оклейку"], video: "https://assets.mixkit.co/videos/35205/35205-720.mp4", poster: "https://images.unsplash.com/photo-1503376780353-7e6692767b70?auto=format&fit=crop&w=2000&q=85" },
-      { n: "03", title: "Точная оклейка и контроль", overline: "Stage three — Precision", desc: "Каждый элемент клеится вручную. Работаем по технологии: завод под кромки, отсутствие натяжений, контроль качества каждого узла перед выдачей автомобиля.", points: ["Заход плёнки под кромки","Без натяжений и клеевых растяжек","Покомпонентный QC","Финальная проверка покрытия"], video: "https://assets.mixkit.co/videos/35540/35540-720.mp4", poster: "https://images.unsplash.com/photo-1492144534655-ae79c964c9d7?auto=format&fit=crop&w=2000&q=85" },
+      { n: "01", title: "Подготовка автомобиля", overline: "Stage one — Surface", desc: "Многофазная мойка, удаление битума и металлических вкраплений, обезжиривание, очистка труднодоступных зон. Создаём идеально чистую поверхность для адгезии плёнки.", points: ["Многофазная мойка кузова","Удаление битума и вкраплений","Обезжиривание поверхности","Очистка труднодоступных зон"], video: MEDIA.protocol.stage1.video, poster: MEDIA.protocol.stage1.poster },
+      { n: "02", title: "Безопасная подготовка кузова", overline: "Stage two — Paint", desc: "Анализируем состояние ЛКП, устраняем мелкие дефекты, выполняем безопасную полировку. Работаем только профессиональным оборудованием — без перегрева и риска.", points: ["Анализ толщины ЛКП","Устранение мелких дефектов","Деликатная полировка","Подготовка под оклейку"], video: MEDIA.protocol.stage2.video, poster: MEDIA.protocol.stage2.poster },
+      { n: "03", title: "Точная оклейка и контроль", overline: "Stage three — Precision", desc: "Каждый элемент клеится вручную. Работаем по технологии: завод под кромки, отсутствие натяжений, контроль качества каждого узла перед выдачей автомобиля.", points: ["Заход плёнки под кромки","Без натяжений и клеевых растяжек","Покомпонентный QC","Финальная проверка покрытия"], video: MEDIA.protocol.stage3.video, poster: MEDIA.protocol.stage3.poster },
     ],
   },
   before_after: {
@@ -36,8 +42,8 @@ export const FALLBACK_CONTENT = {
     title_line_1: "Разница",
     title_line_2: "видна без слов.",
     description: "Перетащите ползунок — увидите состояние «до» и финальный результат после полной оклейки полиуретановой плёнкой.",
-    before_image: "https://images.unsplash.com/photo-1616591938558-fb03d845567b?auto=format&fit=crop&w=1800&q=85",
-    after_image: "https://images.unsplash.com/photo-1626381958625-f4e4ea343925?auto=format&fit=crop&w=1800&q=85",
+    before_image: MEDIA.beforeAfter.before,
+    after_image: MEDIA.beforeAfter.after,
     label_before: "До",
     label_after: "После",
     cta_label: "Получить расчёт",
@@ -52,10 +58,10 @@ export const FALLBACK_CONTENT = {
     title_line_2_white: " стандарт качества.",
     description: "Каждая услуга — отдельный технологический процесс. Мы не делаем «всё подряд», поэтому делаем безупречно.",
     items: [
-      { n: "01", title: "Полная оклейка полиуретаном", desc: "Невидимая броня PPF толщиной 200 мкм. Self-healing покрытие, защита от сколов и царапин на 10+ лет.", img: "https://images.pexels.com/photos/10126666/pexels-photo-10126666.jpeg?auto=compress&cs=tinysrgb&w=1400", alt: "Полная оклейка автомобиля полиуретановой плёнкой PPF в Калининграде", span: "md:col-span-2 md:row-span-2" },
-      { n: "02", title: "Смена цвета винилом", desc: "От матового сатина до жидкого металла. Полная трансформация без покраски.", img: "https://images.unsplash.com/photo-1605036242577-8ee228902af1?auto=format&fit=crop&w=1200&q=80", alt: "Смена цвета автомобиля виниловой плёнкой — премиальный детейлинг Калининград", span: "md:col-span-2" },
-      { n: "03", title: "Антихром", desc: "Превращаем все хромированные элементы в чёрный матовый или глянцевый.", img: "https://images.unsplash.com/photo-1680844540129-48dacc7d5d88?auto=format&fit=crop&w=1200&q=80", alt: "Антихром Mercedes-Benz BMW в Калининграде — затемнение хрома плёнкой", span: "" },
-      { n: "04", title: "Защита зон риска", desc: "Капот, бампера, фары, пороги, ручки. Частичная оклейка от 1 дня.", img: "https://images.unsplash.com/photo-1592198084033-aade902d1aae?auto=format&fit=crop&w=1200&q=80", alt: "Антигравийная защита капота и бамперов автомобиля в Калининграде", span: "" },
+      { n: "01", title: "Полная оклейка полиуретаном", desc: "Невидимая броня PPF толщиной 200 мкм. Self-healing покрытие, защита от сколов и царапин на 10+ лет.", img: MEDIA.services.ppfFull, alt: "Полная оклейка автомобиля полиуретановой плёнкой PPF в Калининграде", span: "md:col-span-2 md:row-span-2" },
+      { n: "02", title: "Смена цвета винилом", desc: "От матового сатина до жидкого металла. Полная трансформация без покраски.", img: MEDIA.services.vinylColor, alt: "Смена цвета автомобиля виниловой плёнкой — премиальный детейлинг Калининград", span: "md:col-span-2" },
+      { n: "03", title: "Антихром", desc: "Превращаем все хромированные элементы в чёрный матовый или глянцевый.", img: MEDIA.services.antichrome, alt: "Антихром Mercedes-Benz BMW в Калининграде — затемнение хрома плёнкой", span: "" },
+      { n: "04", title: "Защита зон риска", desc: "Капот, бампера, фары, пороги, ручки. Частичная оклейка от 1 дня.", img: MEDIA.services.riskZones, alt: "Антигравийная защита капота и бамперов автомобиля в Калининграде", span: "" },
     ],
   },
   configurator: {
@@ -67,7 +73,7 @@ export const FALLBACK_CONTENT = {
     form_description: "Без обязательств и навязчивых звонков. Свяжемся только по делу и предложим лучший вариант под ваш автомобиль.",
     trust_response_label: "Ответ", trust_response_value: "~15 мин",
     trust_warranty_label: "Гарантия", trust_warranty_value: "до 10 лет",
-    trust_experience_label: "Опыт", trust_experience_value: "15+ лет",
+    trust_experience_label: "Опыт", trust_experience_value: "6+ лет",
   },
   stats: {
     overline: "007 — Numbers",
@@ -76,7 +82,7 @@ export const FALLBACK_CONTENT = {
     title_line_2: "Без воды.",
     description: "Студия с командой мастеров, чьи руки видели больше углов, кромок и фар, чем некоторые целые сервисы.",
     items: [
-      { value: 15, suffix: "+", label: "Лет precision-детейлинга" },
+      { value: 6, suffix: "+", label: "Лет precision-детейлинга" },
       { value: 300, suffix: "+", label: "Оклеенных автомобилей" },
       { value: 100, suffix: "%", label: "Контроль качества" },
       { value: 7, suffix: "", label: "Этапов процесса" },
@@ -92,12 +98,12 @@ export const FALLBACK_CONTENT = {
     cta_text_mobile_prefix: "Хотите также? ",
     cta_text_mobile_suffix: " — подберём решение под Ваш автомобиль.",
     items: [
-      { src: "https://images.unsplash.com/photo-1555215695-3004980ad54e?auto=format&fit=crop&w=2000&q=85", title: "BMW M4", meta: "PPF · Gloss", alt: "Оклейка BMW M4 полиуретановой плёнкой PPF в Калининграде" },
-      { src: "https://images.unsplash.com/photo-1617814086367-b8cb20edbe98?auto=format&fit=crop&w=2000&q=85", title: "BMW M5", meta: "Vinyl · Matte", alt: "Смена цвета BMW M5 матовым винилом — премиум детейлинг" },
-      { src: "https://images.unsplash.com/photo-1606664515524-ed2f786a0bd6?auto=format&fit=crop&w=2000&q=85", title: "BMW X5 M", meta: "PPF · Stealth", alt: "BMW X5 M в плёнке stealth — полная защита кузова Калининград" },
-      { src: "https://images.unsplash.com/photo-1494976388531-d1058494cdd8?auto=format&fit=crop&w=2000&q=85", title: "BMW G80", meta: "Anti-chrome", alt: "Антихром BMW G80 — затемнение хромированных элементов" },
-      { src: "https://images.unsplash.com/photo-1503376780353-7e6692767b70?auto=format&fit=crop&w=2000&q=85", title: "BMW M3 Touring", meta: "Vinyl · Satin", alt: "BMW M3 Touring в сатиновом виниле — смена цвета авто Калининград" },
-      { src: "https://images.unsplash.com/photo-1492144534655-ae79c964c9d7?auto=format&fit=crop&w=2000&q=85", title: "BMW i7", meta: "Full Wrap", alt: "BMW i7 — полная оклейка кузова виниловой плёнкой AUTOHAUS" },
+      { src: MEDIA.gallery.bmwM4, title: "BMW M4", meta: "PPF · Gloss", alt: "Оклейка BMW M4 полиуретановой плёнкой PPF в Калининграде" },
+      { src: MEDIA.gallery.bmwM5, title: "BMW M5", meta: "Vinyl · Matte", alt: "Смена цвета BMW M5 матовым винилом — премиум детейлинг" },
+      { src: MEDIA.gallery.bmwX5M, title: "BMW X5 M", meta: "PPF · Stealth", alt: "BMW X5 M в плёнке stealth — полная защита кузова Калининград" },
+      { src: MEDIA.gallery.bmwG80, title: "BMW G80", meta: "Anti-chrome", alt: "Антихром BMW G80 — затемнение хромированных элементов" },
+      { src: MEDIA.gallery.bmwM3Touring, title: "BMW M3 Touring", meta: "Vinyl · Satin", alt: "BMW M3 Touring в сатиновом виниле — смена цвета авто Калининград" },
+      { src: MEDIA.gallery.bmwI7, title: "BMW i7", meta: "Full Wrap", alt: "BMW i7 — полная оклейка кузова виниловой плёнкой AUTOHAUS" },
     ],
   },
   live: {
@@ -109,11 +115,11 @@ export const FALLBACK_CONTENT = {
     footer_right: "Свайпните в сторону — это ваш будущий проект.",
     cta_default_label: "Хочу так же",
     items: [
-      { title: "BMW M4 · PPF Stealth", meta: "Полная оклейка · 5 дней", src: "https://assets.mixkit.co/videos/35540/35540-720.mp4", poster: "https://images.unsplash.com/photo-1555215695-3004980ad54e?auto=format&fit=crop&w=900&q=85", cta_label: "Хочу так же" },
-      { title: "BMW M5 · Vinyl Matte", meta: "Смена цвета · 4 дня", src: "https://assets.mixkit.co/videos/35205/35205-720.mp4", poster: "https://images.unsplash.com/photo-1617814086367-b8cb20edbe98?auto=format&fit=crop&w=900&q=85", cta_label: "Запросить смету" },
-      { title: "BMW X5 M · Antichrome", meta: "Антихром · 2 дня", src: "https://assets.mixkit.co/videos/35230/35230-720.mp4", poster: "https://images.unsplash.com/photo-1606664515524-ed2f786a0bd6?auto=format&fit=crop&w=900&q=85", cta_label: "Узнать стоимость" },
-      { title: "BMW G80 · Headlights", meta: "Бронирование оптики · 1 день", src: "https://assets.mixkit.co/videos/35540/35540-720.mp4", poster: "https://images.unsplash.com/photo-1494976388531-d1058494cdd8?auto=format&fit=crop&w=900&q=85", cta_label: "Заказать защиту" },
-      { title: "BMW M3 · Satin Wrap", meta: "Сатиновая плёнка · 5 дней", src: "https://assets.mixkit.co/videos/35205/35205-720.mp4", poster: "https://images.unsplash.com/photo-1503376780353-7e6692767b70?auto=format&fit=crop&w=900&q=85", cta_label: "Подобрать цвет" },
+      { title: "BMW M4 · PPF Stealth", meta: "Полная оклейка · 5 дней", src: MEDIA.live.reel1.video, poster: MEDIA.live.reel1.poster, cta_label: "Хочу так же" },
+      { title: "BMW M5 · Vinyl Matte", meta: "Смена цвета · 4 дня", src: MEDIA.live.reel2.video, poster: MEDIA.live.reel2.poster, cta_label: "Запросить смету" },
+      { title: "BMW X5 M · Antichrome", meta: "Антихром · 2 дня", src: MEDIA.live.reel3.video, poster: MEDIA.live.reel3.poster, cta_label: "Узнать стоимость" },
+      { title: "BMW G80 · Headlights", meta: "Бронирование оптики · 1 день", src: MEDIA.live.reel4.video, poster: MEDIA.live.reel4.poster, cta_label: "Заказать защиту" },
+      { title: "BMW M3 · Satin Wrap", meta: "Сатиновая плёнка · 5 дней", src: MEDIA.live.reel5.video, poster: MEDIA.live.reel5.poster, cta_label: "Подобрать цвет" },
     ],
   },
   quiz: {
@@ -122,16 +128,16 @@ export const FALLBACK_CONTENT = {
     title_line_2: "за 90 секунд.",
     description: "5 коротких вопросов — и наш мастер подготовит индивидуальное предложение под ваш автомобиль. Бесплатно, без обязательств.",
     expert_name: "Владимир",
-    expert_role: "Эксперт-детейлер · 20 лет опыта",
+    expert_role: "Эксперт-детейлер · 6 лет опыта",
     expert_quote: "Лично подберу решение под ваш автомобиль и пришлю расчёт в Telegram. Без навязчивых звонков.",
-    expert_image: "https://images.unsplash.com/photo-1607853554439-0069ec0f29b6?auto=format&fit=crop&w=1200&q=85",
+    expert_image: MEDIA.quiz.expertPhoto,
     expert_stat_1_value: "1200+", expert_stat_1_label: "оклеенных авто",
     expert_stat_2_value: "98%", expert_stat_2_label: "возвращаются",
-    expert_stat_3_value: "20 лет", expert_stat_3_label: "precision-опыта",
+    expert_stat_3_value: "6+ лет", expert_stat_3_label: "precision-опыта",
     trust_badge: "Premium · Trusted · Kaliningrad",
     call_button_label: "Позвонить",
-    call_phone_link: "+74012000000",
-    call_phone_display: "+7 (4012) 00-00-00",
+    call_phone_link: "+79291695700",
+    call_phone_display: "+7 (929) 169-57-00",
     step_messages: {
       type: "Так подберём идеальную плёнку под габариты вашего авто и точнее рассчитаем стоимость.",
       goal: "Это ключевой вопрос — от него зависит технология и материал. Подбираем под задачу, а не «как у всех».",
@@ -149,7 +155,7 @@ export const FALLBACK_CONTENT = {
     thanks_title: "Заявка принята",
     thanks_subtitle: "Владимир перезвонит в течение 15 минут с готовым расчётом.",
     thanks_telegram_label: "Написать в Telegram",
-    thanks_telegram_url: "https://t.me/autohaus",
+    thanks_telegram_url: "https://t.me/autohaus_detailing",
   },
   exit_intent: {
     enabled: true,
@@ -158,20 +164,20 @@ export const FALLBACK_CONTENT = {
     description: "Оставьте номер, и мы пришлём персональный расчёт за 15 минут плюс бонус: защитное покрытие на стёкла бесплатно.",
     submit_label: "Получить расчёт + бонус",
     consent: "Без обязательств. Звоним и пишем только по делу.",
-    delay_seconds: 12,
+    delay_seconds: 90,
   },
   contact: {
     overline: "009 — Contact",
     title_line_1: "Запишитесь",
     title_line_2_grey: "на бесплатный осмотр.",
     address_label: "Адрес",
-    address: "Калининград, ул. Премиальная, 1",
+    address: "Калининград, ул. Генерала Челнокова, 43",
     address_sub: "Цех — закрытая территория",
     phone_label: "Телефон",
-    phone_display: "+7 (XXX) XXX-XX-XX",
-    phone_link: "+70000000000",
-    socials_label: "Контакты",
-    socials: ["Instagram", "Telegram", "WhatsApp"],
+    phone_display: "+7 (929) 169-57-00",
+    phone_link: "+79291695700",
+    socials_label: "Мессенджеры",
+    socials: ["Telegram", "WhatsApp", "MAX"],
     form_consent: "Отправляя форму, вы соглашаетесь на обработку персональных данных. Звоним и пишем только по делу.",
     submit_label: "Отправить заявку",
   },
@@ -182,15 +188,19 @@ export const FALLBACK_CONTENT = {
     nav_label: "Навигация",
     contacts_label: "Контакты",
     address_line_1: "Калининград,",
-    address_line_2: "ул. Премиальная, 1",
-    phone_display: "+7 (XXX) XXX-XX-XX",
-    phone_link: "+70000000000",
+    address_line_2: "ул. Генерала Челнокова, 43",
+    phone_display: "+7 (929) 169-57-00",
+    phone_link: "+79291695700",
     email: "hello@detailing-autohaus.ru",
     hours_label: "Часы",
     hours_line_1: "Пн–Сб · 09:00 — 21:00",
     hours_line_2: "Вс · по записи",
     copyright: "© 2026 AUTOHAUS — Все права защищены",
     tagline_right: "Made with precision · Kaliningrad",
+    // Messenger URLs
+    telegram_url: "https://t.me/autohaus_detailing",
+    whatsapp_url: "https://wa.me/79291695700",
+    max_url: "https://max.ru/u/f9LHodD0cOJkTNH7YvSEGU3ymRkkqlwaTMgF8BQe6Px2ShA-uIwttIzz4VA",
   },
 };
 
