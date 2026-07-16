@@ -1,0 +1,37 @@
+{
+  "summary": "Iteration 11: verified the JWT_SECRET missing-key fix in backend/auth.py. Added 5 new tests to the existing pytest suite: (a) /api/admin/me happy path with Bearer token (proves _jwt_secret() works inside get_current_admin), (b) /api/admin/me without token → 401, (c) unit test: auth._jwt_secret() with JWT_SECRET unset → HTTPException(500) with detail 'JWT_SECRET is missing … backend/.env', (d) unit test: empty JWT_SECRET string → 500, (e) unit test: valid JWT_SECRET returns value. All 11 tests pass (6 pre-existing + 5 new). Regression happy-path login, wrong password 401, unknown email 401, /api/health shape + env.JWT_SECRET_set:true, and /api/content public GET all still green.",
+  "backend_issues": {
+    "critical": [],
+    "minor": []
+  },
+  "frontend_issues": {
+    "ui_bugs": [],
+    "integration_issues": [],
+    "design_issues": []
+  },
+  "test_report_links": [
+    "/app/backend/tests/test_health_and_auth.py",
+    "/app/test_reports/pytest/pytest_results.xml"
+  ],
+  "action_items": [],
+  "critical_code_review_comments": [
+    "auth.py _jwt_secret() fix is well-executed: uses os.environ.get() (no KeyError), treats empty string as missing (`if not secret`), raises HTTPException(500) with an actionable Russian-friendly detail pointing to backend/.env + PM2 restart. Verified via unit tests that both truly-missing and empty-string cases raise 500 with the expected detail substring.",
+    "Because _jwt_secret() is invoked lazily inside create_access_token() and get_current_admin(), the FastAPI app can still boot even with JWT_SECRET missing — /api/health and other public routes will keep working, only auth-touching endpoints will surface the helpful 500. Good design for VPS diagnostics.",
+    "Minor (non-blocking): the raised HTTPException from _jwt_secret() will surface as an HTTP 500 response body {\"detail\": \"...\"}, but FastAPI still logs the traceback at ERROR. That's actually desirable here (PM2 log will show it), so no change needed."
+  ],
+  "updated_files": [
+    "/app/backend/tests/test_health_and_auth.py"
+  ],
+  "success_rate": {"backend": "100% (11/11)", "frontend": "n/a (backend-only iteration)"},
+  "test_credentials": "admin@detailing-autohaus.ru / AutohausAdmin2026! (from /app/memory/test_credentials.md)",
+  "seed_data_creation": "None.",
+  "retest_needed": false,
+  "should_main_agent_self_test": false,
+  "context_for_next_testing_agent": "Backend regression suite now covers /api/health, /api/admin/login (success + 401 variants), /api/admin/me (auth-required happy path + unauth 401), /api/content public GET, plus 3 unit tests for auth._jwt_secret() edge cases (missing / empty / set). Uses pytest monkeypatch to isolate env mutations from the running backend process — safe to re-run in any order. Preview backend has JWT_SECRET set; the unit-level missing-JWT_SECRET scenario is fully covered without touching the live process.",
+  "rca_of_the_issue": {
+    "issue": "On VPS, admin login returned 500 with a raw KeyError: 'JWT_SECRET' at auth.py:16.",
+    "root_cause": "Previous _jwt_secret() used os.environ['JWT_SECRET'] which raises KeyError if the env var is absent. The VPS operator's backend/.env did not contain JWT_SECRET, so every call to create_access_token()/get_current_admin() crashed the request with an unhelpful 500 (no detail body, just the traceback in PM2 logs).",
+    "reproduction": "Unset JWT_SECRET in backend/.env → POST /api/admin/login → 500. Fix verified: monkeypatch.delenv('JWT_SECRET') → auth._jwt_secret() → raises HTTPException(500, detail='JWT_SECRET is missing in backend/.env...').",
+    "mitigation": "auth.py now uses os.environ.get('JWT_SECRET'); on missing/empty raises HTTPException(500) with a bilingual-friendly actionable detail. Frontend AdminLogin.jsx surfaces detail for 5xx errors in a toast, so the operator sees the fix instruction immediately."
+  }
+}

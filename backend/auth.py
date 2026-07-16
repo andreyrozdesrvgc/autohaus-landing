@@ -13,7 +13,19 @@ COOKIE_NAME = "autohaus_admin"
 
 
 def _jwt_secret() -> str:
-    return os.environ["JWT_SECRET"]
+    secret = os.environ.get("JWT_SECRET")
+    if not secret:
+        # Bail out with a HELPFUL 500 message instead of a raw KeyError trace.
+        # Any 500 with this exact detail means the ops person should edit
+        # backend/.env and add JWT_SECRET=<any-long-random-string>.
+        raise HTTPException(
+            status_code=500,
+            detail=(
+                "JWT_SECRET is missing in backend/.env. "
+                "Add a line like: JWT_SECRET=<random-32+-char-string> and restart PM2."
+            ),
+        )
+    return secret
 
 
 def hash_password(password: str) -> str:
