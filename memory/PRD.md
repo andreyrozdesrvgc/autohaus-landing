@@ -36,6 +36,14 @@
 - Создан `deploy.sh` — one-command update script (git pull → yarn build → chmod → pm2 restart → nginx reload → HTTP check)
 - Создан `INSTALL.md` — полная 15-шаговая инструкция для чистого Ubuntu VPS
 
+### 2026-07-16 — Auth diagnostics + Yandex Disk auto-import (iterations 9-10)
+- **GET /api/health** — публичный health-check: MongoDB ping, admin seeded, все env vars set. Помогает диагностировать проблемы на VPS
+- **Improved AdminLogin errors**: 401→неверный пароль, 404→nginx misconfig, 502→pm2 down, 5xx→server error, network→backend недоступен
+- **Startup logging**: логгер теперь явно пишет `❌ MISSING critical env vars` при старте если .env неполный
+- **POST /api/admin/media/import-url**: принимает любую публичную ссылку (в т.ч. `disk.yandex.ru/i/...`), автоматически разрешает через Yandex Disk API, скачивает файл (макс 80 MB), сохраняет в GridFS
+- **MediaPicker**: кнопка «Импортировать по ссылке» + жёлтая плашка-подсказка при вставке Yandex Disk share URL
+- **mediaUrls.js**: добавлено большое предупреждение сверху — это НЕ источник контента, а fallback; правки в этом файле не отображаются на сайте
+
 ### 2026-07-16 — CMS reliability fixes (iterations 7-8)
 - **Cache-buster**: `GET /api/content?t=${Date.now()}` + `Cache-Control: no-cache` header — обходит любой CDN/browser HTTP кэш
 - **BroadcastChannel cross-tab sync**: при сохранении в `/admin` открытые лендинг-вкладки автоматически перезагружают контент без hard-reload (канал `autohaus-content-updates`)
