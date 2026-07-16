@@ -27,6 +27,7 @@ from media_service import (
     ALLOWED_MIME_PREFIXES,
     MAX_UPLOAD_BYTES,
     save_file,
+    import_from_url,
     find_file_meta,
     iter_grid_range,
     parse_range,
@@ -294,6 +295,23 @@ async def upload_media(file: UploadFile = File(...), admin: dict = Depends(get_c
         "content_type": content_type,
         "size": len(payload),
     }
+
+
+class ImportUrlPayload(BaseModel):
+    url: str
+
+
+@api_router.post("/admin/media/import-url")
+async def import_media_from_url(payload: ImportUrlPayload, admin: dict = Depends(get_current_admin)):
+    """Скачивает файл по публичной ссылке (в том числе Яндекс.Диск /i/xxx)
+    и сохраняет его в GridFS. Возвращает постоянный /api/media/{id} URL."""
+    try:
+        return await import_from_url(db, payload.url)
+    except ValueError as e:
+        raise HTTPException(status_code=400, detail=str(e))
+    except Exception as e:
+        logger.exception("import_from_url failed")
+        raise HTTPException(status_code=500, detail=f"Не удалось импортировать файл: {e}")
 
 
 @api_router.head("/media/{file_id}")

@@ -60,3 +60,8 @@ export async function uploadMedia(file, onProgress) {
   });
   return data; // { id, url, filename, content_type, size }
 }
+
+export async function importMediaFromUrl(url) {
+  const { data } = await adminAxios.post("/admin/media/import-url", { url }, { timeout: 90000 });
+  return data; // { id, url, filename, content_type, size }
+}

@@ -1,7 +1,9 @@
 """Media storage backed by MongoDB GridFS with HTTP Range support for video streaming."""
 import mimetypes
 import re
+from urllib.parse import urlparse, unquote
 
+import httpx
 from bson import ObjectId
 from motor.motor_asyncio import AsyncIOMotorGridFSBucket
 
@@ -22,6 +24,118 @@ async def save_file(db, filename: str, content_type: str, payload: bytes) -> str
         metadata={"content_type": content_type or "application/octet-stream"},
     )
     return str(file_id)
+
+
+YANDEX_DISK_RE = re.compile(r"^https?://(disk\.yandex\.(ru|com|by|kz|uz)|yadi\.sk)/(i|d)/", re.I)
+
+
+async def _resolve_download_url(url: str) -> str:
+    """If URL is a Yandex Disk public share (disk.yandex.ru/i/... or /d/...),
+    ask Yandex public API for the temporary direct download URL. Otherwise
+    return the URL unchanged."""
+    if not YANDEX_DISK_RE.match(url or ""):
+        return url
+
+    api = "https://cloud-api.yandex.net/v1/disk/public/resources/download"
+    async with httpx.AsyncClient(timeout=15.0, follow_redirects=True) as client:
+        r = await client.get(api, params={"public_key": url})
+        r.raise_for_status()
+        data = r.json()
+        href = data.get("href")
+        if not href:
+            raise ValueError("Yandex Disk API returned no download URL")
+        return href
+
+
+def _filename_from_url(url: str) -> str:
+    try:
+        path = urlparse(url).path
+        name = unquote(path.rsplit("/", 1)[-1]) or "upload.bin"
+        # Strip query fragments
+        return name.split("?")[0] or "upload.bin"
+    except Exception:
+        return "upload.bin"
+
+
+async def import_from_url(db, url: str) -> dict:
+    """Download a file from ANY public URL (with special-case Yandex Disk share
+    links) and persist it to GridFS. Returns {id, url, filename, content_type, size}.
+
+    Raises ValueError with a user-friendly message on validation errors.
+    """
+    if not url or not url.strip():
+        raise ValueError("URL пуст")
+    url = url.strip()
+    if not url.lower().startswith(("http://", "https://")):
+        raise ValueError("Ссылка должна начинаться с http:// или https://")
+
+    try:
+        resolved = await _resolve_download_url(url)
+    except httpx.HTTPStatusError as e:
+        raise ValueError(
+            f"Не удалось получить прямую ссылку от Яндекс.Диск ({e.response.status_code}). "
+            f"Убедитесь, что доступ к файлу — публичный."
+        ) from e
+    except (httpx.RequestError, ValueError) as e:
+        raise ValueError(f"Не удалось разобрать ссылку: {e}") from e
+
+    filename_hint = _filename_from_url(url)
+
+    async with httpx.AsyncClient(timeout=60.0, follow_redirects=True) as client:
+        try:
+            async with client.stream("GET", resolved) as r:
+                r.raise_for_status()
+                content_type = (r.headers.get("content-type") or "").split(";")[0].strip()
+                # If Yandex download URL has ?filename=X, prefer that
+                q = urlparse(resolved).query
+                if "filename=" in q:
+                    for part in q.split("&"):
+                        if part.startswith("filename="):
+                            fn = unquote(part.split("=", 1)[1])
+                            if fn:
+                                filename_hint = fn.split("?")[0]
+                            break
+
+                if content_type and not any(content_type.startswith(p) for p in ALLOWED_MIME_PREFIXES):
+                    raise ValueError(
+                        f"Тип файла '{content_type}' не поддерживается — нужны только image/* или video/*"
+                    )
+
+                data = bytearray()
+                async for chunk in r.aiter_bytes(chunk_size=CHUNK_SIZE):
+                    data.extend(chunk)
+                    if len(data) > MAX_UPLOAD_BYTES:
+                        raise ValueError(
+                            f"Файл больше 80 МБ ({len(data) // (1024*1024)} МБ). "
+                            f"Уменьшите размер или используйте прямой URL."
+                        )
+        except httpx.HTTPStatusError as e:
+            raise ValueError(
+                f"Скачивание не удалось (HTTP {e.response.status_code}). "
+                f"Проверьте, что ссылка публичная."
+            ) from e
+        except httpx.RequestError as e:
+            raise ValueError(f"Сетевая ошибка при скачивании: {e}") from e
+
+    if not data:
+        raise ValueError("Файл пустой")
+
+    # If content-type wasn't sent, guess from filename
+    if not content_type or not any(content_type.startswith(p) for p in ALLOWED_MIME_PREFIXES):
+        content_type = guess_content_type(filename_hint)
+        if not any(content_type.startswith(p) for p in ALLOWED_MIME_PREFIXES):
+            raise ValueError(
+                "Не удалось определить тип файла — принимаются только изображения и видео"
+            )
+
+    file_id = await save_file(db, filename_hint, content_type, bytes(data))
+    return {
+        "id": file_id,
+        "url": f"/api/media/{file_id}",
+        "filename": filename_hint,
+        "content_type": content_type,
+        "size": len(data),
+    }
 
 
 async def find_file_meta(db, file_id: str):

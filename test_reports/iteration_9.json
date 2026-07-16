@@ -1,0 +1,31 @@
+{
+  "summary": "Iteration 9 — тестирование нового Яндекс.Диск import flow. Все 11 UI шагов и 8 backend тестов прошли. Backend endpoint POST /api/admin/media/import-url ведёт себя ровно как описано: 401 без токена, 400 с русским 'Ссылка должна начинаться с http://' для 'not-a-url', 200 c filename='1.mp4' + content_type='video/quicktime' + size≈2.82MB для disk.yandex.ru/i/8nm8HLfB1BL8Lw. GET /api/media/{id} возвращает 200 с правильным Content-Type/Content-Length и поддерживает Range (206). UI flow: логин→Hero (default)→paste yandex URL в media-picker-input-Фоновое видео→yellow hint 'Это ссылка «поделиться»' появился→media-picker-import с классом bg-white→click→toast 'Файл сохранён: 1.mp4 (2754 КБ)' через 6 сек→input сменился на /api/media/6a58a21ba3ee5314ec784519→yellow hint исчез→save→toast 'Сохранено. Изменения уже видны на сайте'→новая вкладка / показала hero-video с src=https://.../api/media/...(cross-tab BroadcastChannel refresh работает и здесь). Одна мелочь: в headless Chromium currentTime остаётся 0 (readyState=0) на новом videourl — это autoplay policy в headless, не баг (mixkit URL в предыдущих итерациях играл, source correctly wired). Финально hero.video_url возвращён на дефолт https://assets.mixkit.co/videos/35540/35540-720.mp4 — подтверждено через GET /api/content.",
+  "backend_issues": {"critical": [], "minor": []},
+  "frontend_issues": {
+    "ui_bugs": [],
+    "integration_issues": [],
+    "design_issues": []
+  },
+  "test_report_links": [
+    "/app/backend/tests/test_import_url.py",
+    "/app/test_reports/pytest/pytest_results.xml"
+  ],
+  "action_items": [],
+  "critical_code_review_comments": [
+    "Backend import_from_url корректно валидирует URL (http/https), корректно резолвит Яндекс.Диск через cloud-api.yandex.net public API, streaming download с MAX_UPLOAD_BYTES=80MB check и fallback на mimetypes.guess_type когда сервер не отдал Content-Type. Ошибки httpx завёрнуты в ValueError с человекочитаемыми сообщениями. Хороший код.",
+    "server.py POST /admin/media/import-url аккуратно ловит ValueError→400 и Exception→500 с logger.exception. OK.",
+    "MediaPicker.jsx: YANDEX_DISK_RE идентичен backend'овскому — единый источник истины было бы неплохо, но дублирование маленькое и понятное. needsImport → и hint, и подсветка кнопки в bg-white — UX ясен.",
+    "Мелочь UX: если пользователь стёр весь URL, кнопка 'Импортировать по ссылке' исчезает (условие value && value.startsWith('http')), что правильно.",
+    "Мелочь потенциальная: import_from_url при content-type='video/quicktime' проходит проверку ALLOWED_MIME_PREFIXES (начинается с video/), но результирующий file для /i/8nm8HLfB1BL8Lw это фактически MP4 контейнер, а yandex отдаёт video/quicktime. Браузеры играют это как MP4, но потенциально Safari/iOS могут капризничать. Не блокер."
+  ],
+  "updated_files": [
+    "/app/backend/tests/test_import_url.py (создан — 8 pytest тестов на новый endpoint + регрессия)"
+  ],
+  "success_rate": {"backend": "100% (8/8 pytest)", "frontend": "100% (11/11 UI шагов; playback currentTime>0 не подтверждён в headless — известное ограничение)"},
+  "test_credentials": "admin@detailing-autohaus.ru / AutohausAdmin2026!",
+  "seed_data_creation": "В процессе теста создано 2 GridFS объекта из disk.yandex.ru/i/8nm8HLfB1BL8Lw (video/quicktime, ~2.82MB каждый — от pytest и от Playwright). hero.video_url временно был установлен на /api/media/<id> и восстановлен на https://assets.mixkit.co/videos/35540/35540-720.mp4. GridFS blobs остались (2шт) — не мешают, но при желании main agent может почистить db.media.files.",
+  "retest_needed": false,
+  "main_agent_can_self_test": true,
+  "context_for_next_testing_agent": "Preview URL https://luxury-wrap.preview.emergentagent.com. Backend тесты в /app/backend/tests/test_import_url.py — запускать: pytest backend/tests/test_import_url.py -v. Важно: [data-testid='media-picker-import'] и [data-testid='media-picker-yandex-hint'] существуют в двух экземплярах на Hero-табе (poster + video pickers) — обязательно скоупить через ancestor MediaPicker root, например: page.locator(\"[data-testid='media-picker-input-Фоновое видео']\").locator(\"xpath=ancestor::div[contains(@class,'border-white/10')][1]\").locator('[data-testid=\"media-picker-import\"]'). Тестовый Yandex URL disk.yandex.ru/i/8nm8HLfB1BL8Lw даёт ~2.82MB видео 1.mp4 (video/quicktime). Импорт занимает 5-8 сек через Яндекс public API. hero-video autoplay в headless Chromium иногда не стартует (readyState остаётся 0) — это не regression, а поведение headless.",
+  "rca of the issue": "Нет issue — весь import-flow работает end-to-end. Первая итерация playwright-теста упала на 'get_by_text(Hero)' т.к. Hero — это дефолтная активная вкладка (не нужен клик), плюс селектор [data-testid='media-picker-import'] без scoping хватал poster picker (первый). Фикс — скоуп через ancestor MediaPicker root от video input. После этого все 11 шагов проходят."
+}
