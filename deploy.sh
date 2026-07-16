@@ -43,24 +43,24 @@ log "🚀 Начинаю обновление AUTOHAUS..."
 [ -d "$APP_DIR" ] || error "Папка $APP_DIR не найдена"
 cd "$APP_DIR"
 
-# ── 1. Git pull ───────────────────────────────────────────────────
-log "1/8  Подтягиваю свежий код с GitHub..."
+# ── 1. Git pull (hard-sync с GitHub — источником правды) ─────────
+log "1/8  Синхронизирую с GitHub (hard reset на origin)..."
 if [ -d ".git" ]; then
-    # Сохраняем локальные изменения (.env файлы и т.п.)
+    # .env файлы в .gitignore — они уцелеют при reset
+    # Сохраняем на всякий случай нетрекнутые файлы (если есть локальные правки в трекнутых)
     if ! git diff-index --quiet HEAD -- 2>/dev/null; then
-        warn "Обнаружены локальные изменения — сохраняю в git stash"
-        git stash push -m "auto-stash-$(date +%s)" || true
-        STASHED=1
+        warn "Обнаружены локальные правки в трекнутых файлах — сохраняю в git stash"
+        git stash push --include-untracked -m "auto-stash-$(date +%s)" || true
     fi
 
     BRANCH=$(git branch --show-current)
-    git pull origin "$BRANCH"
+    [ -z "$BRANCH" ] && BRANCH="main"
 
-    # Возвращаем локальные изменения (.env)
-    if [ "$STASHED" = "1" ]; then
-        git stash pop || warn "Не удалось восстановить stash — проверь .env вручную"
-    fi
-    ok "Код обновлён (ветка $BRANCH)"
+    git fetch origin "$BRANCH"
+    git reset --hard "origin/$BRANCH"
+    git clean -fd -- ':!*.env' ':!node_modules' ':!venv' ':!build' ':!.pm2' 2>/dev/null || true
+
+    ok "Код синхронизирован с origin/$BRANCH (жёсткий reset)"
 else
     warn "Не git-репозиторий — пропускаю git pull"
 fi
