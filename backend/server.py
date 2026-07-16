@@ -133,6 +133,44 @@ async def root():
     return {"message": "Hello World"}
 
 
+@api_router.get("/health")
+async def health():
+    """Публичный health-check: проверяет что backend жив, MongoDB отвечает
+    и админ засеeжен. Используйте на VPS: curl http://127.0.0.1:8001/api/health"""
+    result = {"status": "ok", "backend": "up"}
+    # DB check
+    try:
+        await db.command("ping")
+        result["mongodb"] = "connected"
+    except Exception as e:
+        result["status"] = "degraded"
+        result["mongodb"] = f"error: {e}"
+
+    # Admin seeded check
+    try:
+        email = os.environ.get("ADMIN_EMAIL")
+        if not email:
+            result["admin"] = "no ADMIN_EMAIL env var"
+            result["status"] = "degraded"
+        else:
+            found = await db.admins.find_one({"email": email})
+            result["admin"] = "seeded" if found else "NOT seeded — check ADMIN_EMAIL/ADMIN_PASSWORD in backend/.env"
+            if not found:
+                result["status"] = "degraded"
+    except Exception as e:
+        result["admin"] = f"check failed: {e}"
+
+    # Env sanity
+    result["env"] = {
+        "MONGO_URL_set": bool(os.environ.get("MONGO_URL")),
+        "DB_NAME_set": bool(os.environ.get("DB_NAME")),
+        "JWT_SECRET_set": bool(os.environ.get("JWT_SECRET")),
+        "ADMIN_EMAIL_set": bool(os.environ.get("ADMIN_EMAIL")),
+        "ADMIN_PASSWORD_set": bool(os.environ.get("ADMIN_PASSWORD")),
+    }
+    return result
+
+
 @api_router.post("/status", response_model=StatusCheck)
 async def create_status_check(input: StatusCheckCreate):
     status_obj = StatusCheck(**input.model_dump())
@@ -381,9 +419,24 @@ async def get_media(file_id: str, request: Request):
 
 @app.on_event("startup")
 async def _startup():
+    # Log which critical env vars are missing — helps diagnose "cannot login" on VPS
+    critical = ["MONGO_URL", "DB_NAME", "JWT_SECRET", "ADMIN_EMAIL", "ADMIN_PASSWORD"]
+    missing = [k for k in critical if not os.environ.get(k)]
+    if missing:
+        logger.error(
+            "❌ MISSING critical env vars in backend/.env: %s — админ логин не будет работать!",
+            ", ".join(missing),
+        )
     try:
         await seed_admin(db)
-        logger.info("Admin seeded / verified")
+        # Verify admin actually exists in DB after seed
+        email = os.environ.get("ADMIN_EMAIL")
+        if email:
+            found = await db.admins.find_one({"email": email})
+            if found:
+                logger.info("✅ Admin seeded / verified: %s", email)
+            else:
+                logger.error("❌ Admin NOT in DB after seed — check backend/.env has ADMIN_EMAIL and ADMIN_PASSWORD")
     except Exception as e:
         logger.exception("Failed to seed admin: %s", e)
 

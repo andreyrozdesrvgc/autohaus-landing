@@ -22,8 +22,23 @@ export default function AdminLogin() {
       navigate("/admin");
     } catch (err) {
       const status = err?.response?.status;
-      if (status === 401) toast.error("Неверный email или пароль");
-      else toast.error("Не удалось войти. Попробуйте позже.");
+      const detail = err?.response?.data?.detail;
+      // eslint-disable-next-line no-console
+      console.error("[AdminLogin] error", { status, detail, message: err?.message });
+
+      if (status === 401) {
+        toast.error("Неверный email или пароль");
+      } else if (status === 404) {
+        toast.error("API не найден. Проверьте настройку nginx (/api/ → 127.0.0.1:8001).");
+      } else if (status === 502 || status === 503 || status === 504) {
+        toast.error("Backend недоступен (Bad Gateway). Проверьте `pm2 status` на сервере.");
+      } else if (status && status >= 500) {
+        toast.error(`Ошибка сервера ${status}. См. логи backend: pm2 logs autohaus-backend`);
+      } else if (!status) {
+        toast.error("Сервер не отвечает. Backend работает? Проверьте pm2 и nginx.");
+      } else {
+        toast.error(`Ошибка ${status}: ${detail || "Попробуйте позже."}`);
+      }
     } finally {
       setLoading(false);
     }
