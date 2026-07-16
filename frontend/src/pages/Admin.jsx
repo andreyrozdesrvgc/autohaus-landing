@@ -429,8 +429,9 @@ export default function Admin() {
     try {
       const saved = await saveContent(content);
       setContent(saved);
-      await refreshLanding();
-      toast.success("Сохранено. Откройте сайт — изменения уже видны.");
+      // broadcast=true → posts BroadcastChannel message so open landing tabs auto-refresh
+      await refreshLanding({ broadcast: true });
+      toast.success("Сохранено. Изменения уже видны на сайте (если открыт — обновится сам).");
     } catch (err) {
       const status = err?.response?.status;
       if (status === 401) {

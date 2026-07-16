@@ -1,0 +1,26 @@
+{
+  "summary": "Iteration 8 — verified two new defensive measures added on top of iter-7 save flow: (1) cache-buster ?t=timestamp on GET /api/content and (2) BroadcastChannel 'autohaus-content-updates' for cross-tab landing refresh. All 7 test steps passed end-to-end: (1) landing / regression — GET /api/content 200, <video data-testid=hero-video> shows mixkit default; (2) GET /api/content?t=<ts> returns 200 with valid JSON; (3) admin login OK with admin@detailing-autohaus.ru; (4) MediaPicker input on Hero tab accepts new URL and save fires PUT /api/admin/content; (5) success toast 'Сохранено. Изменения уже видны на сайте …' shows; (6) fresh landing tab picks up new video URL; (7) CROSS-TAB SYNC verified — BroadcastChannel listener in Tab A received {type:'content-updated', ts:<n>}, and Tab A's <video src> auto-updated to the new URL WITHOUT hard-reload while Tab B (admin) was doing the save. Final restore: hero.video_url and hero.poster_url returned to defaults (mixkit + unsplash), confirmed via final GET /api/content.",
+  "backend_issues": {"critical": [], "minor": []},
+  "frontend_issues": {
+    "ui_bugs": [],
+    "integration_issues": [],
+    "design_issues": []
+  },
+  "test_report_links": [],
+  "action_items": [],
+  "critical_code_review_comments": [
+    "ContentContext.refresh() now correctly appends ?t=${Date.now()} + Cache-Control:no-cache header — good defensive layer against any misconfigured intermediate CDN cache. Verified in browser network tab.",
+    "BroadcastChannel implementation is clean: sender in refresh({broadcast:true}) opens the channel, posts once, and closes; listener in useEffect installs bc.onmessage and cleans up on unmount. Correctly guarded with typeof BroadcastChannel !== 'undefined' fallback for older browsers.",
+    "Cross-tab flow works: admin tab save → refreshLanding({broadcast:true}) → PUT + GET + BC.postMessage → landing tab receives msg → refresh() re-fetches /api/content?t=<new ts> → setContent triggers Hero re-render → <video key={hero.video_url}> unmounts/remounts with new source. Verified with a direct BC listener injected into landing tab in Playwright.",
+    "Nit: after admin's own refresh({broadcast:true}), a landing tab in the SAME browser will also receive the message and do a second GET (admin already did one). Cheap and harmless — 1 extra GET per save per open tab. Fine.",
+    "Nit (leftover from iter-7): saveContent → setContent(saved) could race with in-flight local edits. Not a regression, not in scope for this iteration."
+  ],
+  "updated_files": [],
+  "success_rate": {"backend": "100% (both GET /api/content and GET /api/content?t=<ts> return 200 with valid JSON)", "frontend": "100% (7/7 scenarios pass, including new BroadcastChannel cross-tab sync)"},
+  "test_credentials": "admin@detailing-autohaus.ru / AutohausAdmin2026!",
+  "seed_data_creation": "Test temporarily set hero.video_url=https://storage.yandexcloud.net/newautohaus/1.mp4 then 2.mp4 and RESTORED to defaults (hero.video_url=https://assets.mixkit.co/videos/35540/35540-720.mp4, hero.poster_url=https://images.unsplash.com/photo-1503376780353-7e6692767b70?auto=format&fit=crop&w=1920&q=85). Verified final state via GET /api/content.",
+  "retest_needed": false,
+  "main_agent_can_self_test": true,
+  "context_for_next_testing_agent": "Preview URL https://luxury-wrap.preview.emergentagent.com. Iter-8 added cache-buster + BroadcastChannel — both work perfectly. BroadcastChannel name: 'autohaus-content-updates'. Message shape: {type:'content-updated', ts:<epoch>}. Listener is in ContentProvider useEffect; sender is refresh({broadcast:true}) called from Admin.handleSave. Selector tip (from iter-7 preserved): use page.get_by_text('Фоновое видео', exact=True) to find MediaPicker label; then xpath ancestor::div[.//input[@placeholder]][1] to reach its URL input — MediaPicker inputs have no data-testid.",
+  "rca of the issue": "No issue — both new defensive measures work as designed. Verified: (a) cache-buster query string is on every ContentContext GET; (b) BroadcastChannel emits on save and receives on other tabs and triggers a fresh GET → DOM update within 2-3 seconds. No regression from previous iterations."
+}
