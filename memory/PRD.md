@@ -36,6 +36,12 @@
 - Создан `deploy.sh` — one-command update script (git pull → yarn build → chmod → pm2 restart → nginx reload → HTTP check)
 - Создан `INSTALL.md` — полная 15-шаговая инструкция для чистого Ubuntu VPS
 
+### 2026-07-16 — CMS reliability fixes (iterations 7-8)
+- **Cache-buster**: `GET /api/content?t=${Date.now()}` + `Cache-Control: no-cache` header — обходит любой CDN/browser HTTP кэш
+- **BroadcastChannel cross-tab sync**: при сохранении в `/admin` открытые лендинг-вкладки автоматически перезагружают контент без hard-reload (канал `autohaus-content-updates`)
+- Улучшен toast после сохранения: "Сохранено. Изменения уже видны на сайте (если открыт — обновится сам)"
+- Проверено E2E: полный save flow (admin → API → refresh → DOM) работает 100% на всех сценариях
+
 ### 2026-07-16 — UX refinements (iteration 6)
 - **Hero mobile**: заголовок + подзаголовок + 2 CTA подтянуты в верхнюю треть экрана (spacer перенесён под CTA-блок)
 - **Protocol mobile**: карточки этапов уменьшены с 78vh до 62vh (min-440, max-560) — меньше пустого пространства
