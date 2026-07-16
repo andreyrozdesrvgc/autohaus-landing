@@ -51,7 +51,10 @@ export default function Hero() {
             <span className="hidden md:inline">{hero.geo_label}</span>
           </div>
 
-          <div className="flex-1" />
+          {/* Desktop spacer — pushes content to bottom */}
+          <div className="hidden md:block flex-1" />
+          {/* Mobile: small gap only, content sits near top */}
+          <div className="md:hidden h-6" />
 
           <motion.span
             {...fadeUp(0.1)}
@@ -97,6 +100,9 @@ export default function Hero() {
               </a>
             </div>
           </motion.div>
+
+          {/* Mobile: spacer pushes footer meta to bottom */}
+          <div className="md:hidden flex-1 min-h-[16px]" />
 
           <motion.div
             {...fadeUp(0.75)}

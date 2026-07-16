@@ -3,7 +3,6 @@
     <head>
         <meta charset="utf-8" />
         <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
-        <meta name="theme-color" content="#000000" />
         <meta name="color-scheme" content="dark" />
 
         <!-- Primary SEO -->
@@ -39,10 +38,21 @@
         <meta name="twitter:description" content="Полиуретан. Винил. Антихром. Detailing premium class в Калининграде." />
         <meta name="twitter:image" content="https://detailing-autohaus.ru/og-image.jpg" />
 
-        <!-- Favicons -->
-        <link rel="icon" href="%PUBLIC_URL%/favicon.ico" />
-        <link rel="apple-touch-icon" href="%PUBLIC_URL%/logo192.png" />
+        <!-- Favicons — чёрный фон с белой буквой A -->
+        <link rel="icon" type="image/svg+xml" href="%PUBLIC_URL%/favicon.svg" />
+        <link rel="icon" type="image/x-icon" href="%PUBLIC_URL%/favicon.ico" />
+        <link rel="apple-touch-icon" href="%PUBLIC_URL%/apple-touch-icon.png" />
+        <link rel="mask-icon" href="%PUBLIC_URL%/favicon.svg" color="#000000" />
         <link rel="manifest" href="%PUBLIC_URL%/manifest.json" />
+
+        <!-- Browser tab / status-bar theme colors (mobile + desktop Safari) -->
+        <meta name="theme-color" content="#000000" media="(prefers-color-scheme: light)" />
+        <meta name="theme-color" content="#000000" media="(prefers-color-scheme: dark)" />
+        <meta name="msapplication-TileColor" content="#000000" />
+        <meta name="msapplication-navbutton-color" content="#000000" />
+        <meta name="apple-mobile-web-app-capable" content="yes" />
+        <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+        <meta name="apple-mobile-web-app-title" content="AUTOHAUS" />
 
         <!-- Performance: preconnect to key origins -->
         <link rel="preconnect" href="https://fonts.googleapis.com" />

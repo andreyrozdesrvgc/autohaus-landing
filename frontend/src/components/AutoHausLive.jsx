@@ -10,18 +10,29 @@ function LiveCard({ item, index, total, onOpen, onCta }) {
   const videoRef = useRef(null);
 
   // Autoplay only when the card is visible. Saves bandwidth + battery on mobile.
+  // Lower threshold + preload='auto' so first frame appears BEFORE user scrolls
+  // fully into view — kills the black-background flash.
   useEffect(() => {
     const video = videoRef.current;
     if (!video) return;
+
+    // Try to warm up first frame immediately so poster/frame is visible
+    try {
+      video.load();
+    } catch (_) {
+      // noop
+    }
+
     const io = new IntersectionObserver(
       ([entry]) => {
         if (entry.isIntersecting) {
-          video.play().catch(() => {});
+          const p = video.play();
+          if (p && typeof p.catch === "function") p.catch(() => {});
         } else {
           video.pause();
         }
       },
-      { threshold: 0.45 }
+      { threshold: 0.12, rootMargin: "0px 0px 20% 0px" }
     );
     io.observe(video);
     return () => io.disconnect();
@@ -43,10 +54,11 @@ function LiveCard({ item, index, total, onOpen, onCta }) {
           ref={videoRef}
           src={resolveMedia(item.src)}
           poster={item.poster ? resolveMedia(item.poster) : undefined}
+          autoPlay
           muted
           loop
           playsInline
-          preload="metadata"
+          preload="auto"
           aria-label={`AutoHaus Live — ${item.title || `видео ${index + 1}`}`}
           className="absolute inset-0 w-full h-full object-cover transition-transform duration-700 group-hover:scale-[1.03]"
         />

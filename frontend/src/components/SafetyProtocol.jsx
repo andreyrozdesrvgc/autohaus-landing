@@ -134,7 +134,7 @@ function MobileStage({ s, total, index }) {
       animate={inView ? { opacity: 1, y: 0 } : {}}
       transition={{ duration: 0.9, ease: [0.16, 1, 0.3, 1], delay: index * 0.08 }}
       data-testid={`protocol-stage-${s.n}-mobile`}
-      className="relative w-full h-[78vh] bg-[#0A0A0A] border border-white/10 overflow-hidden"
+      className="relative w-full h-[62vh] min-h-[440px] max-h-[560px] bg-[#0A0A0A] border border-white/10 overflow-hidden"
     >
       <img
         src={resolveMedia(s.poster)}
@@ -159,15 +159,15 @@ function MobileStage({ s, total, index }) {
       <div className="absolute -bottom-2 -right-2 select-none pointer-events-none text-white/[0.06] font-medium leading-none tracking-tighter text-[clamp(8rem,40vw,16rem)]">
         {s.n}
       </div>
-      <div className="absolute inset-0 px-6 pb-8 pt-20 flex flex-col justify-end">
-        <h3 className="text-3xl tracking-tighter font-medium leading-[0.95] text-white">
+      <div className="absolute inset-0 px-6 pb-6 pt-14 flex flex-col justify-end">
+        <h3 className="text-2xl tracking-tighter font-medium leading-[0.95] text-white">
           {s.title}
         </h3>
-        <p className="mt-4 text-[#BDBDBD] text-sm leading-relaxed font-light">{s.desc}</p>
-        <ul className="mt-5 space-y-2">
-          {s.points.map((p) => (
-            <li key={p} className="flex items-start gap-3 text-[13px] text-white/75">
-              <span className="mt-[8px] block w-1.5 h-px bg-white/50" />
+        <p className="mt-3 text-[#BDBDBD] text-[13px] leading-relaxed font-light line-clamp-3">{s.desc}</p>
+        <ul className="mt-4 space-y-1.5">
+          {s.points.slice(0, 4).map((p) => (
+            <li key={p} className="flex items-start gap-3 text-[12px] text-white/75">
+              <span className="mt-[7px] block w-1.5 h-px bg-white/50" />
               {p}
             </li>
           ))}
