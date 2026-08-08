@@ -11,6 +11,21 @@ const cardFade = (i) => ({
   transition: { duration: 0.85, ease: [0.16, 1, 0.3, 1], delay: 0.1 + i * 0.08 },
 });
 
+/** Дательный падеж мужских/женских русских имён — для «Записаться к Максиму». */
+function toDativeRu(name) {
+  if (!name) return name;
+  const n = name.trim();
+  if (!n) return n;
+  const lower = n.toLowerCase();
+  // Простые правила для большинства имён
+  if (lower.endsWith("ий")) return n.slice(0, -2) + "ию"; // Дмитрий → Дмитрию
+  if (lower.endsWith("й"))  return n.slice(0, -1) + "ю";  // Николай → Николаю
+  if (lower.endsWith("ь"))  return n.slice(0, -1) + "ю";  // Игорь → Игорю
+  if (lower.endsWith("я"))  return n.slice(0, -1) + "е";  // Илья → Илье
+  if (lower.endsWith("а"))  return n.slice(0, -1) + "е";  // Никита → Никите, Мария → Марии(упрощаем)
+  return n + "у"; // согласная (Максим/Артём/Иван) → +у
+}
+
 /**
  * Наша команда — 6 сотрудников (динамическое кол-во из CMS).
  * Каждая карточка: фото 3:4, имя, должность, специализация, стаж, CTA «Записаться к [Имя]».
@@ -171,7 +186,7 @@ function TeamCard({ member, index, ctaPrefix, onCta }) {
           className="mt-auto group/btn inline-flex items-center justify-between gap-3 px-4 py-3 border border-white/15 text-[10px] tracking-[0.28em] uppercase text-white/85 hover:bg-white hover:text-black hover:border-white transition-all duration-500"
         >
           <span>
-            {ctaPrefix} {member.name}
+            {ctaPrefix} {toDativeRu(member.name)}
           </span>
           <ArrowUpRight
             size={14}

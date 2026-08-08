@@ -36,6 +36,13 @@
 - Создан `deploy.sh` — one-command update script (git pull → yarn build → chmod → pm2 restart → nginx reload → HTTP check)
 - Создан `INSTALL.md` — полная 15-шаговая инструкция для чистого Ubuntu VPS
 
+### 2026-08-08 — Team + Clients sections, Live video→photo (iteration 12)
+- **Наша команда** (`/team`): 6 сотрудников (фото, имя, должность, специализация, стаж) с CTA «Записаться к [Имя]» — русские имена автосклоняются в дательный падеж. Framer-motion staggered fade-in при скролле
+- **Наши клиенты** (`/clients`): 4-5 логотипов клиентов, компьютер = 1 ряд auto-fit, мобилка = 2 колонки. Без анимации логотипов
+- **AutoHaus Live**: видео заменены на фото (аспект 9:16 сохранён), PhotoLightbox вместо VideoLightbox. Backward-compat: `item.image || item.poster`
+- **CMS**: 2 новых таба (Наша команда, Наши клиенты). Live tab упрощён — только 4 поля на кадр (title, meta, cta_label, image). Количество лого/сотрудников/кадров любое
+- Порядок секций: Hero → Protocol → Quiz → BeforeAfter → Services → Configurator → Stats → Gallery → **Live → Team → Clients** → Contact → Footer
+
 ### 2026-07-16 — Auth diagnostics + Yandex Disk auto-import (iterations 9-10)
 - **GET /api/health** — публичный health-check: MongoDB ping, admin seeded, все env vars set. Помогает диагностировать проблемы на VPS
 - **Improved AdminLogin errors**: 401→неверный пароль, 404→nginx misconfig, 502→pm2 down, 5xx→server error, network→backend недоступен
