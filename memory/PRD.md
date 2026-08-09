@@ -36,6 +36,11 @@
 - Создан `deploy.sh` — one-command update script (git pull → yarn build → chmod → pm2 restart → nginx reload → HTTP check)
 - Создан `INSTALL.md` — полная 15-шаговая инструкция для чистого Ubuntu VPS
 
+### 2026-08-09 — Gallery scroll + raw photos (iterations 14-15)
+- **Gallery scroll fix**: динамический расчёт translate% + explicit `width: ${totalVW}vw` на motion.div — теперь все N фото (не только 3) проходят через viewport. Формула: `-(overflowVW/totalVW) * 100`. Высота обёртки: `max(240, 120 + count*45)vh`
+- **Убраны эффекты с фото**: удалён `grayscale`, `bg-gradient-to-t` — фотки отображаются 1:1 как загружены. Title/meta вынесены в компактные chip'ы с `backdrop-blur` (только там где текст)
+- Работает для любого количества работ в CMS
+
 ### 2026-08-09 — Team refinement + Clients color + MAX integration (iteration 13)
 - **Team**: убраны CTA-кнопки под сотрудниками и связанный LeadPopup. Убрана per-card fade-анимация (карточки больше не «летают» при горизонтальном скролле — это была основная жалоба). Уменьшены до 260px десктоп / 242px мобилка, фото aspect 3:4 (было 4:5)
 - **Clients**: убран `invert brightness-0` — логотипы теперь показываются в оригинальных цветах. Размер логотипа увеличен с `h-10 md:h-14` до `h-16 md:h-20 max-w-[80%]`
