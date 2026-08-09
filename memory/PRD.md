@@ -36,6 +36,11 @@
 - Создан `deploy.sh` — one-command update script (git pull → yarn build → chmod → pm2 restart → nginx reload → HTTP check)
 - Создан `INSTALL.md` — полная 15-шаговая инструкция для чистого Ubuntu VPS
 
+### 2026-08-09 — Protocol mobile fix + Configurator CMS options (iterations 16-17)
+- **Protocol mobile fix**: MobileStage теперь рендерит `<video autoPlay muted playsInline loop poster=...>` (как DesktopStage), с fallback на `<img>` или radial-gradient. До этого на мобилке был только `<img>` — при пустом poster карточки были полностью чёрными
+- **Configurator options в CMS**: `film_types` / `finishes` / `coverage_options` / `addons` вынесены из хардкода в default_content.py, `Configurator.jsx` читает с валидацией + fallback. Admin.jsx расширен MultiListEditor — 3 списка в одной вкладке
+- **Переименовано** «Винил» → «Цветной полиуретан» в дефолтном контенте
+
 ### 2026-08-09 — Gallery scroll + raw photos (iterations 14-15)
 - **Gallery scroll fix**: динамический расчёт translate% + explicit `width: ${totalVW}vw` на motion.div — теперь все N фото (не только 3) проходят через viewport. Формула: `-(overflowVW/totalVW) * 100`. Высота обёртки: `max(240, 120 + count*45)vh`
 - **Убраны эффекты с фото**: удалён `grayscale`, `bg-gradient-to-t` — фотки отображаются 1:1 как загружены. Title/meta вынесены в компактные chip'ы с `backdrop-blur` (только там где текст)
