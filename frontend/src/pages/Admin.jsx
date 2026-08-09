@@ -109,6 +109,43 @@ const SECTIONS = [
       { k: "trust_warranty_value", label: "Бейдж 2 — значение" },
       { k: "trust_experience_label", label: "Бейдж 3 — заголовок" },
       { k: "trust_experience_value", label: "Бейдж 3 — значение" },
+      { k: "addons.antichrome_label", label: "Доп. опция 1 — название (Антихром)" },
+      { k: "addons.antichrome_price", label: "Доп. опция 1 — цена в ₽" },
+      { k: "addons.darkout_label", label: "Доп. опция 2 — название (Затемнение чёрных элементов)" },
+      { k: "addons.darkout_price", label: "Доп. опция 2 — цена в ₽" },
+      { k: "addons.headlights_label", label: "Доп. опция 3 — название (Бронирование оптики)" },
+      { k: "addons.headlights_price", label: "Доп. опция 3 — цена в ₽" },
+    ],
+    lists: [
+      {
+        key: "film_types",
+        label: "Типы плёнки (шаг 01)",
+        item: [
+          { k: "id", label: "ID (уникальный, латиница)" },
+          { k: "label", label: "Название (напр. Полиуретан, Цветной полиуретан, Hybrid)" },
+          { k: "sub", label: "Подпись под названием" },
+          { k: "price", label: "Базовая цена в ₽ (число)" },
+        ],
+      },
+      {
+        key: "finishes",
+        label: "Финиш (шаг 02)",
+        item: [
+          { k: "id", label: "ID (напр. gloss, matte, satin)" },
+          { k: "label", label: "Название (Глянец, Мат, Сатин)" },
+          { k: "mult", label: "Коэффициент цены (1.0 = без надбавки, 1.08 = +8%)" },
+        ],
+      },
+      {
+        key: "coverage_options",
+        label: "Зоны оклейки (шаг 03)",
+        item: [
+          { k: "id", label: "ID (front, half, full и т.п.)" },
+          { k: "label", label: "Название (Зоны риска, Половина кузова, Полный кузов)" },
+          { k: "sub", label: "Подпись под названием" },
+          { k: "mult", label: "Коэффициент от базовой цены (0.45 = 45% от полной)" },
+        ],
+      },
     ],
   },
   {
@@ -490,8 +527,7 @@ export default function Admin() {
   const sectionData = content[activeSection.key] || {};
 
   return (
-    <main data-testid="admin-page" className="min-h-screen bg-black text-white">
-      {/* TOP BAR */}
+    <main data-testid="admin-page" className="min-h-screen bg-black text-white">      {/* TOP BAR */}
       <header className="sticky top-0 z-30 bg-black/95 backdrop-blur border-b border-white/10">
         <div className="mx-auto max-w-[1400px] px-6 md:px-10 py-4 flex items-center justify-between gap-4">
           <div className="flex items-center gap-3">
@@ -568,45 +604,36 @@ export default function Admin() {
             </div>
           </div>
 
-          {/* List items (services, gallery items, stats items, protocol stages) */}
+          {/* List items (single list per section — legacy) */}
           {activeSection.listKey && (
-            <div className="bg-[#0A0A0A] border border-white/10 p-6 md:p-8">
-              <div className="flex items-center justify-between mb-5">
-                <h3 className="text-lg tracking-tight font-medium">{activeSection.listLabel}</h3>
-                <button
-                  type="button"
-                  onClick={() => addListItem(activeSection.key, activeSection.listKey, activeSection.listItem)}
-                  className="text-[10px] tracking-[0.3em] uppercase border border-white/20 px-3 py-2 hover:border-white/50"
-                >
-                  + добавить
-                </button>
-              </div>
-              <div className="flex flex-col gap-6">
-                {((sectionData[activeSection.listKey]) || []).map((item, idx) => (
-                  <div key={idx} className="border border-white/10 p-5">
-                    <div className="flex items-center justify-between mb-4">
-                      <span className="text-[10px] tracking-[0.3em] uppercase text-white/40">№ {String(idx + 1).padStart(2, "0")}</span>
-                      <div className="flex gap-2">
-                        <button onClick={() => moveListItem(activeSection.key, activeSection.listKey, idx, -1)} className="text-[10px] uppercase border border-white/15 px-2 py-1 hover:border-white/40">↑</button>
-                        <button onClick={() => moveListItem(activeSection.key, activeSection.listKey, idx, 1)} className="text-[10px] uppercase border border-white/15 px-2 py-1 hover:border-white/40">↓</button>
-                        <button onClick={() => removeListItem(activeSection.key, activeSection.listKey, idx)} className="text-[10px] tracking-[0.3em] uppercase border border-white/15 px-3 py-1 text-white/50 hover:text-white hover:border-white/40">удалить</button>
-                      </div>
-                    </div>
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
-                      {activeSection.listItem.map((f) => (
-                        <Field
-                          key={f.k}
-                          field={f}
-                          value={item[f.k]}
-                          onChange={(v) => updateField([activeSection.key, activeSection.listKey, idx, f.k], v)}
-                        />
-                      ))}
-                    </div>
-                  </div>
-                ))}
-              </div>
-            </div>
+            <MultiListEditor
+              sectionKey={activeSection.key}
+              listKey={activeSection.listKey}
+              listLabel={activeSection.listLabel}
+              listItem={activeSection.listItem}
+              items={sectionData[activeSection.listKey] || []}
+              addListItem={addListItem}
+              removeListItem={removeListItem}
+              moveListItem={moveListItem}
+              updateField={updateField}
+            />
           )}
+
+          {/* Multiple lists per section (used by Configurator) */}
+          {Array.isArray(activeSection.lists) && activeSection.lists.map((list) => (
+            <MultiListEditor
+              key={list.key}
+              sectionKey={activeSection.key}
+              listKey={list.key}
+              listLabel={list.label}
+              listItem={list.item}
+              items={sectionData[list.key] || []}
+              addListItem={addListItem}
+              removeListItem={removeListItem}
+              moveListItem={moveListItem}
+              updateField={updateField}
+            />
+          ))}
 
           <div className="flex justify-end">
             <button
@@ -622,5 +649,46 @@ export default function Admin() {
         </section>
       </div>
     </main>
+  );
+}
+
+function MultiListEditor({ sectionKey, listKey, listLabel, listItem, items, addListItem, removeListItem, moveListItem, updateField }) {
+  return (
+    <div className="bg-[#0A0A0A] border border-white/10 p-6 md:p-8">
+      <div className="flex items-center justify-between mb-5">
+        <h3 className="text-lg tracking-tight font-medium">{listLabel}</h3>
+        <button
+          type="button"
+          onClick={() => addListItem(sectionKey, listKey, listItem)}
+          className="text-[10px] tracking-[0.3em] uppercase border border-white/20 px-3 py-2 hover:border-white/50"
+        >
+          + добавить
+        </button>
+      </div>
+      <div className="flex flex-col gap-6">
+        {items.map((item, idx) => (
+          <div key={idx} className="border border-white/10 p-5">
+            <div className="flex items-center justify-between mb-4">
+              <span className="text-[10px] tracking-[0.3em] uppercase text-white/40">№ {String(idx + 1).padStart(2, "0")}</span>
+              <div className="flex gap-2">
+                <button onClick={() => moveListItem(sectionKey, listKey, idx, -1)} className="text-[10px] uppercase border border-white/15 px-2 py-1 hover:border-white/40">↑</button>
+                <button onClick={() => moveListItem(sectionKey, listKey, idx, 1)} className="text-[10px] uppercase border border-white/15 px-2 py-1 hover:border-white/40">↓</button>
+                <button onClick={() => removeListItem(sectionKey, listKey, idx)} className="text-[10px] tracking-[0.3em] uppercase border border-white/15 px-3 py-1 text-white/50 hover:text-white hover:border-white/40">удалить</button>
+              </div>
+            </div>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
+              {listItem.map((f) => (
+                <Field
+                  key={f.k}
+                  field={f}
+                  value={item[f.k]}
+                  onChange={(v) => updateField([sectionKey, listKey, idx, f.k], v)}
+                />
+              ))}
+            </div>
+          </div>
+        ))}
+      </div>
+    </div>
   );
 }

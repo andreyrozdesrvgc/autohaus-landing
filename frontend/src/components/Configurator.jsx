@@ -9,19 +9,19 @@ import SuccessOverlay from "@/components/SuccessOverlay";
 import { useContent } from "@/context/ContentContext";
 import { MEDIA } from "@/lib/mediaUrls";
 
-const FILM_TYPES = [
+const FILM_TYPES_FALLBACK = [
   { id: "ppf", label: "Полиуретан (PPF)", price: 260000, sub: "Самовосстанавливающаяся защита 200 мкм" },
-  { id: "vinyl", label: "Винил", price: 150000, sub: "Смена цвета. До 7 лет службы." },
+  { id: "vinyl", label: "Цветной полиуретан", price: 150000, sub: "Смена цвета. До 7 лет службы." },
   { id: "hybrid", label: "Hybrid PPF + Color", price: 320000, sub: "Защита + цвет в одной плёнке." },
 ];
 
-const FINISHES = [
+const FINISHES_FALLBACK = [
   { id: "gloss", label: "Глянец", mult: 1.0 },
   { id: "matte", label: "Мат", mult: 1.08 },
   { id: "satin", label: "Сатин", mult: 1.05 },
 ];
 
-const COVERAGE = [
+const COVERAGE_FALLBACK = [
   { id: "front", label: "Зоны риска", mult: 0.45, sub: "Капот, бампер, фары, зеркала" },
   { id: "half", label: "Половина кузова", mult: 0.7, sub: "Передняя часть + двери" },
   { id: "full", label: "Полный кузов", mult: 1.0, sub: "Все внешние панели" },
@@ -42,9 +42,36 @@ function fmt(n) {
 
 export default function Configurator() {
   const { configurator: cfg } = useContent();
-  const [film, setFilm] = useState(FILM_TYPES[0]);
-  const [finish, setFinish] = useState(FINISHES[1]);
-  const [coverage, setCoverage] = useState(COVERAGE[2]);
+
+  // Опции читаем из CMS если есть, иначе — из хардкод-fallback.
+  // Валидируем: должен быть непустой массив, каждый элемент имеет id + label +
+  // (price ИЛИ mult), иначе игнорируем и берём fallback.
+  const filmTypes = useMemo(() => {
+    const arr = cfg?.film_types;
+    if (Array.isArray(arr) && arr.length && arr.every(x => x && x.id && x.label && x.price != null)) return arr;
+    return FILM_TYPES_FALLBACK;
+  }, [cfg]);
+  const finishes = useMemo(() => {
+    const arr = cfg?.finishes;
+    if (Array.isArray(arr) && arr.length && arr.every(x => x && x.id && x.label && x.mult != null)) return arr;
+    return FINISHES_FALLBACK;
+  }, [cfg]);
+  const coverageOpts = useMemo(() => {
+    const arr = cfg?.coverage_options;
+    if (Array.isArray(arr) && arr.length && arr.every(x => x && x.id && x.label && x.mult != null)) return arr;
+    return COVERAGE_FALLBACK;
+  }, [cfg]);
+  const addons = cfg?.addons || {};
+  const antichromePrice = Number(addons.antichrome_price ?? 22000);
+  const darkoutPrice = Number(addons.darkout_price ?? 18000);
+  const headlightsPrice = Number(addons.headlights_price ?? 14000);
+  const antichromeLabel = addons.antichrome_label || "Антихром";
+  const darkoutLabel = addons.darkout_label || "Затемнение чёрных элементов";
+  const headlightsLabel = addons.headlights_label || "Бронирование оптики";
+
+  const [film, setFilm] = useState(filmTypes[0]);
+  const [finish, setFinish] = useState(finishes[1] || finishes[0]);
+  const [coverage, setCoverage] = useState(coverageOpts[coverageOpts.length - 1] || coverageOpts[0]);
   const [antichrome, setAntichrome] = useState(true);
   const [darkout, setDarkout] = useState(false);
   const [headlights, setHeadlights] = useState(true);
@@ -56,12 +83,13 @@ export default function Configurator() {
   const [success, setSuccess] = useState(false);
 
   const total = useMemo(() => {
-    let t = film.price * finish.mult * coverage.mult;
-    if (antichrome) t += 22000;
-    if (darkout) t += 18000;
-    if (headlights) t += 14000;
+    let t = Number(film.price) * Number(finish.mult) * Number(coverage.mult);
+    if (isNaN(t)) t = 0;
+    if (antichrome) t += antichromePrice;
+    if (darkout) t += darkoutPrice;
+    if (headlights) t += headlightsPrice;
     return t;
-  }, [film, finish, coverage, antichrome, darkout, headlights]);
+  }, [film, finish, coverage, antichrome, darkout, headlights, antichromePrice, darkoutPrice, headlightsPrice]);
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -171,7 +199,7 @@ export default function Configurator() {
                 <span className="text-[10px] tracking-[0.28em] uppercase text-white/30">01</span>
               </div>
               <div className="space-y-2">
-                {FILM_TYPES.map((f) => (
+                {filmTypes.map((f) => (
                   <button
                     key={f.id}
                     type="button"
@@ -200,7 +228,7 @@ export default function Configurator() {
                 <span className="text-[10px] tracking-[0.28em] uppercase text-white/30">02</span>
               </div>
               <div className="grid grid-cols-3 gap-2">
-                {FINISHES.map((f) => (
+                {finishes.map((f) => (
                   <button
                     key={f.id}
                     type="button"
@@ -225,7 +253,7 @@ export default function Configurator() {
                 <span className="text-[10px] tracking-[0.28em] uppercase text-white/30">03</span>
               </div>
               <div className="space-y-2">
-                {COVERAGE.map((c) => (
+                {coverageOpts.map((c) => (
                   <button
                     key={c.id}
                     type="button"
@@ -251,9 +279,9 @@ export default function Configurator() {
                 <span className="text-[10px] tracking-[0.28em] uppercase text-white/30">04</span>
               </div>
               <div className="space-y-2">
-                <Toggle active={antichrome} onChange={setAntichrome} label="Антихром" sub="Все хром-элементы — в чёрный" testid="toggle-antichrome" />
-                <Toggle active={darkout} onChange={setDarkout} label="Чёрные элементы" sub="Эмблемы, молдинги, шильдики" testid="toggle-darkout" />
-                <Toggle active={headlights} onChange={setHeadlights} label="Бронирование оптики" sub="Защита фар плёнкой" testid="toggle-headlights" />
+                <Toggle active={antichrome} onChange={setAntichrome} label={antichromeLabel} sub="Все хром-элементы — в чёрный" testid="toggle-antichrome" />
+                <Toggle active={darkout} onChange={setDarkout} label={darkoutLabel} sub="Эмблемы, молдинги, шильдики" testid="toggle-darkout" />
+                <Toggle active={headlights} onChange={setHeadlights} label={headlightsLabel} sub="Защита фар плёнкой" testid="toggle-headlights" />
               </div>
             </div>
 
@@ -263,9 +291,9 @@ export default function Configurator() {
               <span className="px-3 py-1.5 border border-white/15 bg-white/[0.03]">{film.label}</span>
               <span className="px-3 py-1.5 border border-white/15 bg-white/[0.03]">{finish.label}</span>
               <span className="px-3 py-1.5 border border-white/15 bg-white/[0.03]">{coverage.label}</span>
-              {antichrome && <span className="px-3 py-1.5 border border-white/15 bg-white/[0.03]">Антихром</span>}
-              {darkout && <span className="px-3 py-1.5 border border-white/15 bg-white/[0.03]">Чёрные элементы</span>}
-              {headlights && <span className="px-3 py-1.5 border border-white/15 bg-white/[0.03]">Бронь оптики</span>}
+              {antichrome && <span className="px-3 py-1.5 border border-white/15 bg-white/[0.03]">{antichromeLabel}</span>}
+              {darkout && <span className="px-3 py-1.5 border border-white/15 bg-white/[0.03]">{darkoutLabel}</span>}
+              {headlights && <span className="px-3 py-1.5 border border-white/15 bg-white/[0.03]">{headlightsLabel}</span>}
             </div>
           </div>
 

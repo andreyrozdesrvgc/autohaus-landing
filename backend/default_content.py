@@ -138,6 +138,29 @@ DEFAULT_CONTENT = {
         "trust_warranty_value": "до 10 лет",
         "trust_experience_label": "Опыт",
         "trust_experience_value": "6+ лет",
+        "film_types": [
+            {"id": "ppf", "label": "Полиуретан (PPF)", "price": 260000, "sub": "Самовосстанавливающаяся защита 200 мкм"},
+            {"id": "vinyl", "label": "Цветной полиуретан", "price": 150000, "sub": "Смена цвета. До 7 лет службы."},
+            {"id": "hybrid", "label": "Hybrid PPF + Color", "price": 320000, "sub": "Защита + цвет в одной плёнке."},
+        ],
+        "finishes": [
+            {"id": "gloss", "label": "Глянец", "mult": 1.0},
+            {"id": "matte", "label": "Мат", "mult": 1.08},
+            {"id": "satin", "label": "Сатин", "mult": 1.05},
+        ],
+        "coverage_options": [
+            {"id": "front", "label": "Зоны риска", "mult": 0.45, "sub": "Капот, бампер, фары, зеркала"},
+            {"id": "half", "label": "Половина кузова", "mult": 0.7, "sub": "Передняя часть + двери"},
+            {"id": "full", "label": "Полный кузов", "mult": 1.0, "sub": "Все внешние панели"},
+        ],
+        "addons": {
+            "antichrome_label": "Антихром",
+            "antichrome_price": 22000,
+            "darkout_label": "Затемнение чёрных элементов",
+            "darkout_price": 18000,
+            "headlights_label": "Бронирование оптики",
+            "headlights_price": 14000,
+        },
     },
     "stats": {
         "overline": "007 — Numbers",

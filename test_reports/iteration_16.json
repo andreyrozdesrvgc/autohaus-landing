@@ -1,0 +1,29 @@
+{
+  "summary": "Iter 16 — Configurator CMS-driven options tested end-to-end. Verified: (1) GET /api/content returns configurator.film_types (3), finishes (3), coverage_options (3), addons (6 fields) with expected values. (2) Landing button [data-testid='film-vinyl'] label = 'Цветной полиуретан' (renamed from Винил); film-ppf and film-hybrid unchanged. (3) All 3 film buttons, 3 finish buttons, 3 coverage buttons, and 3 addon toggles are clickable and update selection. (4) Price calc validated by intercepting the POST /api/leads payload from the configurator form: film=PPF(260000) × finish=Мат(1.08) × coverage=Полный(1.0) + antichrome(22000) + headlights(14000) = estimated_price:316800 — exact match. (5) Admin > Конфигуратор tab renders: base text fields, 6 addons.* fields (labels + prices), and 3 MultiListEditor blocks 'Типы плёнки (шаг 01)', 'Финиш (шаг 02)', 'Зоны оклейки (шаг 03)' with 3 items each showing id/label/sub/price(or mult). (6) Admin edit flow via UI: changed film_types[1].label to 'UI_TEST_LABEL_XYZ' → PUT /api/admin/content 200 → GET /api/content returns new label → rolled back to 'Цветной полиуретан' successfully. (7) Add-item + remove-item covered by direct API PUT (same endpoint the UI uses); appended {id:test,label:Test,sub:...,price:100000} and then removed it. Original content byte-equal preserved. No runtime page errors.",
+  "backend_issues": {"critical": [], "minor": []},
+  "frontend_issues": {
+    "ui_bugs": [
+      {"component": "Configurator (right sticky form)", "issue": "Итоговая цена (fmt(total)) НЕ отображается в UI. Функция fmt() определена в Configurator.jsx строка 39 но нигде не используется — user не видит рассчитанную стоимость на странице, хотя расчёт корректный и отправляется в POST /api/leads (estimated_price:316800). Задача явно просила 'Проверить что в DOM отображается ~316 800 ₽' — этого нет.", "selector": "Configurator.jsx", "priority": "MEDIUM"}
+    ],
+    "integration_issues": [],
+    "design_issues": []
+  },
+  "test_report_links": ["/app/test_reports/admin_configurator.png", "/tmp/admin_test.py"],
+  "action_items": [
+    "E1: Отобразить total в DOM в правой sticky-панели Configurator (например, над кнопкой submit) — использовать уже готовую fmt(total) + ' ₽'. Расчёт уже корректный, нужна только визуализация."
+  ],
+  "critical_code_review_comments": [
+    "Configurator.jsx: fmt() определена но не используется — dead code либо забытый рендер итога. Пользователь не видит цену перед отправкой заявки.",
+    "Admin.jsx: 'admin-save' (top, sticky) и 'admin-save-bottom' оба вызывают handleSave(content) — OK. Дубликат save-кнопок разумен (доступ и сверху и снизу).",
+    "Валидация в filmTypes/finishes/coverageOpts useMemo (проверка id+label+price/mult на каждом элементе) — хорошо защищает от битого CMS-контента, fallback на хардкод корректный.",
+    "MultiListEditor корректно передаёт updateField([sectionKey, listKey, idx, f.k]) — работает и для одиночного listKey (legacy), и для массива lists[] (Configurator). Add/remove/move функциональны."
+  ],
+  "updated_files": [],
+  "success_rate": {"backend": "100% (login, GET content, PUT content, add/remove item, rollback all OK)", "frontend": "95% (все проверки прошли; единственный minus — total не рендерится в UI)"},
+  "test_credentials": "admin@detailing-autohaus.ru / AutohausAdmin2026! — использовались, работают",
+  "seed_data_creation": "Временно добавлял film_types item {id:test,...} через PUT /api/admin/content — сразу удалил. film_types[1].label временно менял на 'UI_TEST_LABEL_XYZ' — откатил обратно на 'Цветной полиуретан'. Проверено GET-ом: контент byte-equal исходному.",
+  "retest_needed": false,
+  "should_main_agent_self_test": true,
+  "context_for_next_testing_agent": "Configurator + admin CMS для секции configurator полностью функциональны. Единственная UX-регрессия: fmt(total) не рендерится в DOM. Backend расчёт корректный (316800 подтверждено в payload POST /api/leads). Все другие секции админки (film_types, finishes, coverage_options, addons.*) редактируются штатно через UI и через API. Тест-скрипт для регрессии admin CRUD: /tmp/admin_test.py — можно переиспользовать.",
+  "rca of the issue": "N/A — задачи iter 16 реализованы правильно, кроме visible total. RCA по total: E1 добавил Number() protection и правильный useMemo для total, но забыл добавить JSX-узел <span>{fmt(total)} ₽</span> в правую sticky-форму (aside в Configurator.jsx строки 302-390). Быстрый фикс: добавить блок над button data-testid='config-submit', напр. <div data-testid='config-total' className='text-3xl'>{fmt(total)} ₽</div>."
+}
