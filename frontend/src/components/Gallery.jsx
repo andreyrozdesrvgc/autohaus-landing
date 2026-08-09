@@ -66,7 +66,10 @@ export default function Gallery() {
         className="relative hidden md:block"
       >
         <div className="sticky top-0 h-screen overflow-hidden">
-          <motion.div style={{ x }} className="flex h-full items-center gap-6 px-10 will-change-transform">
+          <motion.div
+            style={{ x, width: `${totalVW}vw` }}
+            className="flex h-full items-center gap-6 px-10 will-change-transform"
+          >
             {items.map((img, i) => (
               <div
                 key={i}
