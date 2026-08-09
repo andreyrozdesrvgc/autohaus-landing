@@ -3,9 +3,15 @@ import { motion, useScroll, useTransform, useInView } from "framer-motion";
 import { useContent } from "@/context/ContentContext";
 import { resolveMedia } from "@/lib/contentDefaults";
 
+// Соответствуют классам ниже: карточка 60vw, gap-6 = 24px ≈ 1.5vw, trailing spacer 20vw.
+const CARD_VW = 60;
+const GAP_VW = 1.5;
+const TRAILING_VW = 20;
+
 export default function Gallery() {
   const { gallery } = useContent();
   const items = gallery.items || [];
+  const count = items.length;
   const wrapper = useRef(null);
   const headerRef = useRef(null);
   const headerIn = useInView(headerRef, { once: true, margin: "-10%" });
@@ -13,7 +19,17 @@ export default function Gallery() {
     target: wrapper,
     offset: ["start start", "end end"],
   });
-  const x = useTransform(scrollYProgress, [0, 1], ["0%", "-78%"]);
+
+  // Считаем реальный оверфлоу в vw и переводим в % ширины track'а.
+  // Это даёт корректный ход независимо от кол-ва работ (3, 6, 10...).
+  const totalVW = count * CARD_VW + Math.max(0, count - 1) * GAP_VW + TRAILING_VW;
+  const overflowVW = Math.max(0, totalVW - 100);
+  const translatePct = totalVW > 0 ? -(overflowVW / totalVW) * 100 : 0;
+  const x = useTransform(scrollYProgress, [0, 1], ["0%", `${translatePct}%`]);
+
+  // Высота обёртки — тоже динамическая: базовые 100vh (для sticky) + запас на каждую карточку.
+  // Меньше 3 карточек — 240vh; больше — увеличиваем плавно.
+  const wrapperVH = Math.max(240, 120 + count * 45);
 
   return (
     <section
@@ -43,33 +59,46 @@ export default function Gallery() {
         </div>
       </div>
 
-      <div ref={wrapper} className="relative h-[260vh] hidden md:block">
+      {/* DESKTOP — horizontal scroll driven by vertical scroll */}
+      <div
+        ref={wrapper}
+        style={{ height: `${wrapperVH}vh` }}
+        className="relative hidden md:block"
+      >
         <div className="sticky top-0 h-screen overflow-hidden">
           <motion.div style={{ x }} className="flex h-full items-center gap-6 px-10 will-change-transform">
             {items.map((img, i) => (
               <div
                 key={i}
                 data-testid={`gallery-item-${i}`}
-                className="relative flex-shrink-0 h-[78vh] w-[60vw] max-w-[900px] bg-[#0A0A0A] border border-white/10 overflow-hidden group"
+                className="relative flex-shrink-0 h-[78vh] w-[60vw] max-w-[900px] bg-[#0A0A0A] border border-white/10 overflow-hidden"
               >
                 <img
                   src={resolveMedia(img.src)}
                   alt={img.alt || img.title}
                   loading="lazy"
                   decoding="async"
-                  className="absolute inset-0 w-full h-full object-cover grayscale group-hover:grayscale-0 transition-all duration-1000"
+                  className="absolute inset-0 w-full h-full object-cover"
                 />
-                <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-transparent to-transparent" />
-                <div className="absolute bottom-8 left-8 right-8 flex items-end justify-between">
-                  <div>
-                    <div className="text-[10px] tracking-[0.4em] uppercase text-white/60">
-                      № {String(i + 1).padStart(2, "0")}
+                {/* Компактный инфо-чип поверх фото — только там, где текст, без затемнения всей фотографии */}
+                <div className="absolute bottom-6 left-6 right-6 flex items-end justify-between gap-4 pointer-events-none">
+                  {(img.title || i >= 0) && (
+                    <div className="px-4 py-3 bg-black/65 backdrop-blur-md border border-white/10 max-w-[70%]">
+                      <div className="text-[10px] tracking-[0.4em] uppercase text-white/60">
+                        № {String(i + 1).padStart(2, "0")}
+                      </div>
+                      {img.title && (
+                        <div className="mt-1 text-2xl md:text-3xl tracking-tight font-medium leading-none text-white">
+                          {img.title}
+                        </div>
+                      )}
                     </div>
-                    <div className="mt-2 text-3xl tracking-tight font-medium">{img.title}</div>
-                  </div>
-                  <div className="text-[11px] tracking-[0.3em] uppercase text-white/70 px-3 py-2 border border-white/20 backdrop-blur-md bg-black/40">
-                    {img.meta}
-                  </div>
+                  )}
+                  {img.meta && (
+                    <div className="text-[11px] tracking-[0.3em] uppercase text-white/85 px-3 py-2 border border-white/20 backdrop-blur-md bg-black/50">
+                      {img.meta}
+                    </div>
+                  )}
                 </div>
               </div>
             ))}
@@ -78,19 +107,33 @@ export default function Gallery() {
         </div>
       </div>
 
+      {/* MOBILE — простой вертикальный список */}
       <div className="md:hidden px-6 pb-10 space-y-4">
         {items.map((img, i) => (
           <div key={i} className="relative aspect-[4/5] bg-[#0A0A0A] border border-white/10 overflow-hidden">
-            <img src={resolveMedia(img.src)} alt={img.alt || img.title} loading="lazy" decoding="async" className="absolute inset-0 w-full h-full object-cover grayscale" />
-            <div className="absolute inset-0 bg-gradient-to-t from-black/70 to-transparent" />
-            <div className="absolute bottom-6 left-6 right-6 flex items-end justify-between">
-              <div>
-                <div className="text-[10px] tracking-[0.4em] uppercase text-white/60">№ {String(i + 1).padStart(2, "0")}</div>
-                <div className="mt-1 text-2xl tracking-tight font-medium">{img.title}</div>
+            <img
+              src={resolveMedia(img.src)}
+              alt={img.alt || img.title}
+              loading="lazy"
+              decoding="async"
+              className="absolute inset-0 w-full h-full object-cover"
+            />
+            <div className="absolute bottom-4 left-4 right-4 flex items-end justify-between gap-3 pointer-events-none">
+              <div className="px-3 py-2 bg-black/65 backdrop-blur-md border border-white/10 max-w-[70%]">
+                <div className="text-[10px] tracking-[0.4em] uppercase text-white/60">
+                  № {String(i + 1).padStart(2, "0")}
+                </div>
+                {img.title && (
+                  <div className="mt-1 text-xl tracking-tight font-medium leading-none text-white">
+                    {img.title}
+                  </div>
+                )}
               </div>
-              <div className="text-[10px] tracking-[0.3em] uppercase text-white/70 px-2 py-1 border border-white/20 bg-black/40">
-                {img.meta}
-              </div>
+              {img.meta && (
+                <div className="text-[10px] tracking-[0.3em] uppercase text-white/85 px-2 py-1 border border-white/20 bg-black/50 backdrop-blur">
+                  {img.meta}
+                </div>
+              )}
             </div>
           </div>
         ))}

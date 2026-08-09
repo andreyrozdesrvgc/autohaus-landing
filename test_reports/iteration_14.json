@@ -1,0 +1,27 @@
+{
+  "summary": "Tested Gallery (008 SELECTED WORKS) after refactor: 6 items render, wrapper height=390vh, no grayscale/gradient overlays, chip present, mobile shows all 6 vertically. HOWEVER core intent (all 6 cards visible during horizontal scroll) is STILL BROKEN. The translate% formula is mathematically correct (-74.19%), but framer-motion applies x-percent relative to the element's own layout width, and the motion.div (flex track) has offsetWidth=1440px (constrained by sticky h-screen parent) even though its scrollWidth=5344px. Result: max translation is only 1068px, but ~3904px is needed to reveal item-5. item-5 stays at left=3411px at end of scroll — never enters viewport.",
+  "backend_issues": {"critical": [], "minor": []},
+  "frontend_issues": {
+    "ui_bugs": [
+      {"component": "Gallery.jsx (desktop horizontal scroll)", "issue": "Cards 4-6 never come into viewport. useTransform x with percent string translates relative to motion.div offsetWidth (=1440px viewport width) NOT scrollWidth (=5344px content). translatePct math (-74.19%) treats totalVW=387.5vw as the base but the actual element width is only 100vw, so effective translation = -1068px vs needed -3904px. Root cause: flex container width is clamped by sticky parent overflow-hidden; children are flex-shrink-0 and overflow visually but don't push parent's layout width.", "selector": "[data-testid=\"gallery-item-5\"]", "priority": "CRITICAL"}
+    ],
+    "integration_issues": [],
+    "design_issues": []
+  },
+  "test_report_links": ["/app/test_reports/gallery_end.png"],
+  "action_items": [
+    "Fix horizontal translation math in /app/frontend/src/components/Gallery.jsx. Two viable approaches: (A) Give the motion.div an explicit width so its offsetWidth equals content: add style width: `${totalVW}vw` (or class w-max) to the motion.div — then translatePct = -(overflowVW/totalVW)*100 works as intended. (B) Switch to pixel-based transform: measure track scrollWidth and container clientWidth via useRef+useEffect, then useTransform(scrollYProgress, [0,1], [0, -(scrollWidth - clientWidth)]) and apply as `${x}px`. Option A is simpler.",
+    "After fix, verify at scroll end: getBoundingClientRect().left of gallery-item-5 should be within [0, viewportWidth] so the card is visible."
+  ],
+  "critical_code_review_comments": [
+    "Gallery.jsx: current formula assumes motion.div width == totalVW, but layout width is clamped to parent (100vw). Use w-max / explicit width, OR use pixel translation.",
+    "Also: TRAILING_VW=20 spacer div is inside the flex but placed AFTER items — good, but include it in totalVW correctly (already done)."
+  ],
+  "updated_files": [],
+  "success_rate": {"backend": "N/A (not tested)", "frontend": "partially — cosmetic fixes ✓, core scroll fix ✗"},
+  "seed_data_creation": "None. Default 6 gallery items used.",
+  "retest_needed": true,
+  "should_main_agent_self_test": true,
+  "context_for_next_testing_agent": "The refactor removed grayscale/gradient (verified ✓) and made wrapperVH dynamic (390vh for 6 items ✓). Chip and mobile layout ✓. But horizontal reveal for cards >3 still broken due to percent-based translate on a viewport-width-constrained flex track. Repro: set viewport 1440x900, scroll to bottom of gallery wrapper (~10800px scrollY), inspect [data-testid=gallery-item-5] getBoundingClientRect().left → ~3411 (outside 1440 viewport).",
+  "rca of the issue": "Framer-motion percent translations use the element's border-box width. The motion.div flex track's offsetWidth is 1440px (constrained by parent sticky h-screen overflow-hidden), not the sum of its children (5344px). So `-74.19%` = -1068px, insufficient to expose the ~3904px of overflow. Fix by making the track's own width equal the content width (style={{width: `${totalVW}vw`, x}} plus class w-max), or by switching to pixel-valued transform."
+}
