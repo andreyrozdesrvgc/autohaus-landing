@@ -14,6 +14,7 @@ import uuid
 from datetime import datetime, timezone
 
 from telegram_service import send_lead_to_telegram
+from max_service import send_lead_to_max
 from auth import (
     verify_password,
     create_access_token,
@@ -167,6 +168,10 @@ async def health():
         "JWT_SECRET_set": bool(os.environ.get("JWT_SECRET")),
         "ADMIN_EMAIL_set": bool(os.environ.get("ADMIN_EMAIL")),
         "ADMIN_PASSWORD_set": bool(os.environ.get("ADMIN_PASSWORD")),
+        "TELEGRAM_BOT_TOKEN_set": bool(os.environ.get("TELEGRAM_BOT_TOKEN")),
+        "TELEGRAM_CHAT_ID_set": bool(os.environ.get("TELEGRAM_CHAT_ID")),
+        "MAX_BOT_TOKEN_set": bool(os.environ.get("MAX_BOT_TOKEN")),
+        "MAX_CHAT_ID_set": bool(os.environ.get("MAX_CHAT_ID")),
     }
     return result
 
@@ -230,12 +235,16 @@ async def create_lead(payload: LeadCreate, request: Request):
     doc['created_at'] = doc['created_at'].isoformat()
     await db.leads.insert_one(doc)
 
-    # 5) Notify Telegram (best-effort, doesn't fail the request)
+    # 5) Notify Telegram + MAX (best-effort, doesn't fail the request)
     notify_payload: dict[str, Any] = {**data, "id": lead.id}
     telegram_sent = await send_lead_to_telegram(notify_payload)
-    if telegram_sent:
-        lead.telegram_sent = True
-        await db.leads.update_one({"id": lead.id}, {"$set": {"telegram_sent": True}})
+    max_sent = await send_lead_to_max(notify_payload)
+    if telegram_sent or max_sent:
+        lead.telegram_sent = telegram_sent
+        await db.leads.update_one(
+            {"id": lead.id},
+            {"$set": {"telegram_sent": telegram_sent, "max_sent": max_sent}},
+        )
 
     return lead
 

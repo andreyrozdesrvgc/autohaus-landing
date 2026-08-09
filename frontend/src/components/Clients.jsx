@@ -63,7 +63,7 @@ export default function Clients() {
                   src={resolveMedia(item.logo)}
                   alt={`Логотип ${item.name || `клиент ${i + 1}`}`}
                   loading="lazy"
-                  className="h-10 md:h-14 max-w-[70%] object-contain invert brightness-0 opacity-70 hover:opacity-100 transition-opacity duration-500"
+                  className="h-16 md:h-20 max-w-[80%] object-contain transition-transform duration-500 hover:scale-105"
                 />
               ) : (
                 <div className="h-10 md:h-14 w-24 bg-white/5 border border-white/10 flex items-center justify-center text-[10px] tracking-[0.32em] uppercase text-white/30">

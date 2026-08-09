@@ -1,40 +1,18 @@
-import React, { useRef, useState, useCallback } from "react";
+import React, { useRef, useCallback } from "react";
 import { motion, useInView } from "framer-motion";
-import { ArrowUpRight, ChevronLeft, ChevronRight } from "lucide-react";
+import { ChevronLeft, ChevronRight } from "lucide-react";
 import { useContent } from "@/context/ContentContext";
 import { resolveMedia } from "@/lib/contentDefaults";
-import LeadPopup from "@/components/LeadPopup";
-
-const cardFade = (i) => ({
-  initial: { opacity: 0, y: 40 },
-  animate: { opacity: 1, y: 0 },
-  transition: { duration: 0.85, ease: [0.16, 1, 0.3, 1], delay: 0.1 + i * 0.08 },
-});
-
-/** Дательный падеж мужских/женских русских имён — для «Записаться к Максиму». */
-function toDativeRu(name) {
-  if (!name) return name;
-  const n = name.trim();
-  if (!n) return n;
-  const lower = n.toLowerCase();
-  if (lower.endsWith("ий")) return n.slice(0, -2) + "ию";
-  if (lower.endsWith("й"))  return n.slice(0, -1) + "ю";
-  if (lower.endsWith("ь"))  return n.slice(0, -1) + "ю";
-  if (lower.endsWith("я"))  return n.slice(0, -1) + "е";
-  if (lower.endsWith("а"))  return n.slice(0, -1) + "е";
-  return n + "у";
-}
 
 /**
  * Наша команда — горизонтальный snap-scroll ряд компактных карточек.
- * На экране видно 3 карточки + краешек 4-й (peek), чтобы был понятен скролл.
- * Стрелки на десктопе, свайп + мягкая пульсирующая подсказка на мобилке.
+ * На экране видно 3 карточки + краешек 4-й. БЕЗ per-card анимации, чтобы
+ * карточки не "летали" при горизонтальном скролле. Без CTA-кнопок.
  */
 export default function Team() {
   const content = useContent();
   const team = content?.team || {};
   const members = team.members || [];
-  const [popupIdx, setPopupIdx] = useState(null);
   const headerRef = useRef(null);
   const trackRef = useRef(null);
   const headerIn = useInView(headerRef, { once: true, margin: "-15%" });
@@ -43,14 +21,11 @@ export default function Team() {
     const track = trackRef.current;
     if (!track) return;
     const card = track.querySelector('[data-testid^="team-card-"]');
-    const step = card ? card.getBoundingClientRect().width + 20 : 320;
+    const step = card ? card.getBoundingClientRect().width + 16 : 300;
     track.scrollBy({ left: dir * step, behavior: "smooth" });
   }, []);
 
   if (!members.length) return null;
-
-  const activeMember = popupIdx != null ? members[popupIdx] : null;
-  const ctaPrefix = team.cta_prefix || "Записаться к";
 
   return (
     <section
@@ -106,26 +81,18 @@ export default function Team() {
         </div>
       </div>
 
-      {/* HORIZONTAL SCROLL TRACK — виден ~3 карточки на десктопе + краешек 4-й */}
       <div
         ref={trackRef}
         data-testid="team-track"
-        className="flex gap-4 md:gap-5 overflow-x-auto snap-x snap-mandatory px-6 md:px-10 pb-4 no-scrollbar"
+        className="flex gap-4 overflow-x-auto snap-x snap-mandatory px-6 md:px-10 pb-4 no-scrollbar"
         style={{ scrollPaddingLeft: "24px", scrollPaddingRight: "24px" }}
       >
         {members.map((m, i) => (
-          <TeamCard
-            key={i}
-            member={m}
-            index={i}
-            ctaPrefix={ctaPrefix}
-            onCta={() => setPopupIdx(i)}
-          />
+          <TeamCard key={i} member={m} index={i} />
         ))}
         <div className="flex-shrink-0 w-2" aria-hidden="true" />
       </div>
 
-      {/* Мягкая подсказка про свайп — пульсация на мобилке */}
       <div className="md:hidden mx-auto max-w-[1400px] px-6 mt-3 text-center">
         <motion.span
           animate={{ opacity: [0.35, 0.85, 0.35], x: [0, 4, 0] }}
@@ -147,30 +114,17 @@ export default function Team() {
           </div>
         </div>
       )}
-
-      <LeadPopup
-        open={activeMember != null}
-        onClose={() => setPopupIdx(null)}
-        source="team_member"
-        subject={activeMember ? `Запись к мастеру · ${activeMember.name}` : ""}
-      />
     </section>
   );
 }
 
-function TeamCard({ member, index, ctaPrefix, onCta }) {
-  const ref = useRef(null);
-  const inView = useInView(ref, { once: true, margin: "-10%" });
-
+function TeamCard({ member, index }) {
   return (
-    <motion.article
-      ref={ref}
-      {...cardFade(index)}
-      animate={inView ? { opacity: 1, y: 0 } : undefined}
+    <article
       data-testid={`team-card-${index}`}
-      className="group relative flex-shrink-0 snap-start w-[74vw] sm:w-[52vw] md:w-[320px] lg:w-[360px] bg-[#0A0A0A] border border-white/10 overflow-hidden flex flex-col"
+      className="group relative flex-shrink-0 snap-start w-[62vw] sm:w-[42vw] md:w-[240px] lg:w-[260px] bg-[#0A0A0A] border border-white/10 overflow-hidden flex flex-col"
     >
-      <div className="relative aspect-[4/5] overflow-hidden">
+      <div className="relative aspect-[3/4] overflow-hidden">
         {member.photo ? (
           <img
             src={resolveMedia(member.photo)}
@@ -191,50 +145,32 @@ function TeamCard({ member, index, ctaPrefix, onCta }) {
           }}
         />
         {member.years && (
-          <div className="absolute top-3 left-3 px-2.5 py-1 bg-black/60 backdrop-blur border border-white/15 text-[9px] md:text-[10px] tracking-[0.28em] uppercase text-white/85">
+          <div className="absolute top-3 left-3 px-2.5 py-1 bg-black/60 backdrop-blur border border-white/15 text-[9px] tracking-[0.28em] uppercase text-white/85">
             {member.years}
           </div>
         )}
         <div className="absolute bottom-0 inset-x-0 p-4">
-          <div className="text-[9px] md:text-[10px] tracking-[0.32em] uppercase text-white/55">
+          <div className="text-[9px] tracking-[0.32em] uppercase text-white/55">
             № {String(index + 1).padStart(2, "0")}
           </div>
-          <h3 className="mt-0.5 text-xl md:text-2xl tracking-tighter font-medium leading-none text-white">
+          <h3 className="mt-0.5 text-lg md:text-xl tracking-tighter font-medium leading-none text-white">
             {member.name}
           </h3>
         </div>
       </div>
 
-      <div className="flex-1 p-4 flex flex-col gap-3">
-        <div>
-          {member.role && (
-            <div className="text-[10px] tracking-[0.28em] uppercase text-white/55">
-              {member.role}
-            </div>
-          )}
-          {member.focus && (
-            <p className="mt-1.5 text-[12px] text-[#BDBDBD] leading-relaxed font-light line-clamp-2">
-              {member.focus}
-            </p>
-          )}
-        </div>
-
-        <button
-          type="button"
-          onClick={onCta}
-          data-testid={`team-cta-${index}`}
-          className="mt-auto group/btn inline-flex items-center justify-between gap-2 px-3 py-2.5 border border-white/15 text-[9px] md:text-[10px] tracking-[0.24em] uppercase text-white/85 hover:bg-white hover:text-black hover:border-white transition-all duration-500"
-        >
-          <span className="truncate">
-            {ctaPrefix} {toDativeRu(member.name)}
-          </span>
-          <ArrowUpRight
-            size={12}
-            strokeWidth={1.5}
-            className="shrink-0 transition-transform duration-500 group-hover/btn:translate-x-0.5 group-hover/btn:-translate-y-0.5"
-          />
-        </button>
+      <div className="p-4 flex flex-col gap-1.5">
+        {member.role && (
+          <div className="text-[10px] tracking-[0.28em] uppercase text-white/55">
+            {member.role}
+          </div>
+        )}
+        {member.focus && (
+          <p className="text-[12px] text-[#BDBDBD] leading-relaxed font-light line-clamp-2">
+            {member.focus}
+          </p>
+        )}
       </div>
-    </motion.article>
+    </article>
   );
 }
