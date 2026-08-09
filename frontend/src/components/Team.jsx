@@ -168,7 +168,7 @@ function TeamCard({ member, index, ctaPrefix, onCta }) {
       {...cardFade(index)}
       animate={inView ? { opacity: 1, y: 0 } : undefined}
       data-testid={`team-card-${index}`}
-      className="group relative flex-shrink-0 snap-start w-[68vw] xs:w-[62vw] sm:w-[46vw] md:w-[calc((100%-2.5rem)/3.2)] lg:w-[calc((100%-2.5rem)/3.3)] bg-[#0A0A0A] border border-white/10 overflow-hidden flex flex-col"
+      className="group relative flex-shrink-0 snap-start w-[74vw] sm:w-[52vw] md:w-[320px] lg:w-[360px] bg-[#0A0A0A] border border-white/10 overflow-hidden flex flex-col"
     >
       <div className="relative aspect-[4/5] overflow-hidden">
         {member.photo ? (
