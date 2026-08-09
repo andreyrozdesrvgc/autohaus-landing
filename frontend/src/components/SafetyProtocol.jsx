@@ -127,6 +127,8 @@ function DesktopStage({ s, range, total, progress, index }) {
 function MobileStage({ s, total, index }) {
   const ref = useRef(null);
   const inView = useInView(ref, { once: true, margin: "-15%" });
+  const hasVideo = !!s.video;
+  const posterUrl = s.poster ? resolveMedia(s.poster) : undefined;
   return (
     <motion.article
       ref={ref}
@@ -136,15 +138,38 @@ function MobileStage({ s, total, index }) {
       data-testid={`protocol-stage-${s.n}-mobile`}
       className="relative w-full h-[62vh] min-h-[440px] max-h-[560px] bg-[#0A0A0A] border border-white/10 overflow-hidden"
     >
-      <img
-        src={resolveMedia(s.poster)}
-        alt={`${s.title} — премиальный детейлинг AUTOHAUS Калининград`}
-        loading="lazy"
-        decoding="async"
-        className="absolute inset-0 w-full h-full object-cover grayscale brightness-[0.55]"
-      />
+      {hasVideo ? (
+        <video
+          autoPlay
+          loop
+          muted
+          playsInline
+          preload="auto"
+          poster={posterUrl}
+          aria-label={`${s.title} — видеоиллюстрация этапа`}
+          className="absolute inset-0 w-full h-full object-cover grayscale brightness-[0.55]"
+        >
+          <source src={resolveMedia(s.video)} type="video/mp4" />
+        </video>
+      ) : posterUrl ? (
+        <img
+          src={posterUrl}
+          alt={`${s.title} — премиальный детейлинг AUTOHAUS Калининград`}
+          loading="lazy"
+          decoding="async"
+          className="absolute inset-0 w-full h-full object-cover grayscale brightness-[0.55]"
+        />
+      ) : (
+        <div
+          className="absolute inset-0"
+          style={{
+            background:
+              "radial-gradient(ellipse at top, rgba(255,255,255,0.06) 0%, rgba(0,0,0,0.9) 70%)",
+          }}
+        />
+      )}
       <div
-        className="absolute inset-0"
+        className="absolute inset-0 pointer-events-none"
         style={{
           background:
             "linear-gradient(180deg, rgba(0,0,0,0.4) 0%, rgba(0,0,0,0.2) 40%, rgba(0,0,0,0.85) 100%)",

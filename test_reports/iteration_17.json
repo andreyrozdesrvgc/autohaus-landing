@@ -1,0 +1,23 @@
+{
+  "summary": "Frontend-only regression test for SafetyProtocol MobileStage fix (video with poster fallback). Mobile viewport 390x844: all 3 mobile cards [protocol-stage-01/02/03-mobile] now render <video autoPlay muted playsInline loop preload='auto'> WITH poster attribute (Unsplash car images). Previously mobile was pure black. Screenshot confirms Stage 01 now shows car poster image visible. Desktop 1440x900 regression: all 3 sticky stages [protocol-stage-01/02/03] have <video> with autoplay/muted/poster/source — no regression. Gallery section present. Zero .error elements on page. Zero console errors.",
+  "backend_issues": {"critical": [], "minor": []},
+  "frontend_issues": {
+    "ui_bugs": [],
+    "integration_issues": [],
+    "design_issues": []
+  },
+  "test_report_links": ["/app/test_reports/iteration_17.json"],
+  "action_items": [],
+  "critical_code_review_comments": [
+    "In headless Chromium the mobile <video> elements did not actually start playback (currentTime stayed at 0, paused=true, readyState=0 after 3s wait) despite muted+playsInline+autoPlay+preload='auto'. However the poster attribute IS rendered natively by the video element, so users see the car image not black. On real iOS Safari / Android Chrome muted+playsInline autoplay is supported and should play. Recommend verifying manually on a real device or via a lighter poster-preload strategy if playback is critical.",
+    "MobileStage relies on Framer Motion useInView with margin '-15%' & once:true — cards below the fold don't animate until scrolled. Fine, works as designed.",
+    "STAGES_FALLBACK only has one entry (n:01) — if API returns empty stages array, only Stage 01 renders. Not a bug for current test (API returns 3 stages) but note as edge case."
+  ],
+  "updated_files": [],
+  "success_rate": {"backend": "N/A (not tested per request)", "frontend": "100%"},
+  "seed_data_creation": "None",
+  "retest_needed": false,
+  "should_main_agent_self_test": false,
+  "context_for_next_testing_agent": "SafetyProtocol MobileStage now correctly renders <video> (with poster fallback) instead of only <img>. All 3 mobile cards have proper video tags with src pointing to mixkit.co CDN and poster to Unsplash. Desktop unchanged. If retesting playback, test on a real device — headless Chromium may not auto-play even with muted+playsInline.",
+  "rca of the issue": "Before fix MobileStage only rendered <img src={s.poster}> — if poster empty, mobile showed black. After fix it renders <video> when s.video exists, <img> when only poster exists, and radial-gradient fallback when neither. This exactly mirrors DesktopStage. Verified live: mobile stages 01/02/03 all contain <video> elements with correct attrs & poster URLs. Screenshot proves visual fix (car poster visible on Stage 01)."
+}
