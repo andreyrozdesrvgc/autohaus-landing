@@ -197,7 +197,7 @@ export default function ExitIntentPopup() {
           </motion.div>
         )}
       </AnimatePresence>
-      <SuccessOverlay open={success} onClose={() => setSuccess(false)} />
+      <SuccessOverlay open={success} onClose={() => setSuccess(false)} source="exit_intent" />
     </>
   );
 }

@@ -4,14 +4,16 @@ import { Toaster } from "sonner";
 import Landing from "@/pages/Landing";
 import AdminLogin from "@/pages/AdminLogin";
 import Admin from "@/pages/Admin";
+import ThankYou from "@/pages/ThankYou";
 import ExitIntentPopup from "@/components/ExitIntentPopup";
 import ErrorBoundary from "@/components/ErrorBoundary";
 import { ContentProvider } from "@/context/ContentContext";
 
 function GlobalExitIntent() {
   const loc = useLocation();
-  // Disable on admin routes
+  // Disable on admin routes and on /thank-you (no exit-intent after a success)
   if (loc.pathname.startsWith("/admin")) return null;
+  if (loc.pathname.startsWith("/thank-you")) return null;
   return <ExitIntentPopup />;
 }
 
@@ -23,6 +25,7 @@ function App() {
           <BrowserRouter>
             <Routes>
               <Route path="/" element={<Landing />} />
+              <Route path="/thank-you" element={<ThankYou />} />
               <Route path="/admin/login" element={<AdminLogin />} />
               <Route path="/admin" element={<Admin />} />
             </Routes>

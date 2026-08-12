@@ -429,6 +429,11 @@ export default function Quiz() {
         ...getAnalyticsPayload(),
       });
       setDone(true);
+      // Google/Yandex conversion tracking + redirect to thank-you page.
+      import("@/lib/metrika").then(({ trackLeadSubmit }) => trackLeadSubmit("quiz"));
+      setTimeout(() => {
+        window.location.assign("/thank-you?source=quiz");
+      }, 1400);
     } catch (err) {
       const status = err?.response?.status;
       if (status === 429) toast.error("Слишком много запросов. Попробуйте через минуту.");

@@ -305,7 +305,7 @@ export default function LeadPopup({
           </motion.div>
         )}
       </AnimatePresence>
-      <SuccessOverlay open={success} onClose={() => setSuccess(false)} />
+      <SuccessOverlay open={success} onClose={() => setSuccess(false)} source="lead_popup" />
     </>
   );
 }

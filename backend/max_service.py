@@ -17,7 +17,7 @@ import httpx
 
 logger = logging.getLogger(__name__)
 
-MAX_API_BASE = "https://platform-api2.max.ru"
+MAX_API_BASE = "https://botapi.max.ru"
 
 
 def _humanise_config(config: dict[str, Any]) -> list[str]:

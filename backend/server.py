@@ -176,6 +176,19 @@ async def health():
     return result
 
 
+@api_router.post("/max/webhook")
+async def max_webhook(request: Request):
+    """Приёмник webhook-событий от MAX (message_created, callback и т.п.).
+    Должен ответить 200 не позже 30 секунд. Также доступен по alias'у
+    /max-webhook.php через nginx (см. README/deploy)."""
+    try:
+        raw = await request.body()
+        logger.info("MAX webhook incoming (%d bytes): %s", len(raw), raw[:1000].decode("utf-8", "replace"))
+    except Exception as exc:  # noqa: BLE001
+        logger.warning("MAX webhook body read failed: %s", exc)
+    return {"ok": True}
+
+
 @api_router.post("/status", response_model=StatusCheck)
 async def create_status_check(input: StatusCheckCreate):
     status_obj = StatusCheck(**input.model_dump())

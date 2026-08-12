@@ -390,7 +390,7 @@ export default function Configurator() {
           </aside>
         </div>
       </div>
-      <SuccessOverlay open={success} onClose={() => setSuccess(false)} />
+      <SuccessOverlay open={success} onClose={() => setSuccess(false)} source="configurator" />
     </section>
   );
 }

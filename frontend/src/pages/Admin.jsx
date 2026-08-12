@@ -94,6 +94,23 @@ const SECTIONS = [
     ],
   },
   {
+    key: "thank_you",
+    label: "Страница «Спасибо»",
+    fields: [
+      { k: "overline", label: "Верхняя плашка" },
+      { k: "title_line_1", label: "Заголовок — строка 1" },
+      { k: "title_line_2_grey", label: "Заголовок — строка 2 (серым)" },
+      { k: "description", label: "Описание", type: "textarea" },
+      { k: "messenger_prompt", label: "Подсказка над мессенджерами" },
+      { k: "telegram_url", label: "Ссылка на Telegram (t.me/...)" },
+      { k: "whatsapp_url", label: "Ссылка на WhatsApp (wa.me/...)" },
+      { k: "max_url", label: "Ссылка на MAX (max.ru/...)" },
+      { k: "maps_url", label: "Ссылка на Яндекс.Карты" },
+      { k: "maps_label", label: "Текст кнопки карт (напр. «Открыть на карте»)" },
+      { k: "back_home_label", label: "Текст кнопки «На главную»" },
+    ],
+  },
+  {
     key: "configurator",
     label: "Конфигуратор",
     fields: [

@@ -36,6 +36,15 @@
 - Создан `deploy.sh` — one-command update script (git pull → yarn build → chmod → pm2 restart → nginx reload → HTTP check)
 - Создан `INSTALL.md` — полная 15-шаговая инструкция для чистого Ubuntu VPS
 
+### 2026-08-09 — MAX + Yandex Metrika + Thank You page (iteration 18)
+- **MAX API fix**: base URL `https://botapi.max.ru` (был неверный `platform-api2.max.ru`). Подтверждено curl — сообщения доставляются в чат «Заявки с сайта AutoHaus»
+- **POST /api/max/webhook**: приёмник событий от MAX (message_created, callback и т.п.), отвечает 200 `{ok:true}` в <5с — соответствует требованию MAX «webhook ACK <30 сек». Nginx-alias `/max-webhook.php` → FastAPI
+- **Yandex Metrika**: подключена в index.html (id 111530949, webvisor + clickmap + trackLinks). Хелпер `lib/metrika.js` с `reachGoal` / `trackLeadSubmit`
+- **`/thank-you` страница**: после успешной отправки любой формы, редирект через 1.4с. Отправляет цели: `lead_submit_${source}`, `thank_you_view`, `thank_you_messenger_click`, `thank_you_maps_click`
+- **CMS секция «Страница «Спасибо»»**: 11 полей (telegram_url, whatsapp_url, max_url, maps_url и т.д.) — редактируется без пересборки
+- **Все 5 форм** трекают submits: LeadPopup, ExitIntent, Quiz, ContactForm, Configurator — каждая передаёт source в SuccessOverlay
+- ExitIntent теперь отключён на `/thank-you` — не показывается сразу после отправки
+
 ### 2026-08-09 — Protocol mobile fix + Configurator CMS options (iterations 16-17)
 - **Protocol mobile fix**: MobileStage теперь рендерит `<video autoPlay muted playsInline loop poster=...>` (как DesktopStage), с fallback на `<img>` или radial-gradient. До этого на мобилке был только `<img>` — при пустом poster карточки были полностью чёрными
 - **Configurator options в CMS**: `film_types` / `finishes` / `coverage_options` / `addons` вынесены из хардкода в default_content.py, `Configurator.jsx` читает с валидацией + fallback. Admin.jsx расширен MultiListEditor — 3 списка в одной вкладке
