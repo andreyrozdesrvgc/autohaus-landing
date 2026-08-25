@@ -35,6 +35,7 @@ const SECTIONS = [
     key: "before_after",
     label: "Before / After",
     fields: [
+      { k: "visible", label: "Показывать секцию на сайте", type: "toggle" },
       { k: "overline", label: "Верхняя плашка" },
       { k: "title_line_1", label: "Заголовок — строка 1" },
       { k: "title_line_2", label: "Заголовок — строка 2" },
@@ -435,6 +436,30 @@ function Field({ field, value, onChange }) {
           onChange={(e) => onChange(e.target.value === "" ? "" : Number(e.target.value))}
           className="w-full bg-transparent border-b border-white/15 focus:border-white py-2.5 text-sm outline-none"
         />
+      </div>
+    );
+  }
+  if (field.type === "toggle") {
+    const on = value === true || value === "true";
+    return (
+      <div className="flex items-center justify-between gap-3 py-2 border border-white/10 bg-[#070707] px-4">
+        <label className="text-[11px] tracking-[0.32em] uppercase text-white/70">{field.label}</label>
+        <button
+          type="button"
+          role="switch"
+          aria-checked={on}
+          data-testid={`toggle-${field.k}`}
+          onClick={() => onChange(!on)}
+          className={`relative w-12 h-6 border transition-colors duration-300 ${
+            on ? "bg-white border-white" : "bg-transparent border-white/30"
+          }`}
+        >
+          <span
+            className={`absolute top-0.5 h-4 w-4 transition-all duration-300 ${
+              on ? "left-[26px] bg-black" : "left-0.5 bg-white/70"
+            }`}
+          />
+        </button>
       </div>
     );
   }

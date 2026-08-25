@@ -36,6 +36,11 @@
 - Создан `deploy.sh` — one-command update script (git pull → yarn build → chmod → pm2 restart → nginx reload → HTTP check)
 - Создан `INSTALL.md` — полная 15-шаговая инструкция для чистого Ubuntu VPS
 
+### 2026-08-09 — Visibility toggle for sections (iteration 19)
+- Секция BeforeAfter скрыта по умолчанию (`visible: False`)
+- Универсальный toggle-переключатель в CMS: `{k:'visible', type:'toggle'}` — можно применить к любой секции
+- Тумблер выводится в /admin над остальными полями секции
+
 ### 2026-08-09 — MAX + Yandex Metrika + Thank You page (iteration 18)
 - **MAX API fix**: base URL `https://botapi.max.ru` (был неверный `platform-api2.max.ru`). Подтверждено curl — сообщения доставляются в чат «Заявки с сайта AutoHaus»
 - **POST /api/max/webhook**: приёмник событий от MAX (message_created, callback и т.п.), отвечает 200 `{ok:true}` в <5с — соответствует требованию MAX «webhook ACK <30 сек». Nginx-alias `/max-webhook.php` → FastAPI

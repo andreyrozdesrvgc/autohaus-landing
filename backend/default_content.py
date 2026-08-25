@@ -71,6 +71,7 @@ DEFAULT_CONTENT = {
         ],
     },
     "before_after": {
+        "visible": False,
         "overline": "002 — Result",
         "title_line_1": "Разница",
         "title_line_2": "видна без слов.",

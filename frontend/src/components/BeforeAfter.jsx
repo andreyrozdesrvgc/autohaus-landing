@@ -21,10 +21,14 @@ export default function BeforeAfter() {
     setPos((x / rect.width) * 100);
   }, []);
 
+  // Секция скрывается через админку (before_after.visible === false).
+  // Проверка ПОСЛЕ всех хуков — правило React.
+  if (ba?.visible === false) return null;
+
   const onPointerDown = (e) => {
     dragging.current = true;
     if (e.currentTarget && e.pointerId !== undefined) {
-      try { e.currentTarget.setPointerCapture(e.pointerId); } catch (_) {}
+      try { e.currentTarget.setPointerCapture(e.pointerId); } catch (_) { /* noop */ }
     }
     setFromClientX(e.clientX);
   };
@@ -36,7 +40,7 @@ export default function BeforeAfter() {
   const onPointerUp = (e) => {
     dragging.current = false;
     if (e && e.currentTarget && e.pointerId !== undefined) {
-      try { e.currentTarget.releasePointerCapture(e.pointerId); } catch (_) {}
+      try { e.currentTarget.releasePointerCapture(e.pointerId); } catch (_) { /* noop */ }
     }
   };
 
