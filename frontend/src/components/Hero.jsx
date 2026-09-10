@@ -1,8 +1,9 @@
-import React from "react";
+import React, { useState } from "react";
 import { motion } from "framer-motion";
 import { ArrowDown, Play } from "lucide-react";
 import { useContent } from "@/context/ContentContext";
 import { resolveMedia } from "@/lib/contentDefaults";
+import LeadPopup from "@/components/LeadPopup";
 
 const fadeUp = (delay = 0) => ({
   initial: { opacity: 0, y: 40 },
@@ -13,6 +14,7 @@ const fadeUp = (delay = 0) => ({
 export default function Hero() {
   const content = useContent();
   const hero = content?.hero || {};
+  const [popupOpen, setPopupOpen] = useState(false);
   return (
     <section
       id="top"
@@ -82,14 +84,15 @@ export default function Hero() {
             </p>
 
             <div className="flex flex-wrap items-center gap-4">
-              <a
-                href="#configurator"
+              <button
+                type="button"
+                onClick={() => setPopupOpen(true)}
                 data-testid="hero-cta-primary"
                 className="group inline-flex items-center gap-4 px-8 py-5 glass-strong text-white text-[12px] tracking-[0.3em] uppercase hover:bg-white hover:text-black transition-all duration-500 shine"
               >
                 <span>{hero.cta_primary}</span>
                 <span className="block w-8 h-px bg-current transition-all duration-500 group-hover:w-14" />
-              </a>
+              </button>
               <a
                 href="#protocol"
                 data-testid="hero-cta-secondary"
@@ -117,6 +120,14 @@ export default function Hero() {
           </motion.div>
         </div>
       </div>
+
+      <LeadPopup
+        open={popupOpen}
+        onClose={() => setPopupOpen(false)}
+        source="hero_cta"
+        subject="Рассчитать проект"
+        mode="chooser"
+      />
     </section>
   );
 }

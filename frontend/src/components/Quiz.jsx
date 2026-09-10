@@ -485,13 +485,15 @@ export default function Quiz() {
       {/* BODY: expert | quiz — balanced, centered */}
       <div className="mx-auto max-w-[1240px] px-6 md:px-10">
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-4 md:gap-6 items-stretch">
-          {/* Expert / manager sidebar */}
-          <div className="lg:col-span-5 relative z-20">
-            <ExpertCard q={q} contextKey={contextKey} />
-          </div>
+          {/* Expert / manager sidebar — hides via CMS quiz.show_expert */}
+          {q?.show_expert !== false && (
+            <div className="lg:col-span-5 relative z-20">
+              <ExpertCard q={q} contextKey={contextKey} />
+            </div>
+          )}
 
           {/* Quiz card */}
-          <div className="lg:col-span-7 relative z-10 bg-[#0A0A0A] border border-white/10 p-6 md:p-10 flex flex-col min-h-[520px]">
+          <div className={`${q?.show_expert === false ? "lg:col-span-12" : "lg:col-span-7"} relative z-10 bg-[#0A0A0A] border border-white/10 p-6 md:p-10 flex flex-col min-h-[520px]`}>
             {/* Progress */}
             <ProgressBar progress={progress} />
 

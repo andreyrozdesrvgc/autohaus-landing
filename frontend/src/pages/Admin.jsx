@@ -271,6 +271,7 @@ const SECTIONS = [
     key: "quiz",
     label: "Квиз (подбор решения)",
     fields: [
+      { k: "show_expert", label: "Показывать плашку с менеджером слева", type: "toggle" },
       { k: "overline", label: "Верхняя плашка" },
       { k: "title_line_1", label: "Заголовок — строка 1" },
       { k: "title_line_2", label: "Заголовок — строка 2 (серым)" },

@@ -1,2 +1,17 @@
 /* App-level styles intentionally minimal — see index.css */
 .App { min-height: 100vh; background: #000000; }
+
+/*
+ * Mobile: iOS Safari автозумит поле если font-size < 16px. Форсируем 16px
+ * на всех input/textarea/select чтобы клавиатура открывалась без масштабирования.
+ * Также убираем tap-highlight — премиум-эстетика.
+ */
+@media (max-width: 767px) {
+  input, textarea, select {
+    font-size: 16px !important;
+  }
+}
+input, textarea, select, button, a {
+  -webkit-tap-highlight-color: rgba(255,255,255,0.05);
+  touch-action: manipulation;
+}

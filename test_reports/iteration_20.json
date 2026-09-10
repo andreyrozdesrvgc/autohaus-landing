@@ -1,0 +1,20 @@
+{
+  "summary": "Iter 20 regression + 5 new fixes verified end-to-end. All 8 tests PASS. Backend defaults: quiz.show_expert=true, hero.cta_primary='Рассчитать проект'. Desktop: Quiz section renders ExpertCard with Максим. hero-cta-primary opens LeadPopup in chooser mode showing lead-popup-tg, lead-popup-wa, lead-popup-max, lead-popup-open-form. hero-video present. hero-cta-secondary href='#protocol'. Mobile (390x844): input computed font-size=16px, viewport innerWidth/clientWidth unchanged after focus+type on [data-testid=contact-name] (390→390, scale=1). protocol-stage-01-mobile video has autoplay+muted+loop+playsInline. Admin: toggle-show_expert initial aria-checked=true, clicking flips to false, save persists → GET /api/content quiz.show_expert=false, landing quiz-expert count=0. Restored to true and verified via GET /api/content=True. No runtime errors.",
+  "backend_issues": {"critical": [], "minor": []},
+  "frontend_issues": {"ui_bugs": [], "integration_issues": [], "design_issues": []},
+  "test_report_links": [],
+  "action_items": [],
+  "critical_code_review_comments": [
+    "Quiz.jsx: q?.show_expert !== false correctly treats undefined as true (safe default before content loads).",
+    "Admin.jsx: toggle value comparison uses value === true || value === 'true' — good for hydration from bool or stringified bool.",
+    "LeadPopup chooser buttons rely on footer.*_url; if footer URLs missing, buttons still render but link would be undefined. Non-blocking here as defaults exist."
+  ],
+  "updated_files": [],
+  "success_rate": {"backend": "100%", "frontend": "100%"},
+  "test_credentials": "admin@detailing-autohaus.ru / AutohausAdmin2026!",
+  "seed_data_creation": "",
+  "retest_needed": false,
+  "main_agent_can_self_test": true,
+  "context_for_next_testing_agent": "quiz.show_expert restored to True (default). All 5 fixes from iter 20 verified. LeadPopup testids: lead-popup, lead-popup-tg/wa/max, lead-popup-open-form, lead-popup-form, lead-popup-name/phone/car/submit.",
+  "rca of the issue": "N/A — regression + feature verification, no issues found."
+}

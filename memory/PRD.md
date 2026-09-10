@@ -36,6 +36,12 @@
 - Создан `deploy.sh` — one-command update script (git pull → yarn build → chmod → pm2 restart → nginx reload → HTTP check)
 - Создан `INSTALL.md` — полная 15-шаговая инструкция для чистого Ubuntu VPS
 
+### 2026-08-09 — Mobile forms + Hero CTA + Quiz toggle (iteration 20)
+- **Mobile inputs**: `viewport maximum-scale=1` + `@media 767px { input font-size 16px !important }` — iOS больше не зумит форму на focus, клавиатура открывается штатно
+- **Touch UX**: `touch-action: manipulation` + минимальный `tap-highlight` на всех интерактивных элементах — двойной тап-зум отключён
+- **Hero CTA**: `Рассчитать проект` теперь открывает LeadPopup (mode chooser с Telegram/WhatsApp/MAX/форма) — как кнопка «Записаться»
+- **Quiz expert toggle**: новый CMS-переключатель `quiz.show_expert` — скрывает плашку менеджера (Максим), Quiz-карточка растягивается на всю ширину при `false`
+
 ### 2026-08-09 — Visibility toggle for sections (iteration 19)
 - Секция BeforeAfter скрыта по умолчанию (`visible: False`)
 - Универсальный toggle-переключатель в CMS: `{k:'visible', type:'toggle'}` — можно применить к любой секции
