@@ -15,26 +15,47 @@ export default function Hero() {
   const content = useContent();
   const hero = content?.hero || {};
   const [popupOpen, setPopupOpen] = useState(false);
+  const [videoFailed, setVideoFailed] = useState(false);
+  const videoUrl = resolveMedia(hero.video_url);
+  const posterUrl = resolveMedia(hero.poster_url);
+  const showVideo = Boolean(videoUrl) && !videoFailed;
   return (
     <section
       id="top"
       data-testid="hero-section"
       className="relative w-full h-[100svh] min-h-[700px] overflow-hidden bg-black"
     >
-      <video
-        key={hero.video_url}
-        data-testid="hero-video"
-        className="absolute inset-0 w-full h-full object-cover"
-        autoPlay
-        loop
-        muted
-        playsInline
-        preload="auto"
-        aria-label="Премиальный автомобиль — фон Hero блока AUTOHAUS"
-        poster={resolveMedia(hero.poster_url)}
-      >
-        <source src={resolveMedia(hero.video_url)} type="video/mp4" />
-      </video>
+      {showVideo ? (
+        <video
+          key={videoUrl}
+          data-testid="hero-video"
+          className="absolute inset-0 w-full h-full object-cover"
+          autoPlay
+          loop
+          muted
+          playsInline
+          // eslint-disable-next-line react/no-unknown-property
+          webkit-playsinline="true"
+          // eslint-disable-next-line react/no-unknown-property
+          x5-playsinline="true"
+          preload="auto"
+          aria-label="Премиальный автомобиль — фон Hero блока AUTOHAUS"
+          poster={posterUrl}
+          onError={() => setVideoFailed(true)}
+        >
+          <source src={videoUrl} type="video/mp4" />
+        </video>
+      ) : (
+        // Fallback: show poster as background image if video URL missing or failed.
+        // Prevents iOS Safari from rendering an empty <video> with an un-clickable
+        // native "tap to play" overlay.
+        <div
+          data-testid="hero-poster-fallback"
+          className="absolute inset-0 w-full h-full bg-cover bg-center"
+          style={posterUrl ? { backgroundImage: `url(${posterUrl})` } : undefined}
+          aria-label="Премиальный автомобиль — фоновое изображение Hero"
+        />
+      )}
 
       <div className="absolute inset-0 bg-black/70" />
       <div

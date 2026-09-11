@@ -17,7 +17,7 @@ export function clearToken() {
   localStorage.removeItem(STORAGE_KEY);
 }
 
-export const adminAxios = axios.create({ baseURL: API, withCredentials: true });
+export const adminAxios = axios.create({ baseURL: API, withCredentials: true, timeout: 15000 });
 
 adminAxios.interceptors.request.use((config) => {
   const t = getToken();

@@ -47,37 +47,68 @@ export default function Clients() {
           )}
         </div>
 
-        {/* Logos grid — mobile 2 cols, desktop up to N cols */}
-        <div
-          data-testid="clients-grid"
-          className="mt-10 md:mt-16 grid grid-cols-2 md:grid-cols-4 lg:[grid-template-columns:repeat(auto-fit,minmax(180px,1fr))] gap-px bg-white/[0.06] border border-white/[0.06]"
-        >
-          {items.map((item, i) => (
+        {/* Logos grid — 2 cols on mobile, N cols on desktop where N = items.length
+             capped at 6, so 7 logos gracefully split into 6+1 stays centred, and
+             1-6 logos fit exactly in one row without a lonely orphan. */}
+        {(() => {
+          const desktopCols = Math.min(items.length, 6);
+          return (
             <div
-              key={i}
-              data-testid={`client-item-${i}`}
-              className="flex flex-col items-center justify-center gap-3 md:gap-4 bg-black px-4 py-8 md:py-12 min-h-[160px] md:min-h-[200px]"
+              data-testid="clients-grid"
+              className="mt-10 md:mt-16 grid grid-cols-2 gap-px bg-white/[0.06] border border-white/[0.06] justify-center"
+              style={{
+                gridTemplateColumns: undefined,
+              }}
             >
-              {item.logo ? (
-                <img
-                  src={resolveMedia(item.logo)}
-                  alt={`Логотип ${item.name || `клиент ${i + 1}`}`}
-                  loading="lazy"
-                  className="h-16 md:h-20 max-w-[80%] object-contain transition-transform duration-500 hover:scale-105"
-                />
-              ) : (
-                <div className="h-10 md:h-14 w-24 bg-white/5 border border-white/10 flex items-center justify-center text-[10px] tracking-[0.32em] uppercase text-white/30">
-                  Empty
-                </div>
-              )}
-              {item.name && (
-                <div className="text-[10px] md:text-[11px] tracking-[0.3em] uppercase text-white/55 text-center">
-                  {item.name}
-                </div>
-              )}
+              <style>{`
+                @media (min-width: 768px) {
+                  [data-testid="clients-grid"] {
+                    grid-template-columns: repeat(${desktopCols}, minmax(0, 1fr)) !important;
+                  }
+                }
+              `}</style>
+              {items.map((item, i) => {
+                // If total items > desktopCols, last row may be short — centre orphans.
+                const rem = items.length % desktopCols;
+                const orphanCount = rem === 0 ? 0 : rem;
+                const isOrphan = orphanCount > 0 && i >= items.length - orphanCount;
+                const firstOrphanIdx = items.length - orphanCount;
+                const orphanPosition = i - firstOrphanIdx; // 0-based within orphan row
+                // Compute starting column for first orphan to centre the group.
+                const orphanStartCol = Math.floor((desktopCols - orphanCount) / 2) + 1;
+                const orphanStyle = isOrphan
+                  ? { gridColumnStart: orphanStartCol + orphanPosition }
+                  : undefined;
+                return (
+                  <div
+                    key={i}
+                    data-testid={`client-item-${i}`}
+                    className="flex flex-col items-center justify-center gap-3 md:gap-4 bg-black px-4 py-8 md:py-12 min-h-[160px] md:min-h-[200px]"
+                    style={orphanStyle}
+                  >
+                    {item.logo ? (
+                      <img
+                        src={resolveMedia(item.logo)}
+                        alt={`Логотип ${item.name || `клиент ${i + 1}`}`}
+                        loading="lazy"
+                        className="h-16 md:h-20 max-w-[80%] object-contain transition-transform duration-500 hover:scale-105"
+                      />
+                    ) : (
+                      <div className="h-10 md:h-14 w-24 bg-white/5 border border-white/10 flex items-center justify-center text-[10px] tracking-[0.32em] uppercase text-white/30">
+                        Empty
+                      </div>
+                    )}
+                    {item.name && (
+                      <div className="text-[10px] md:text-[11px] tracking-[0.3em] uppercase text-white/55 text-center">
+                        {item.name}
+                      </div>
+                    )}
+                  </div>
+                );
+              })}
             </div>
-          ))}
-        </div>
+          );
+        })()}
 
         {clients.footer_note && (
           <div className="mt-6 md:mt-8 text-[10px] tracking-[0.28em] uppercase text-white/35 text-center md:text-left">

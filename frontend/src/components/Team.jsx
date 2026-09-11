@@ -159,17 +159,18 @@ function TeamCard({ member, index }) {
         </div>
       </div>
 
-      <div className="p-4 flex flex-col gap-1.5">
+      <div className="p-4 flex flex-col gap-1.5 min-h-[92px]">
         {member.role && (
           <div className="text-[10px] tracking-[0.28em] uppercase text-white/55">
             {member.role}
           </div>
         )}
         {member.focus && (
-          <p className="text-[12px] text-[#BDBDBD] leading-relaxed font-light line-clamp-2">
+          <p className="text-[12px] text-[#BDBDBD] leading-relaxed font-light line-clamp-2 min-h-[2.6em]">
             {member.focus}
           </p>
         )}
+        {!member.focus && <div className="min-h-[2.6em]" aria-hidden="true" />}
       </div>
     </article>
   );

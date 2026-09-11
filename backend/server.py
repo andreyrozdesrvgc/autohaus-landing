@@ -1,5 +1,5 @@
-from fastapi import FastAPI, APIRouter, HTTPException, Request, Response, Depends, UploadFile, File
-from fastapi.responses import StreamingResponse
+from fastapi import FastAPI, APIRouter, HTTPException, Request, Response, Depends, UploadFile, File, BackgroundTasks
+from fastapi.responses import StreamingResponse, JSONResponse
 from dotenv import load_dotenv
 from starlette.middleware.cors import CORSMiddleware
 from motor.motor_asyncio import AsyncIOMotorClient
@@ -216,7 +216,7 @@ def _phone_is_valid(phone: str) -> bool:
 
 
 @api_router.post("/leads", response_model=Lead)
-async def create_lead(payload: LeadCreate, request: Request):
+async def create_lead(payload: LeadCreate, request: Request, background_tasks: BackgroundTasks):
     # 1) Honeypot — silently 200 to avoid signalling bots.
     if (payload.website or "").strip():
         logger.warning("Honeypot triggered, dropping lead")
@@ -248,18 +248,33 @@ async def create_lead(payload: LeadCreate, request: Request):
     doc['created_at'] = doc['created_at'].isoformat()
     await db.leads.insert_one(doc)
 
-    # 5) Notify Telegram + MAX (best-effort, doesn't fail the request)
+    # 5) Notify Telegram + MAX in BACKGROUND — response returns immediately.
+    # A slow/unresponsive MAX API must never block the user's form submission.
     notify_payload: dict[str, Any] = {**data, "id": lead.id}
-    telegram_sent = await send_lead_to_telegram(notify_payload)
-    max_sent = await send_lead_to_max(notify_payload)
-    if telegram_sent or max_sent:
-        lead.telegram_sent = telegram_sent
-        await db.leads.update_one(
-            {"id": lead.id},
-            {"$set": {"telegram_sent": telegram_sent, "max_sent": max_sent}},
-        )
+    background_tasks.add_task(_notify_and_update_lead, lead.id, notify_payload)
 
     return lead
+
+
+async def _notify_and_update_lead(lead_id: str, notify_payload: dict) -> None:
+    """Send Telegram + MAX notifications in background and update the lead row."""
+    try:
+        telegram_sent = await send_lead_to_telegram(notify_payload)
+    except Exception as exc:
+        logger.exception("Telegram notify failed: %s", exc)
+        telegram_sent = False
+    try:
+        max_sent = await send_lead_to_max(notify_payload)
+    except Exception as exc:
+        logger.exception("MAX notify failed: %s", exc)
+        max_sent = False
+    try:
+        await db.leads.update_one(
+            {"id": lead_id},
+            {"$set": {"telegram_sent": telegram_sent, "max_sent": max_sent}},
+        )
+    except Exception as exc:
+        logger.exception("Lead status update failed: %s", exc)
 
 
 @api_router.get("/leads", response_model=List[Lead])
@@ -328,7 +343,16 @@ async def admin_me(admin: dict = Depends(get_current_admin)):
 # --- CMS content ------------------------------------------------------------
 @api_router.get("/content")
 async def fetch_content():
-    return await get_content(db)
+    data = await get_content(db)
+    return JSONResponse(
+        content=data,
+        headers={
+            # Never cache — CMS edits must be visible immediately on every device.
+            "Cache-Control": "no-store, no-cache, must-revalidate, max-age=0",
+            "Pragma": "no-cache",
+            "Expires": "0",
+        },
+    )
 
 
 @api_router.put("/admin/content")

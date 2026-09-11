@@ -23,10 +23,13 @@ export default function AdminLogin() {
     } catch (err) {
       const status = err?.response?.status;
       const detail = err?.response?.data?.detail;
+      const isTimeout = err?.code === "ECONNABORTED" || /timeout/i.test(err?.message || "");
       // eslint-disable-next-line no-console
       console.error("[AdminLogin] error", { status, detail, message: err?.message });
 
-      if (status === 401) {
+      if (isTimeout) {
+        toast.error("Сервер не отвечает (таймаут 15с). Проверьте `pm2 status` — backend online?");
+      } else if (status === 401) {
         toast.error("Неверный email или пароль");
       } else if (status === 404) {
         toast.error("API не найден. Проверьте настройку nginx (/api/ → 127.0.0.1:8001).");

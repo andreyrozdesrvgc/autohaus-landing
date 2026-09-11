@@ -29,6 +29,14 @@
 
 ## Completed Work (Changelog)
 
+### 2026-09-11 — Performance & UX fixes (session)
+- **POST /api/leads**: Telegram + MAX уведомления переведены в `BackgroundTasks` — форма теперь возвращает ответ за <100мс (было 20-30 сек когда MAX API таймаутил)
+- **GET /api/content**: явные заголовки `Cache-Control: no-store, no-cache, must-revalidate` + `Pragma: no-cache` + `Expires: 0` — фиксит проблему устаревших медиа на мобильных
+- **AdminLogin**: `adminAxios` timeout 15с + новая ветка обработки `ECONNABORTED` — кнопка «Вход…» больше не висит бесконечно при недоступном бэкенде
+- **Hero video**: если `video_url` пустой или видео с ошибкой — рендерится `<div>` с постером как background-image вместо пустого `<video>` с некликабельной iOS-заглушкой. Добавлены `webkit-playsinline`/`x5-playsinline`
+- **Clients grid**: динамическое `grid-template-columns: repeat(N, 1fr)` где N = min(items, 6). Одиночные плитки в последнем ряду теперь центрируются через `gridColumnStart` — нет больше «сиротской» плитки в углу
+- **Team cards**: нижняя текстовая часть карточки получила `min-h-[92px]` + `min-h-[2.6em]` на focus — все карточки одинаковой высоты, независимо от длины описания
+
 ### 2026-07-15 — Deployment stabilization
 - Исправлен black screen на VPS: ErrorBoundary + safe `content?.hero || {}` в Hero
 - `REACT_APP_BACKEND_URL` теперь опциональный (fallback на относительный `/api` для nginx proxy)
