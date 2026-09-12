@@ -47,44 +47,45 @@ export default function Clients() {
           )}
         </div>
 
-        {/* Logos grid — 2 cols on mobile, N cols on desktop where N = items.length
-             capped at 6, so 7 logos gracefully split into 6+1 stays centred, and
-             1-6 logos fit exactly in one row without a lonely orphan. */}
+        {/* Logos grid — 2 cols on mobile, N cols on desktop where N = min(items, 6).
+             Orphan items in the last desktop row are centered via a CSS variable
+             that ONLY applies inside the desktop media query — mobile layout
+             stays a clean 2-column flow without any grid-column-start overrides. */}
         {(() => {
           const desktopCols = Math.min(items.length, 6);
+          const rem = items.length % desktopCols;
+          const orphanCount = rem === 0 ? 0 : rem;
+          const firstOrphanIdx = items.length - orphanCount;
+          const orphanStartCol = Math.floor((desktopCols - orphanCount) / 2) + 1;
           return (
             <div
               data-testid="clients-grid"
-              className="mt-10 md:mt-16 grid grid-cols-2 gap-px bg-white/[0.06] border border-white/[0.06] justify-center"
-              style={{
-                gridTemplateColumns: undefined,
-              }}
+              className="clients-grid mt-10 md:mt-16 grid grid-cols-2 gap-px bg-white/[0.06] border border-white/[0.06]"
             >
               <style>{`
                 @media (min-width: 768px) {
                   [data-testid="clients-grid"] {
                     grid-template-columns: repeat(${desktopCols}, minmax(0, 1fr)) !important;
                   }
+                  [data-testid="clients-grid"] > .client-orphan {
+                    grid-column-start: var(--orphan-col);
+                  }
                 }
               `}</style>
               {items.map((item, i) => {
-                // If total items > desktopCols, last row may be short — centre orphans.
-                const rem = items.length % desktopCols;
-                const orphanCount = rem === 0 ? 0 : rem;
-                const isOrphan = orphanCount > 0 && i >= items.length - orphanCount;
-                const firstOrphanIdx = items.length - orphanCount;
-                const orphanPosition = i - firstOrphanIdx; // 0-based within orphan row
-                // Compute starting column for first orphan to centre the group.
-                const orphanStartCol = Math.floor((desktopCols - orphanCount) / 2) + 1;
-                const orphanStyle = isOrphan
-                  ? { gridColumnStart: orphanStartCol + orphanPosition }
+                const isOrphan = orphanCount > 0 && i >= firstOrphanIdx;
+                const orphanPosition = i - firstOrphanIdx;
+                const cssVar = isOrphan
+                  ? { "--orphan-col": orphanStartCol + orphanPosition }
                   : undefined;
                 return (
                   <div
                     key={i}
                     data-testid={`client-item-${i}`}
-                    className="flex flex-col items-center justify-center gap-3 md:gap-4 bg-black px-4 py-8 md:py-12 min-h-[160px] md:min-h-[200px]"
-                    style={orphanStyle}
+                    className={`flex flex-col items-center justify-center gap-3 md:gap-4 bg-black px-4 py-8 md:py-12 min-h-[160px] md:min-h-[200px]${
+                      isOrphan ? " client-orphan" : ""
+                    }`}
+                    style={cssVar}
                   >
                     {item.logo ? (
                       <img
