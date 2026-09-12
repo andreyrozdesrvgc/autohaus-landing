@@ -2,6 +2,7 @@ import React from "react";
 import Navigation from "@/components/Navigation";
 import Hero from "@/components/Hero";
 import SafetyProtocol from "@/components/SafetyProtocol";
+import StudioAvailability from "@/components/StudioAvailability";
 import BeforeAfter from "@/components/BeforeAfter";
 import Services from "@/components/Services";
 import Configurator from "@/components/Configurator";
@@ -20,6 +21,7 @@ export default function Landing() {
       <Navigation />
       <Hero />
       <SafetyProtocol />
+      <StudioAvailability />
       <Quiz />
       <BeforeAfter />
       <Services />
