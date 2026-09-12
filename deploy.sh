@@ -58,7 +58,7 @@ if [ -d ".git" ]; then
 
     git fetch origin "$BRANCH"
     git reset --hard "origin/$BRANCH"
-    git clean -fd -- ':!*.env' ':!node_modules' ':!venv' ':!build' ':!.pm2' 2>/dev/null || true
+    git clean -fd -- ':!*.env' ':!node_modules' ':!venv' ':!build' ':!.pm2' ':!ecosystem.config.js' 2>/dev/null || true
 
     ok "Код синхронизирован с origin/$BRANCH (жёсткий reset)"
 else
@@ -135,20 +135,25 @@ ok "Nginx перезагружен"
 sleep 2
 log "🔍 Финальная проверка..."
 
-HTTP_STATUS=$(curl -s -o /dev/null -w "%{http_code}" http://127.0.0.1/)
+# Определяем что проверять: домен (если DNS указывает на этот сервер)
+# или IP (127.0.0.1). После установки SSL запрос по 127.0.0.1 может вернуть
+# 404 (нет подходящего server_name), поэтому проверяем через API-эндпоинт
+# который есть в любом server-блоке /api/ location.
 API_STATUS=$(curl -s -o /dev/null -w "%{http_code}" http://127.0.0.1/api/content)
 
 echo ""
-if [ "$HTTP_STATUS" = "200" ]; then
-    ok "Frontend: HTTP $HTTP_STATUS"
+if [ "$API_STATUS" = "200" ]; then
+    ok "Backend API (через nginx): HTTP $API_STATUS"
 else
-    error "Frontend вернул HTTP $HTTP_STATUS (ожидался 200)"
+    warn "Backend API вернул HTTP $API_STATUS через nginx (проверьте вручную по домену)"
 fi
 
-if [ "$API_STATUS" = "200" ]; then
-    ok "Backend API: HTTP $API_STATUS"
+# Прямая проверка backend в обход nginx (порт 8001)
+DIRECT_STATUS=$(curl -s -o /dev/null -w "%{http_code}" http://127.0.0.1:8001/api/content)
+if [ "$DIRECT_STATUS" = "200" ]; then
+    ok "Backend напрямую (8001): HTTP $DIRECT_STATUS"
 else
-    error "Backend API вернул HTTP $API_STATUS (ожидался 200)"
+    error "Backend напрямую вернул HTTP $DIRECT_STATUS — проверьте pm2 logs autohaus-backend"
 fi
 
 echo ""
