@@ -90,8 +90,11 @@ export default function StudioAvailability() {
   const free_slots_label = cfg.free_slots_label || "свободное окно";
   const free_slots_label_plural = cfg.free_slots_label_plural || "свободных окна";
   const free_slots_when = cfg.free_slots_when || "на завтра";
-  const cars_in_work_label = cfg.cars_in_work_label || "автомобилей в работе";
-  const posts_total_label = cfg.posts_total_label || `из ${carsMax} постов заняты`;
+  const cars_in_work_label_one = cfg.cars_in_work_label_one || "автомобиль в работе";
+  const cars_in_work_label_few = cfg.cars_in_work_label_few || "автомобиля в работе";
+  const cars_in_work_label_many =
+    cfg.cars_in_work_label_many || cfg.cars_in_work_label || "автомобилей в работе";
+  const posts_total_label = cfg.posts_total_label || `из ${carsMax} боксов заняты`;
 
   const cta_label = cfg.cta_label || "Забронировать дату";
   const cta_note = cfg.cta_note || "Оставьте заявку — мастер подберёт удобное окно и перезвонит за 15 минут.";
@@ -104,6 +107,20 @@ export default function StudioAvailability() {
 
   const freeSlotsWord =
     freeSlots === 1 ? free_slots_label : free_slots_label_plural;
+
+  // Русская плюрализация для "автомобиль"
+  //   1  → автомобиль
+  //   2-4 → автомобиля
+  //   5-6, 11-14 → автомобилей
+  const pluralizeCar = (n) => {
+    const mod100 = n % 100;
+    const mod10 = n % 10;
+    if (mod100 >= 11 && mod100 <= 14) return cars_in_work_label_many;
+    if (mod10 === 1) return cars_in_work_label_one;
+    if (mod10 >= 2 && mod10 <= 4) return cars_in_work_label_few;
+    return cars_in_work_label_many;
+  };
+  const carsInWorkWord = pluralizeCar(carsInWork);
 
   const loadPercent = Math.min(
     100,
@@ -218,7 +235,7 @@ export default function StudioAvailability() {
               </div>
               <div className="flex-1 pt-8">
                 <div className="text-lg md:text-xl font-light leading-snug">
-                  {cars_in_work_label}
+                  {carsInWorkWord}
                 </div>
                 <div className="mt-2 text-[11px] tracking-[0.3em] uppercase text-white/45">
                   {posts_total_label}
