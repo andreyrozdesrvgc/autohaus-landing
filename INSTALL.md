@@ -1,69 +1,106 @@
-# 🚀 AUTOHAUS — Полная инструкция по установке с нуля на Selectel VPS
+# AUTOHAUS — Полная инструкция по установке с нуля на Selectel VPS
 
 Инструкция рассчитана на **чистую Ubuntu 22.04 LTS** на Selectel VPS.
-После выполнения всех шагов сайт будет работать по `http://ВАШ_IP` и `http://detailing-autohaus.ru`.
+После выполнения всех шагов сайт будет работать по `https://detailing-autohaus.ru`.
+
+**Занимает ~30 минут. Не пропускайте шаги.**
 
 ---
 
-## 📋 Что понадобится
+## Что понадобится
 
-- VPS с Ubuntu 22.04 (минимум 2 GB RAM, 20 GB SSD)
+- VPS Selectel: Ubuntu 22.04 LTS, минимум **2 vCPU / 4 GB RAM / 40 GB SSD** (рекомендую именно 4 GB — на 2 GB yarn build падает даже со swap)
 - Публичный IP (например `139.100.226.220`)
-- Домен `detailing-autohaus.ru` с A-записью на этот IP (для HTTPS в конце)
-- Данные для `.env`:
-  - Telegram Bot Token и Chat ID
-  - Логин/пароль будущего админа CMS
+- Домен `detailing-autohaus.ru` с A-записью на этот IP (можно настроить позже — SSL в конце)
+- Заранее подготовить:
+  - `TELEGRAM_BOT_TOKEN` (получить у @BotFather → `/newbot`)
+  - `TELEGRAM_CHAT_ID` (числовой ID группы/канала, куда бот добавлен)
+  - Логин/пароль для будущего админа CMS
+  - (Опционально) `MAX_BOT_TOKEN` и `MAX_CHAT_ID` — если используете MAX-бота
 
 ---
 
-## 🔐 ШАГ 0. Подключение к VPS
+## ШАГ 0. Подключение
 
 С вашего компьютера:
 ```bash
 ssh root@139.100.226.220
 ```
-Введите пароль от VPS.
+Введите пароль VPS.
 
 ---
 
-## 👤 ШАГ 1. Создать пользователя `autohaus` (не работаем под root)
+## ШАГ 1. Создать пользователя `autohaus`
+
+Работа под root — плохая практика и ломает git/pm2. Создаём отдельного пользователя:
 
 ```bash
 adduser autohaus
 usermod -aG sudo autohaus
+```
+
+Разрешаем ему `sudo` без пароля (упростит команды):
+```bash
+echo 'autohaus ALL=(ALL) NOPASSWD:ALL' | sudo tee /etc/sudoers.d/autohaus
+sudo chmod 440 /etc/sudoers.d/autohaus
+```
+
+Переключаемся:
+```bash
 su - autohaus
 ```
 
-Теперь вы под пользователем `autohaus`. Все дальнейшие команды — **под ним** (не под root!).
+Теперь вы под `autohaus`. **Все дальнейшие команды выполняются под этим пользователем**, кроме случаев, где явно используется `sudo`.
 
 ---
 
-## 📦 ШАГ 2. Обновить систему и поставить базовые пакеты
+## ШАГ 2. Обновление системы + базовые пакеты
 
 ```bash
 sudo apt update && sudo apt upgrade -y
-sudo apt install -y curl git build-essential nginx ufw
+sudo apt install -y curl git build-essential nginx ufw software-properties-common gnupg
 ```
 
 ---
 
-## 🐍 ШАГ 3. Установить Python 3.11 + venv
+## ШАГ 3. КРИТИЧНО! Создать SWAP-файл (4 GB)
+
+Без swap `yarn build` может уронить ядро (kernel panic) на VDS с малой RAM.
+
+```bash
+sudo fallocate -l 4G /swapfile
+sudo chmod 600 /swapfile
+sudo mkswap /swapfile
+sudo swapon /swapfile
+echo '/swapfile none swap sw 0 0' | sudo tee -a /etc/fstab
+sudo sysctl vm.swappiness=10
+echo 'vm.swappiness=10' | sudo tee -a /etc/sysctl.conf
+
+free -h    # Должна появиться строка "Swap: 4.0Gi"
+```
+
+Также ограничим потребление памяти Node:
+```bash
+echo 'export NODE_OPTIONS="--max-old-space-size=1536"' >> ~/.bashrc
+source ~/.bashrc
+```
+
+---
+
+## ШАГ 4. Python 3.10+ + venv
 
 ```bash
 sudo apt install -y python3 python3-pip python3-venv
-python3 --version   # должно быть 3.10+ (нормально) или 3.11+
+python3 --version   # 3.10.x — ОК
 ```
 
 ---
 
-## 📗 ШАГ 4. Установить Node.js 20 + Yarn + PM2
+## ШАГ 5. Node.js 20 + Yarn + PM2
 
 ```bash
-# Node.js 20 через NodeSource
 curl -fsSL https://deb.nodesource.com/setup_20.x | sudo -E bash -
 sudo apt install -y nodejs
-
-# Yarn
 sudo npm install -g yarn pm2
 
 # Проверка
@@ -74,28 +111,58 @@ pm2 -v     # 5.x.x
 
 ---
 
-## 🍃 ШАГ 5. Установить MongoDB
+## ШАГ 6. MongoDB 7.0
 
+Сначала проверим что CPU поддерживает AVX (Mongo 5+ требует AVX):
 ```bash
-# Ключ и репозиторий
+grep -o 'avx' /proc/cpuinfo | head -1
+```
+- Если вывод `avx` → идём дальше с Mongo 7.0
+- Если пусто → перейдите в раздел **«Fallback: MongoDB 4.4»** внизу этого шага
+
+### Установка Mongo 7.0
+```bash
 curl -fsSL https://pgp.mongodb.com/server-7.0.asc | sudo gpg -o /usr/share/keyrings/mongodb-server-7.0.gpg --dearmor
 echo "deb [ arch=amd64,arm64 signed-by=/usr/share/keyrings/mongodb-server-7.0.gpg ] https://repo.mongodb.org/apt/ubuntu jammy/mongodb-org/7.0 multiverse" | sudo tee /etc/apt/sources.list.d/mongodb-org-7.0.list
 
 sudo apt update
 sudo apt install -y mongodb-org
 
-# Запуск и автостарт
 sudo systemctl start mongod
 sudo systemctl enable mongod
-
-# Проверка
-sudo systemctl status mongod --no-pager | head -5
+sudo systemctl status mongod --no-pager | head -8
 ```
-Если MongoDB не запускается на Ubuntu 22 из-за libssl — используйте образ mongo для 20.04 или Docker. Обычно всё работает.
+Должно быть **`Active: active (running)`** зелёным.
+
+### Проверка подключения
+```bash
+mongosh --eval "db.runCommand({ping:1})"
+```
+Должен вернуть `{ ok: 1 }`.
+
+### Fallback: MongoDB 4.4 (если CPU без AVX)
+```bash
+curl -fsSL https://pgp.mongodb.com/server-4.4.asc | sudo gpg -o /usr/share/keyrings/mongodb-server-4.4.gpg --dearmor
+echo "deb [ arch=amd64 signed-by=/usr/share/keyrings/mongodb-server-4.4.gpg ] https://repo.mongodb.org/apt/ubuntu focal/mongodb-org/4.4 multiverse" | sudo tee /etc/apt/sources.list.d/mongodb-org-4.4.list
+sudo apt update
+sudo apt install -y mongodb-org
+sudo systemctl start mongod
+sudo systemctl enable mongod
+```
+
+### Если Mongo не стартует
+```bash
+sudo tail -n 40 /var/log/mongodb/mongod.log
+sudo systemctl status mongod --no-pager -l
+```
+Смотрите на строки со словом `error` или `exception`. Самые частые причины:
+- **Битый lock-файл** после reboot → `sudo rm -f /var/lib/mongodb/mongod.lock && sudo systemctl start mongod`
+- **Битые права** → `sudo chown -R mongodb:mongodb /var/lib/mongodb /var/log/mongodb && sudo systemctl start mongod`
+- **Нехватка места** → `df -h`
 
 ---
 
-## 🔥 ШАГ 6. Настроить firewall (UFW)
+## ШАГ 7. Firewall (UFW)
 
 ```bash
 sudo ufw allow OpenSSH
@@ -106,60 +173,68 @@ sudo ufw status
 
 ---
 
-## 📂 ШАГ 7. Клонировать проект с GitHub
+## ШАГ 8. Клонирование проекта
 
 ```bash
 cd /home/autohaus
-git clone https://github.com/ВАШ_ЛОГИН/ВАШ_РЕПОЗИТОРИЙ.git app
+git clone https://github.com/andreyrozdesrvgc/autohaus-landing.git app
 cd /home/autohaus/app
-ls -la    # должны увидеть frontend/ backend/ и т.д.
+ls -la
 ```
+Вы должны увидеть папки `frontend/`, `backend/`, файлы `deploy.sh`, `INSTALL.md`.
 
-Если репозиторий приватный:
+Если репозиторий приватный — сначала настройте SSH-ключ:
 ```bash
-# Сгенерировать SSH ключ и добавить в GitHub
-ssh-keygen -t ed25519 -C "autohaus-vps"
-cat ~/.ssh/id_ed25519.pub    # добавить в GitHub → Settings → SSH keys
-git clone git@github.com:ВАШ_ЛОГИН/ВАШ_РЕПОЗИТОРИЙ.git app
+ssh-keygen -t ed25519 -C "autohaus-vps" -f ~/.ssh/id_ed25519 -N ""
+cat ~/.ssh/id_ed25519.pub
+# Скопируйте вывод → GitHub → Settings → SSH keys → добавить
+# Потом:
+git clone git@github.com:andreyrozdesrvgc/autohaus-landing.git app
 ```
 
 ---
 
-## ⚙️ ШАГ 8. Создать `.env` файлы
+## ШАГ 9. Файлы окружения `.env`
 
-### backend/.env (обязательные ключи):
+### 9.1 `backend/.env` — секреты бэкенда
 ```bash
 nano /home/autohaus/app/backend/.env
 ```
-Вставьте (замените значения!):
-```env
+
+Вставить (замените значения!):
+```
 MONGO_URL=mongodb://127.0.0.1:27017
 DB_NAME=autohaus
 JWT_SECRET=длинная-случайная-строка-минимум-32-символа-abc123xyz
 ADMIN_EMAIL=admin@detailing-autohaus.ru
-ADMIN_PASSWORD=ВашНадёжныйПарольДляАдминки2026!
+ADMIN_PASSWORD=НадёжныйПарольДляАдминки2026!
 TELEGRAM_BOT_TOKEN=1234567890:AAxxxxxxxxxxxxxxxxxxxxxx
 TELEGRAM_CHAT_ID=-1001234567890
+MAX_BOT_TOKEN=ваш_max_токен_если_есть
+MAX_CHAT_ID=числовой_id_чата_max
 CORS_ORIGINS=*
 ```
 Сохранить: `Ctrl+O` → `Enter` → `Ctrl+X`.
 
-**Как получить `TELEGRAM_BOT_TOKEN`**: напишите @BotFather в Telegram → `/newbot`.
-**Как получить `CHAT_ID`**: добавьте бота в вашу группу/канал → откройте `https://api.telegram.org/botТОКЕН/getUpdates` → найдите `"chat":{"id":-100...}`.
+**Важно:**
+- Никаких кавычек и пробелов вокруг `=`
+- Если MAX не используете — просто оставьте эти строки пустыми или удалите
+- `JWT_SECRET` сгенерируйте случайной строкой (можно `openssl rand -hex 32`)
 
-### frontend/.env (относительный URL — критично!):
+### 9.2 `frontend/.env` — относительный API URL
 ```bash
 cat > /home/autohaus/app/frontend/.env <<'EOF'
 REACT_APP_BACKEND_URL=
 WDS_SOCKET_PORT=443
 EOF
-cat /home/autohaus/app/frontend/.env   # проверить
+cat /home/autohaus/app/frontend/.env
 ```
-⚠️ После `REACT_APP_BACKEND_URL=` **ничего нет**. Это принципиально — так nginx проксирует API на том же домене.
+
+⚠️ После `REACT_APP_BACKEND_URL=` **ничего нет и должно быть пусто** — так фронтенд обращается к API по `/api/*` через тот же домен, и Nginx проксирует внутрь VDS.
 
 ---
 
-## 🐍 ШАГ 9. Установить Python зависимости backend
+## ШАГ 10. Python-зависимости backend
 
 ```bash
 cd /home/autohaus/app/backend
@@ -169,75 +244,95 @@ pip install --upgrade pip
 pip install -r requirements.txt
 deactivate
 ```
+Установка занимает 2-3 минуты. Ошибок быть не должно.
 
 ---
 
-## 🏗️ ШАГ 10. Собрать frontend
+## ШАГ 11. Сборка frontend
 
 ```bash
 cd /home/autohaus/app/frontend
-yarn install
+yarn install --frozen-lockfile
 yarn build
 ls -la build/     # должен появиться index.html и папка static/
 ```
+
 Билд занимает 1-3 минуты. В конце должно быть `Compiled successfully.`
+
+### Если yarn падает с "Killed" или сервер уходит в reboot
+Значит закончилась RAM. Проверьте:
+```bash
+free -h
+```
+Swap должен быть **`4.0Gi`**. Если нет — вернитесь к **Шагу 3** и создайте swap-файл.
 
 ---
 
-## ⚡ ШАГ 11. Настроить PM2 для backend
+## ШАГ 12. Запуск бэкенда через PM2
 
-Создать конфиг PM2:
-```bash
-nano /home/autohaus/app/backend/ecosystem.config.js
-```
-Вставить:
-```javascript
-module.exports = {
-  apps: [{
-    name: "autohaus-backend",
-    cwd: "/home/autohaus/app/backend",
-    script: "venv/bin/uvicorn",
-    args: "server:app --host 127.0.0.1 --port 8001 --workers 2",
-    interpreter: "none",
-    env_file: "/home/autohaus/app/backend/.env",
-    watch: false,
-    autorestart: true,
-    max_restarts: 10,
-    error_file: "/home/autohaus/.pm2/logs/autohaus-error.log",
-    out_file: "/home/autohaus/.pm2/logs/autohaus-out.log"
-  }]
-};
-```
-Сохранить (`Ctrl+O` → `Enter` → `Ctrl+X`).
+Конфиг `ecosystem.config.js` уже в репозитории (`backend/ecosystem.config.js`), ничего создавать не нужно.
 
-Запустить:
 ```bash
 cd /home/autohaus/app/backend
 pm2 start ecosystem.config.js
 pm2 save
-pm2 startup    # покажет команду с sudo — скопируйте и выполните её
 ```
 
-Проверить:
+### Автозапуск PM2 после ребута
 ```bash
-pm2 status                    # должен быть online
-pm2 logs autohaus-backend --lines 20 --nostream
+pm2 startup
+```
+
+Команда выведет строку типа:
+```
+sudo env PATH=$PATH:/usr/bin /usr/lib/node_modules/pm2/bin/pm2 startup systemd -u autohaus --hp /home/autohaus
+```
+**Скопируйте её полностью и выполните**. Затем:
+```bash
+pm2 save
+```
+
+### Проверка
+```bash
+pm2 status
+```
+Строка `autohaus-backend` должна быть **online** (зелёная).
+
+```bash
 curl http://127.0.0.1:8001/api/content | head -c 200
 ```
-Если curl вернул JSON `{"hero":{...` — бекенд работает 🎉
+Должен вернуть JSON, начинающийся с `{"hero":{...`.
+
+```bash
+curl http://127.0.0.1:8001/api/admin/notify-status
+```
+Ответ покажет что подхватилось из `.env`:
+```json
+{"TELEGRAM_BOT_TOKEN_set":true,"TELEGRAM_CHAT_ID_set":true,"MAX_BOT_TOKEN_set":true,"MAX_CHAT_ID_set":true}
+```
+
+### Если бэкенд крашится (status `errored` / `restarting`)
+```bash
+pm2 logs autohaus-backend --lines 60 --nostream
+```
+Ищите `Traceback` в самом низу. Частые причины:
+- **`Connection refused` к MongoDB** → MongoDB не запущен, вернитесь к **Шагу 6**
+- **`ModuleNotFoundError`** → пропущен `pip install`, повторите **Шаг 10**
+- **`ADMIN_PASSWORD not set`** → `.env` не подхватился, проверьте `cat /home/autohaus/app/backend/.env`
 
 ---
 
-## 🌐 ШАГ 12. Настроить Nginx
+## ШАГ 13. Настройка Nginx
 
 ```bash
 sudo nano /etc/nginx/sites-available/autohaus
 ```
-Вставить:
+
+Вставить целиком:
 ```nginx
 server {
     listen 80;
-    server_name detailing-autohaus.ru www.detailing-autohaus.ru _;
+    server_name detailing-autohaus.ru _;
 
     client_max_body_size 100M;
 
@@ -245,11 +340,7 @@ server {
     root /home/autohaus/app/frontend/build;
     index index.html;
 
-    location / {
-        try_files $uri $uri/ /index.html;
-    }
-
-    # Backend API
+    # API прокси на FastAPI backend
     location /api/ {
         proxy_pass http://127.0.0.1:8001;
         proxy_http_version 1.1;
@@ -266,17 +357,22 @@ server {
         proxy_no_cache $http_range $http_if_range;
     }
 
-    # Кэш статики
+    # Кэш статики (JS/CSS/картинки/видео)
     location ~* \.(js|css|png|jpg|jpeg|gif|webp|svg|ico|woff2?|mp4)$ {
         expires 1y;
         add_header Cache-Control "public, immutable";
         try_files $uri =404;
     }
+
+    # React SPA fallback — все остальные запросы → index.html
+    location / {
+        try_files $uri $uri/ /index.html;
+    }
 }
 ```
 Сохранить.
 
-Активировать:
+Активировать конфиг:
 ```bash
 sudo ln -sf /etc/nginx/sites-available/autohaus /etc/nginx/sites-enabled/autohaus
 sudo rm -f /etc/nginx/sites-enabled/default
@@ -284,11 +380,14 @@ sudo nginx -t
 sudo systemctl reload nginx
 ```
 
+`sudo nginx -t` должен ответить `syntax is ok` и `test is successful`.
+
 ---
 
-## 🔓 ШАГ 13. КРИТИЧНО! Права для nginx на папку build
+## ШАГ 14. КРИТИЧНО! Права для Nginx на папку build
 
-Nginx работает от пользователя `www-data`, и по умолчанию не может читать `/home/autohaus/`. Без этого шага будет 500 Internal Server Error.
+Nginx работает от пользователя `www-data`, по умолчанию **не имеет доступа** к `/home/autohaus/`. Без этого шага — 500 Internal Server Error.
+
 ```bash
 sudo chmod o+x /home/autohaus
 sudo chmod o+x /home/autohaus/app
@@ -296,112 +395,183 @@ sudo chmod o+x /home/autohaus/app/frontend
 sudo chmod -R o+rX /home/autohaus/app/frontend/build
 ```
 
-Проверить:
+### Проверка
 ```bash
 curl -I http://127.0.0.1/
-# Должно быть: HTTP/1.1 200 OK
 ```
+Должен вернуть `HTTP/1.1 200 OK`.
+
+```bash
+curl -s http://127.0.0.1/api/content | head -c 100
+```
+Должен показать JSON.
 
 ---
 
-## ✅ ШАГ 14. Открыть в браузере
+## ШАГ 15. Открываем сайт в браузере
 
 ```
 http://139.100.226.220
 ```
 
-- Должен загрузиться сайт с заголовком **"ПРЕОБРАЖАЕМ АВТОМОБИЛИ В ПРОИЗВЕДЕНИЕ ИСКУССТВА"**
-- Меню сверху, видео/фото BMW на фоне
-- Прокрутка должна показать все секции
+Должно быть:
+- Заголовок **«ПРЕОБРАЖАЕМ АВТОМОБИЛИ В ПРОИЗВЕДЕНИЕ ИСКУССТВА»**
+- Меню сверху (AUTOHAUS · KALININGRAD)
+- Видео/фото BMW на фоне
+- Прокрутка показывает все секции (Протокол, Услуги, Конфигуратор, Команда, Клиенты и т.д.)
 
-**Админка**: `http://139.100.226.220/admin/login`
-Логин/пароль — те, что вы указали в `backend/.env`.
+**Админка:** `http://139.100.226.220/admin/login`
+Логин/пароль — из `backend/.env` (`ADMIN_EMAIL` / `ADMIN_PASSWORD`).
 
 ---
 
-## 🔒 ШАГ 15 (опционально). SSL от Let's Encrypt
+## ШАГ 16. SSL / HTTPS через Let's Encrypt
 
-**Только после того как домен `detailing-autohaus.ru` привязан A-записью к IP VPS!**
+Только если `detailing-autohaus.ru` уже указывает A-записью на ваш IP! Проверьте:
+```bash
+dig detailing-autohaus.ru +short
+```
+Должен вернуть ваш IP (например `139.100.226.220`).
+
+### Установка certbot
 ```bash
 sudo apt install -y certbot python3-certbot-nginx
-sudo certbot --nginx -d detailing-autohaus.ru -d www.detailing-autohaus.ru
 ```
-Certbot спросит email, согласие с условиями и предложит редирект HTTP→HTTPS (нажмите `2`).
 
-Проверить автообновление:
+### Выпуск сертификата (только основной домен, без www если DNS для www нет)
 ```bash
+sudo certbot --nginx -d detailing-autohaus.ru --non-interactive --agree-tos -m ваш_email@example.com --redirect
+```
+Certbot:
+- Автоматически добавит блок `listen 443 ssl` в Nginx
+- Выпустит сертификат Let's Encrypt
+- Настроит редирект `http://` → `https://`
+
+### Проверка
+```bash
+sudo nginx -t && sudo systemctl reload nginx
+curl -I https://detailing-autohaus.ru
+```
+Должно быть `HTTP/2 200`.
+
+### Автообновление сертификата
+```bash
+sudo systemctl status certbot.timer --no-pager
 sudo certbot renew --dry-run
+```
+Сертификат сам обновляется каждые 60 дней.
+
+### Если certbot ругается на www
+```
+Domain: www.detailing-autohaus.ru
+Detail: DNS problem: NXDOMAIN
+```
+→ Для `www` не настроена A-запись у регистратора. Либо добавьте её в панели регистратора (Reg.ru, Timeweb и т.п.) — тип `A`, имя `www`, значение — ваш IP. Либо просто выпускайте сертификат без `www` (команда выше уже без него).
+
+---
+
+## ШАГ 17. MAX Bot webhook (после SSL)
+
+Если используете MAX-бота — зарегистрируйте webhook:
+```bash
+curl -X POST "https://botapi.max.ru/subscriptions?access_token=ВАШ_MAX_BOT_TOKEN" \
+     -H "Content-Type: application/json" \
+     -d '{"url":"https://detailing-autohaus.ru/api/max/webhook"}'
+```
+
+Проверить что webhook зарегистрирован:
+```bash
+curl "https://botapi.max.ru/subscriptions?access_token=ВАШ_MAX_BOT_TOKEN"
 ```
 
 ---
 
-## 🔄 Как обновлять сайт после этого
+## Готово! Как обновлять сайт дальше
 
-**Однократно** (после первой установки) — сделать скрипт `deploy.sh` исполняемым:
-```bash
-chmod +x /home/autohaus/app/deploy.sh
-```
-
-**Каждый раз при выкладке новой версии с GitHub — одна команда:**
 ```bash
 cd /home/autohaus/app && bash deploy.sh
 ```
 
 Скрипт сам:
-1. Подтянет свежий код (`git pull`)
-2. Проверит `.env` файлы
-3. Обновит зависимости backend + frontend
-4. Соберёт новый `yarn build`
-5. Выставит права для nginx
-6. Перезапустит PM2
-7. Перезагрузит nginx
-8. Проверит что сайт отвечает 200
+1. `git pull` (жёсткий reset на origin/main)
+2. Обновит зависимости (backend + frontend)
+3. Пересоберёт frontend (`yarn build`)
+4. Выставит права для Nginx
+5. Перезапустит PM2 (`--update-env` — подхватит новые переменные из `.env`)
+6. Перезагрузит Nginx
+7. Проверит `/api/content` — должен вернуть 200
+
+Всё занимает 1-2 минуты. Контент (тексты/фото/видео/номера) редактируется через `/admin/login` без пересборки.
 
 ---
 
-## 🐛 Устранение проблем
+## Устранение проблем (шпаргалка)
 
-### Чёрный экран после загрузки
-1. Откройте DevTools (`F12`) → вкладка Console
-2. Если видите `Cannot read properties of undefined` — билд старый, без ErrorBoundary. Убедитесь, что `git pull` реально подтянул новый код:
-   ```bash
-   cd /home/autohaus/app
-   git log --oneline -5
-   ls /home/autohaus/app/frontend/src/components/ErrorBoundary.jsx   # должен существовать
-   ```
-3. Если файл ErrorBoundary.jsx есть — пересоберите:
-   ```bash
-   bash /home/autohaus/app/deploy.sh
-   ```
-4. Обновите страницу с очисткой кэша: **Ctrl+Shift+R**
-
-### 500 Internal Server Error
-Проверьте логи:
+### 502 Bad Gateway на `/api/*`
+Бэкенд не отвечает.
 ```bash
-sudo tail -n 30 /var/log/nginx/error.log
-```
-Если видите `Permission denied` — повторите **ШАГ 13** (права `o+rX`).
-
-### API возвращает 502 Bad Gateway
-Backend не запущен. Проверьте:
-```bash
-pm2 status
-pm2 logs autohaus-backend --lines 30 --nostream
-curl http://127.0.0.1:8001/api/content
+pm2 status                    # должен быть online
+pm2 logs autohaus-backend --lines 40 --nostream
+sudo systemctl status mongod  # MongoDB должен быть running
+ss -tlnp | grep 8001          # порт должен слушаться
 ```
 
-### Frontend показывает старый контент
-Кэш браузера. Обновите с `Ctrl+Shift+R` или откройте в приватной вкладке.
-
-### MongoDB не подключается
+### 500 Internal Server Error на frontend
+Nginx не может прочитать `build/`.
 ```bash
-sudo systemctl status mongod
-sudo journalctl -u mongod -n 30 --no-pager
+sudo tail -n 20 /var/log/nginx/error.log
 ```
+Если видите `Permission denied` — повторите **Шаг 14**.
+
+### 404 Not Found
+Nginx не находит `index.html` (не собран build или неверный путь).
+```bash
+ls /home/autohaus/app/frontend/build/index.html   # должен существовать
+sudo nginx -t
+```
+
+### Не заходит в админку — кнопка «Вход…» висит
+Backend недоступен из фронта. Проверьте:
+```bash
+curl -s http://127.0.0.1/api/content | head -c 100   # через nginx
+curl -s http://127.0.0.1:8001/api/content | head -c 100   # напрямую в pm2
+```
+
+### Заявка отправляется 20-30 секунд
+Проверьте что подтянули последнюю версию кода:
+```bash
+cd /home/autohaus/app && git log --oneline -5
+```
+Должен быть свежий коммит с `BackgroundTasks` в `server.py`.
+
+### Форма зумит на мобильном при фокусе на input
+Кэш браузера с pre-fix версией. На iPhone: очистить кэш Safari (Настройки → Safari → Очистить историю и данные) или открыть в приватной вкладке.
+
+### MongoDB не запускается после ребута
+```bash
+sudo rm -f /var/lib/mongodb/mongod.lock
+sudo chown -R mongodb:mongodb /var/lib/mongodb /var/log/mongodb
+sudo systemctl start mongod
+```
+
+### yarn build падает / сервер уходит в reboot
+Kernel panic из-за OOM. Проверьте swap:
+```bash
+free -h
+```
+Если `Swap: 0B` — повторите **Шаг 3**.
+
+### Медиа в админке загружены, но на мобиле показываются старые
+```bash
+# Убедитесь что подтянут свежий backend с no-store заголовком:
+curl -sI https://detailing-autohaus.ru/api/content | grep -i cache
+# Должно быть: cache-control: no-store, no-cache, must-revalidate
+```
+Если нет — сделайте `bash deploy.sh` и пересоберите.
 
 ---
 
-## 📱 Полезные команды
+## Полезные команды
 
 ```bash
 # Логи backend в реальном времени
@@ -410,15 +580,19 @@ pm2 logs autohaus-backend
 # Мониторинг ресурсов PM2
 pm2 monit
 
-# Перезапуск backend вручную
-pm2 restart autohaus-backend
+# Перезапуск backend с пересчётом env
+pm2 restart autohaus-backend --update-env
 
-# Перезагрузить nginx
+# Перезагрузка nginx
 sudo systemctl reload nginx
 
 # Проверить статус всех сервисов
 sudo systemctl status nginx mongod
 pm2 status
+
+# Использование RAM/CPU
+free -h
+htop
 
 # Полный передеплой одной командой
 cd /home/autohaus/app && bash deploy.sh
@@ -426,10 +600,19 @@ cd /home/autohaus/app && bash deploy.sh
 
 ---
 
-## 🎯 Готово!
+## Резюме — что должно быть в норме
 
-Сайт работает. Для обновления кода — просто пушьте в GitHub и запускайте `bash deploy.sh` на VPS.
+| Проверка | Ожидаемый результат |
+|----------|---------------------|
+| `free -h` | Swap 4.0Gi |
+| `sudo systemctl status mongod` | active (running) |
+| `pm2 status` | autohaus-backend online |
+| `curl -I https://detailing-autohaus.ru` | HTTP/2 200 |
+| `curl -s https://detailing-autohaus.ru/api/content \| head -c 50` | `{"hero":{...` |
+| `curl http://127.0.0.1:8001/api/admin/notify-status` | `TELEGRAM_BOT_TOKEN_set:true` |
+| Открыть `https://detailing-autohaus.ru/admin/login` | Форма логина |
+| Тестовая заявка через сайт | Приходит в Telegram/MAX за 1-2 сек |
 
-Всё, что связано с контентом (тексты, фото, видео, номер телефона, ссылки на мессенджеры) — редактируется через админку по адресу `/admin/login` без пересборки и деплоя. Изменения применяются мгновенно.
+Если все 8 пунктов ✅ — установка завершена корректно.
 
-Успешного запуска! 🚀
+Успешного запуска!
