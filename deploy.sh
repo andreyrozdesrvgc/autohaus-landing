@@ -98,14 +98,16 @@ ok "backend/.env на месте"
 
 # ── 3. Backend deps ───────────────────────────────────────────────
 log "3/8  Обновляю Python зависимости backend..."
-if [ -d "$VENV_DIR" ]; then
-    source "$VENV_DIR/bin/activate"
-    pip install -q -r "$BACKEND_DIR/requirements.txt"
-    deactivate
-    ok "Backend зависимости обновлены"
-else
-    warn "venv не найден в $VENV_DIR — пропускаю (или создай: python3 -m venv $VENV_DIR)"
+if [ ! -d "$VENV_DIR" ]; then
+    warn "venv не найден — создаю $VENV_DIR"
+    python3 -m venv "$VENV_DIR" || error "Не удалось создать venv (нет python3-venv? sudo apt install python3-venv)"
 fi
+# shellcheck disable=SC1091
+source "$VENV_DIR/bin/activate"
+pip install --upgrade pip -q
+pip install -q -r "$BACKEND_DIR/requirements.txt"
+deactivate
+ok "Backend зависимости обновлены"
 
 # ── 4. Frontend deps + build ──────────────────────────────────────
 log "4/8  Устанавливаю frontend зависимости (yarn install)..."
