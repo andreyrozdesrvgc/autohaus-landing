@@ -43,6 +43,21 @@ log "🚀 Начинаю обновление AUTOHAUS..."
 [ -d "$APP_DIR" ] || error "Папка $APP_DIR не найдена"
 cd "$APP_DIR"
 
+# ── Health: swap файл (защита от OOM при yarn build / mongo) ─────
+if [ "$(swapon --show=NAME --noheadings | wc -l)" -eq 0 ]; then
+    warn "Swap не подключён — создаю 4GB swap-файл (нужен sudo)"
+    if ! sudo -n true 2>/dev/null; then
+        warn "  → sudo без пароля недоступен, пропускаю (создай вручную позже)"
+    else
+        sudo fallocate -l 4G /swapfile 2>/dev/null || sudo dd if=/dev/zero of=/swapfile bs=1M count=4096
+        sudo chmod 600 /swapfile
+        sudo mkswap /swapfile
+        sudo swapon /swapfile
+        grep -q "^/swapfile" /etc/fstab || echo '/swapfile none swap sw 0 0' | sudo tee -a /etc/fstab > /dev/null
+        ok "Swap 4GB подключён"
+    fi
+fi
+
 # ── 1. Git pull (hard-sync с GitHub — источником правды) ─────────
 log "1/8  Синхронизирую с GitHub (hard reset на origin)..."
 if [ -d ".git" ]; then
@@ -112,8 +127,66 @@ sudo chmod o+x "$FRONTEND_DIR"
 sudo chmod -R o+rX "$FRONTEND_DIR/build"
 ok "Права выставлены (o+rX на build)"
 
-# ── 6. PM2 restart ────────────────────────────────────────────────
-log "7/8  Перезапускаю PM2 backend..."
+# ── 6. MongoDB health check + автолечение ─────────────────────────
+log "7/8  Проверяю здоровье MongoDB..."
+
+# Проверка что порт 27017 отвечает
+mongo_ok() {
+    (echo > /dev/tcp/127.0.0.1/27017) >/dev/null 2>&1
+}
+
+if mongo_ok; then
+    ok "MongoDB отвечает на 127.0.0.1:27017"
+else
+    warn "MongoDB не отвечает — пробую починить"
+
+    # Убеждаемся, что в /etc/mongod.conf есть storage: с правильным dbPath.
+    # Если блока нет — перезаписываем безопасный минимальный конфиг.
+    if ! sudo grep -q "^storage:" /etc/mongod.conf 2>/dev/null; then
+        warn "В /etc/mongod.conf отсутствует блок storage — восстанавливаю дефолт"
+        sudo tee /etc/mongod.conf > /dev/null <<'MONGO_CFG'
+storage:
+  dbPath: /var/lib/mongodb
+  wiredTiger:
+    engineConfig:
+      cacheSizeGB: 0.5
+
+systemLog:
+  destination: file
+  logAppend: true
+  path: /var/log/mongodb/mongod.log
+
+net:
+  port: 27017
+  bindIp: 127.0.0.1
+
+processManagement:
+  timeZoneInfo: /usr/share/zoneinfo
+MONGO_CFG
+    fi
+
+    # Убираем битые lock-файлы (частая причина падения после ребута)
+    sudo systemctl stop mongod 2>/dev/null || true
+    sudo rm -f /var/lib/mongodb/mongod.lock 2>/dev/null || true
+    sudo rm -f /var/lib/mongodb/WiredTiger.lock 2>/dev/null || true
+
+    # Выставляем права
+    sudo chown -R mongodb:mongodb /var/lib/mongodb /var/log/mongodb 2>/dev/null || true
+
+    # Стартуем и убеждаемся в автозапуске после ребута
+    sudo systemctl enable mongod 2>/dev/null || true
+    sudo systemctl start mongod
+
+    sleep 5
+    if mongo_ok; then
+        ok "MongoDB восстановлена и работает"
+    else
+        error "MongoDB не поднялась. Смотри: sudo journalctl -u mongod -n 30 --no-pager"
+    fi
+fi
+
+# ── 7. PM2 restart ────────────────────────────────────────────────
+log "8/9  Перезапускаю PM2 backend..."
 if pm2 list 2>/dev/null | grep -q "$PM2_APP_NAME"; then
     pm2 restart "$PM2_APP_NAME" --update-env
     pm2 save
@@ -126,7 +199,7 @@ else
 fi
 
 # ── 7. Nginx reload ───────────────────────────────────────────────
-log "8/8  Перезагружаю nginx..."
+log "9/9  Перезагружаю nginx..."
 sudo nginx -t 2>&1 | tail -2
 sudo systemctl reload nginx
 ok "Nginx перезагружен"
