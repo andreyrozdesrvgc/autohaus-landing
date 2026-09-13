@@ -5,6 +5,7 @@ import axios from "axios";
 import { fetchMe, saveContent, adminLogout, getToken } from "@/lib/adminApi";
 import { useContentRefresh } from "@/context/ContentContext";
 import MediaPicker from "@/components/admin/MediaPicker";
+import BackupPanel from "@/components/admin/BackupPanel";
 
 const API = `${process.env.REACT_APP_BACKEND_URL}/api`;
 
@@ -634,6 +635,19 @@ export default function Admin() {
           </div>
         </div>
       </header>
+
+      <div className="mx-auto max-w-[1400px] px-6 md:px-10 pt-8">
+        <BackupPanel onRestored={async () => {
+          try {
+            const me = await fetchMe();
+            if (me?.content) setContent(me.content);
+            await refreshLanding({ broadcast: true });
+          } catch (_) {}
+          // Проще всего перезагрузить страницу, чтобы гарантированно
+          // подтянуть свежий контент из БД (включая новые ID медиа).
+          window.location.reload();
+        }} />
+      </div>
 
       <div className="mx-auto max-w-[1400px] px-6 md:px-10 py-8 grid grid-cols-1 lg:grid-cols-12 gap-6">
         {/* SIDEBAR — section list */}

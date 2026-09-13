@@ -398,6 +398,178 @@ async def import_media_from_url(payload: ImportUrlPayload, admin: dict = Depends
         raise HTTPException(status_code=500, detail=f"Не удалось импортировать файл: {e}")
 
 
+# ── Backup: экспорт / импорт всего контента + медиа одним ZIP ─────────────
+@api_router.get("/admin/backup/export")
+async def export_backup(admin: dict = Depends(get_current_admin)):
+    """Формирует ZIP-архив: content.json + все файлы из GridFS.
+    Каждый медиа-файл сохраняется под своим ObjectId, чтобы при импорте
+    ссылки /api/media/{id} остались валидными без переписывания content.
+    """
+    import io
+    import json
+    import zipfile
+    from bson import ObjectId as _OID
+    from media_service import gridfs as _gridfs
+
+    buffer = io.BytesIO()
+    with zipfile.ZipFile(buffer, "w", zipfile.ZIP_DEFLATED) as zf:
+        # 1) Контент
+        content_doc = await get_content(db)
+        zf.writestr(
+            "content.json",
+            json.dumps(content_doc, ensure_ascii=False, indent=2, default=str),
+        )
+
+        # 2) Все GridFS файлы
+        bucket = _gridfs(db)
+        files_index = []
+        async for meta in db["media.files"].find({}):
+            file_id = str(meta["_id"])
+            filename = meta.get("filename") or f"{file_id}.bin"
+            metadata = meta.get("metadata") or {}
+            content_type = metadata.get("content_type") or "application/octet-stream"
+            length = int(meta.get("length") or 0)
+
+            # Download to memory
+            data = bytearray()
+            try:
+                stream = await bucket.open_download_stream(_OID(file_id))
+                try:
+                    while True:
+                        chunk = await stream.readchunk()
+                        if not chunk:
+                            break
+                        data.extend(chunk)
+                finally:
+                    await stream.close()
+            except Exception as e:
+                logger.warning("Failed to read GridFS %s: %s", file_id, e)
+                continue
+
+            arcname = f"media/{file_id}__{filename}"
+            zf.writestr(arcname, bytes(data))
+            files_index.append({
+                "id": file_id,
+                "filename": filename,
+                "content_type": content_type,
+                "length": length,
+            })
+
+        zf.writestr(
+            "media_index.json",
+            json.dumps(files_index, ensure_ascii=False, indent=2),
+        )
+        zf.writestr(
+            "README.txt",
+            (
+                "AUTOHAUS backup\n\n"
+                "content.json      — весь текстовый CMS-контент\n"
+                "media/            — все загруженные фото/видео\n"
+                "media_index.json  — список файлов и метаданных\n\n"
+                "Восстановление: админка → «Восстановить из бэкапа» → выбрать этот ZIP.\n"
+            ),
+        )
+
+    buffer.seek(0)
+    filename = f"autohaus-backup-{datetime.now(timezone.utc).strftime('%Y%m%d-%H%M')}.zip"
+    return StreamingResponse(
+        buffer,
+        media_type="application/zip",
+        headers={
+            "Content-Disposition": f'attachment; filename="{filename}"',
+            "Cache-Control": "no-store",
+        },
+    )
+
+
+@api_router.post("/admin/backup/import")
+async def import_backup(
+    file: UploadFile = File(...),
+    admin: dict = Depends(get_current_admin),
+):
+    """Принимает ZIP из /admin/backup/export и восстанавливает всё:
+    - content.json → полностью заменяет текущий CMS-контент
+    - media/*      → файлы восстанавливаются в GridFS с ТЕМ ЖЕ ObjectId,
+                     чтобы старые ссылки /api/media/{id} продолжали работать
+    """
+    import io
+    import json
+    import zipfile
+    from bson import ObjectId as _OID
+    from media_service import gridfs as _gridfs
+
+    if not (file.filename or "").lower().endswith(".zip"):
+        raise HTTPException(status_code=400, detail="Файл должен быть ZIP-архивом")
+
+    raw = await file.read()
+    if len(raw) > 500 * 1024 * 1024:
+        raise HTTPException(status_code=413, detail="Архив больше 500 МБ")
+
+    try:
+        zf = zipfile.ZipFile(io.BytesIO(raw))
+    except zipfile.BadZipFile as e:
+        raise HTTPException(status_code=400, detail=f"Битый ZIP: {e}")
+
+    names = zf.namelist()
+    if "content.json" not in names:
+        raise HTTPException(status_code=400, detail="В архиве нет content.json — это не бэкап AUTOHAUS")
+
+    stats = {"content_restored": False, "media_restored": 0, "media_skipped": 0}
+
+    # 1) Контент
+    try:
+        content_data = json.loads(zf.read("content.json").decode("utf-8"))
+        # Сохраняем всё как есть (save_content делает merge с текущим)
+        if isinstance(content_data, dict):
+            content_data.pop("_id", None)
+            content_data.pop("id", None)
+            await save_content(db, content_data)
+            stats["content_restored"] = True
+    except Exception as e:
+        logger.exception("Content restore failed")
+        raise HTTPException(status_code=500, detail=f"Не удалось восстановить контент: {e}")
+
+    # 2) Медиа — восстанавливаем с сохранением ObjectId
+    bucket = _gridfs(db)
+    for name in names:
+        if not name.startswith("media/") or name.endswith("/"):
+            continue
+        # arcname формат: media/{file_id}__{filename}
+        stem = name[len("media/"):]
+        if "__" not in stem:
+            stats["media_skipped"] += 1
+            continue
+        file_id_str, filename = stem.split("__", 1)
+        try:
+            oid = _OID(file_id_str)
+        except Exception:
+            stats["media_skipped"] += 1
+            continue
+
+        # Проверяем, есть ли уже такой файл — если да, не перезаливаем
+        existing = await db["media.files"].find_one({"_id": oid})
+        if existing:
+            stats["media_skipped"] += 1
+            continue
+
+        # Определяем content_type из filename
+        content_type = guess_content_type(filename, "application/octet-stream")
+        payload = zf.read(name)
+        try:
+            await bucket.upload_from_stream_with_id(
+                oid,
+                filename,
+                payload,
+                metadata={"content_type": content_type},
+            )
+            stats["media_restored"] += 1
+        except Exception as e:
+            logger.warning("Failed to restore media %s: %s", file_id_str, e)
+            stats["media_skipped"] += 1
+
+    return {"ok": True, **stats}
+
+
 @api_router.head("/media/{file_id}")
 async def head_media(file_id: str, request: Request):
     meta = await find_file_meta(db, file_id)
